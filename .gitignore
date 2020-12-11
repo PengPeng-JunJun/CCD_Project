@@ -1,0 +1,6 @@
+*.bmp
+*.sdf
+*.txt
+*.opensdf
+Debug/
+Release/

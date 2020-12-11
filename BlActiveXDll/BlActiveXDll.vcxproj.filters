@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BlActiveXDll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Button.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Menu.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Edit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Slider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Switch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Line.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_DropDown.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Radio.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_CheckBox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_IpAdd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_List.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_VScroll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_DataChart.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_DataChart2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BL_Ctrls.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BlActiveXDll.def">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\BlActiveXDll.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Button.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="_Font.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Menu.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Slider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Edit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Switch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Line.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_DropDown.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Radio.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_CheckBox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_IpAdd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_List.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_VScroll.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_DataChart.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_DataChart2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BL_Ctrls.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BlActiveXDll.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

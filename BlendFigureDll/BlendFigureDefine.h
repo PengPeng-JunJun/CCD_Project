@@ -1,0 +1,33 @@
+
+#pragma once
+
+#include "stdafx.h"
+
+static UINT gMsgBlendFigure = RegisterWindowMessage(_T("gMsgBlendFigure"));
+
+enum _tagBlendInfo
+{
+	FIGURE_MSG_SET_CURSOR = 0,
+	FIGURE_MSG_FILE_DIRTY,
+	FIGURE_MSG_START_DRAWING,
+	FIGURE_MSG_END_DRAWING,
+	FIGURE_MSG_JUST_END,
+	FIGURE_MSG_UPDATE
+};
+
+enum _tagBlendCusor
+{
+	FIGURE_CURSOR_ARROW = 0,
+	FIGURE_CURSOR_CROSS,
+	FIGURE_CURSOR_DOT,
+
+	FIGURE_CURSOR_SIZE_NWSE,
+	FIGURE_CURSOR_SIZE_NESW,
+	FIGURE_CURSOR_SIZE_WE,
+	FIGURE_CURSOR_SIZE_NS,
+	FIGURE_CURSOR_SIZE_ALL
+};
+
+#define RECT_ANCHOR_SUM		8
+#define LINE_ANCHOR_SUM		3
+#define ANCHOR_WID			4
