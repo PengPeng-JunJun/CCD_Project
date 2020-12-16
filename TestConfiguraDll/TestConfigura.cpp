@@ -1510,6 +1510,8 @@ BOOL CTestConfigura::GetImgSimilaritySample()
 
 BOOL CTestConfigura::GetProportion()
 {
+	CString strTemp;
+
 	if(m_nTestProject == TEST_COL_SORT_RANDOM)
 		{return TRUE;}
 
@@ -1580,15 +1582,16 @@ BOOL CTestConfigura::GetProportion()
 			}
 			else
 			{
-				return FALSE;
+				strTemp.Format(_T("%.5f"), m_dTestProportion);
+				_AlterImageResText(_T("校正比例"), strTemp, INSERT, 0);
+				_UpdateUi();
+				return TRUE;
 			}
 		}
 	}
 
-	CString strTemp;
 	strTemp.Format(_T("%.5f"), m_dTestProportion);
 	_AlterImageResText(_T("校正比例"), strTemp, INSERT, 0);
-
 	_UpdateUi();
 
 	Point2d ptTemp;//輪廓重心坐標

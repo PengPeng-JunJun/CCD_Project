@@ -196,7 +196,7 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_bStarTestBySpace(FALSE)
 	, m_bTestContinue(FALSE)
 	, m_bSystemRunStatus(FALSE)
-	, m_bFileFinish(FALSE)
+	, m_nCurFileStatus(NO_FILE)
 	, m_bRegister(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -392,6 +392,10 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
  	SearchReportFile();//创建报表文件夹
 
 	_AddTestProject();
+
+#ifdef _DEBUG
+	m_swBaseLock.SetStatus(FALSE);
+#endif
 
 	LockCtrls(-1);
 // 	CExcel Excel;
@@ -688,7 +692,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	{
 		m_Menu.EnableItemByPos(_T("文件"), nCounter, FALSE);
 	}
-	for (int nCounter = 0; nCounter < 8; nCounter++)
+	for (int nCounter = 0; nCounter < 9; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, FALSE);
 	}
@@ -704,7 +708,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	{
 		m_Menu.EnableItemByPos(_T("標記"), nCounter, FALSE);
 	}
-	for (int nCounter = 0; nCounter < 4; nCounter++)
+	for (int nCounter = 0; nCounter < 5; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("檢測"), nCounter, FALSE);
 	}
@@ -713,40 +717,99 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	
 	BOOL bLocked = _GetLockState(nLock, PSD_LEVEL_TE);
 
-#ifdef _DEBUG
-	bLocked = !bLocked;
-#endif
-
-	const BOOL bEnable = !bLocked;
-
-	if (!bLocked)
+	for (int nCounter = 5; nCounter < 8; nCounter++)
 	{
-		if (!m_bFileFinish)
+		m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
+	}
+	for (int nCounter = 0; nCounter < 5; nCounter++)
+	{
+		m_Menu.EnableItemByPos(_T("圖像"), nCounter, TRUE);
+	}
+
+	m_Menu.EnableItemByName(_T("檢測"), _T("Space啟動檢測..."), TRUE);
+	if (!bLocked)//解鎖狀態
+	{
+		switch (m_nCurFileStatus)
 		{
-			for (int nCounter = 0; nCounter < 9; nCounter++)
-			{
-				m_Menu.EnableItemByPos(_T("文件"), nCounter, TRUE);
-			}
+		case NO_FILE:
+			m_Menu.EnableItemByName(_T("文件"), _T("新建..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("打開..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("最近開啟檔案..."), TRUE);
+			break;
+		case NEW_FILE:
+			m_Menu.EnableItemByName(_T("文件"), _T("打開檔案信息..."), TRUE);
+			break;
+		case LOAD_FILE:
+			m_Menu.EnableItemByName(_T("文件"), _T("保存..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("另存為..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("保存檔案信息..."), TRUE);
+			break;
+		default:
+			break;
 		}
-		else
+		
+		for (int nCounter = 0; nCounter < 5; nCounter++)
 		{
-			m_Menu.EnableItemByName(_T("文件"), _T("新建..."), FALSE);
-			m_Menu.EnableItemByName(_T("文件"), _T("打開..."), FALSE);
-			m_Menu.EnableItemByName(_T("文件"), _T("最近開啟檔案..."), FALSE);
-			m_Menu.EnableItemByName(_T("文件"), _T("打開檔案信息..."), FALSE);
+			m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
+		}
+		for (int nCounter = 0; nCounter < 2; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("拍照方式"), nCounter, TRUE);
+		}
+		for (int nCounter = 0; nCounter < 2; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, TRUE);
+		}
+		for (int nCounter = 0; nCounter < 3; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
+		}
+
+		for (int nCounter = 0; nCounter < 2; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("功能"), nCounter, TRUE);
+		}
+
+		if (!m_bSystemRunStatus && m_TestGroup.m_nCurGroup >= 0 && m_TestGroup.m_nCurRow >= 0 && m_nShowImageMode == SHOW_IMAGE_SINGLE)
+		{
+			for (int nCounter = 0; nCounter < 4; nCounter++)
+			{
+				m_Menu.EnableItemByPos(_T("檢測"), nCounter, TRUE);
+			}
+			for (int i = 1; i < 6; i++)
+			{
+				m_Menu.EnableItemByPos(_T("標記"), i, TRUE);
+			}
 		}
 	}
 	else
 	{
-		m_Menu.EnableItemByName(_T("文件"), _T("打開..."), TRUE);
-		m_Menu.EnableItemByName(_T("文件"), _T("最近開啟檔案..."), TRUE);
+		if (m_nCurFileStatus == NO_FILE)
+		{
+			m_Menu.EnableItemByName(_T("文件"), _T("打開..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("最近開啟檔案..."), TRUE);
+		}
+		else if (m_nCurFileStatus == LOAD_FILE)
+		{
+			m_Menu.EnableItemByName(_T("文件"), _T("保存..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("另存為..."), TRUE);
+			m_Menu.EnableItemByName(_T("文件"), _T("保存檔案信息..."), TRUE);
+		}
+		for (int nCounter = 0; nCounter < 2; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("拍照方式"), nCounter, FALSE);
+		}
+		for (int nCounter = 0; nCounter < 2; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, FALSE);
+		}
+		for (int nCounter = 0; nCounter < 3; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, FALSE);
+		}
+		m_Menu.EnableItemByName(_T("圖像"), _T("加載圖像..."), FALSE);
+		m_Menu.EnableItemByName(_T("圖像"), _T("製作模板圖像..."), FALSE);
 	}
-	
-	if (bEnable)
-	{
-
-	}
-	
 }
 
 void CUDE_OutlookDlg::InitMainWindow()
@@ -1483,6 +1546,8 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 	{
 		OpenprojectWithFilePath(strItemName);
 	}
+	if (m_nCurFileStatus != LOAD_FILE)
+		return;
 	if (strMenuName == _T("拍照方式"))
 	{
 		if (strItemName == _T("同時拍照"))
@@ -1563,7 +1628,6 @@ void CUDE_OutlookDlg::SetMainMenu()
 			{
 				strHistoryPath.Append(_T(";"));
 			}
-			m_Menu.EnableItemByPos(_T("最近開啟檔案"), nCounter, TRUE);
 		}
 		m_Menu.AddPopByPosPosPos(1, 0, 4, 0,_T("最近開啟檔案"), strHistoryPath);
 	}
@@ -1580,13 +1644,14 @@ void CUDE_OutlookDlg::SetMainMenu()
 	m_Menu.AddPopByPosPosPos(0, 6, 0, 0, _T("檢測"), _T("對樣...;坐標校正...;A點校正...;B點校正..;Space啟動檢測..."));
 	m_Menu.AddPopByPosPosPos(0, 7, 0, 0, _T("幫助"), _T("關於...;軟體註冊..."));
 
-	_SetEnableMarkMenuItem(FALSE);
-
 	m_Menu.SetItemFont(_T("微软雅黑,15pt"));
 
 	m_Menu.CheckItemByPos(_T("文件"), 7, m_bAutoFindFile);
-	m_Menu.CheckItemByPos(_T("文件"), 8, m_bAutoRunCheck);
 
+	if (m_nCurFileStatus != LOAD_FILE)
+		return;
+	
+	m_Menu.CheckItemByPos(_T("文件"), 8, m_bAutoRunCheck);
 
 	if (m_nGetImageMode == GET_IMAGE_MODE_SYN)
 	{
@@ -1622,23 +1687,9 @@ void CUDE_OutlookDlg::SetMainMenu()
 	default:
 		break;
 	}
-	
+
 	m_Menu.CheckItemByPos(_T("設置"), 8, m_bTestContinue);
-
-	if (m_strPassword != PROGRAM_LOCK_PASSWORD)
-	{
-		m_Menu.EnableItemByPos(_T("文件"), 7, FALSE);
-		m_Menu.EnableItemByPos(_T("文件"), 8, FALSE);
-	}
-	if (m_bFileFinish)
-	{
-		m_Menu.EnableItemByName(_T("文件"), _T("新建..."), FALSE);
-		m_Menu.EnableItemByName(_T("文件"), _T("打開..."), FALSE);
-		m_Menu.EnableItemByName(_T("文件"), _T("最近開啟檔案..."), FALSE);
-		m_Menu.EnableItemByName(_T("文件"), _T("打開檔案信息..."), FALSE);
-	}
-
-	//m_Menu.EnableItemByName(_T("設置"), _T("連續檢測..."), FALSE);
+	
 }
 
 
@@ -1692,16 +1743,8 @@ void CUDE_OutlookDlg::SaveHistoryPath()
 	CString strOutpt;
 
 	CString strHiatoryName;
-
-	CString strAutoRunCheck;
-
+	
 	CString strAutoFindFile;
-
-	CString strImageTrigger;
-
-	CString strShowImageMode;
-
-	CString strTestContinue;
 
 	/////保存路徑數量，最大為6
 
@@ -1718,16 +1761,6 @@ void CUDE_OutlookDlg::SaveHistoryPath()
 	WritePrivateProfileString(strItem, _T("strPassword"), m_strPassword, strPath);
 	WritePrivateProfileString(strItem, _T("strTimeCounter"), m_strTimeCounter, strPath);
 
-	if (m_Menu.IsItemCheckedByPos(_T("信號輸出模式"), 1))
-	{
-		strImageTrigger= _T("1");
-	}
-	else
-	{
-		strImageTrigger = _T("0");
-	}
-	WritePrivateProfileString(strItem, _T("strImageTrigger"), strImageTrigger, strPath);
-
 	if (m_Menu.IsItemCheckedByPos(_T("文件"), 7))
 	{
 		strAutoFindFile= _T("1");
@@ -1737,32 +1770,6 @@ void CUDE_OutlookDlg::SaveHistoryPath()
 		strAutoFindFile = _T("0");
 	}
 	WritePrivateProfileString(strItem, _T("strAutoFindFile"), strAutoFindFile, strPath);
-
-
-	if (m_Menu.IsItemCheckedByPos(_T("文件"), 8))
-	{
-		strAutoRunCheck= _T("1");
-	}
-	else
-	{
-		strAutoRunCheck = _T("0");
-	}
-	WritePrivateProfileString(strItem, _T("strAutoRunCheck"), strAutoRunCheck, strPath);
-
-	strShowImageMode.Format(_T("%d"), m_nShowImageMode);
-	WritePrivateProfileString(strItem, _T("strShowImageMode"), strShowImageMode, strPath);
-
-	if (m_Menu.IsItemCheckedByPos(_T("設置"), 8))
-	{
-		strTestContinue= _T("1");
-	}
-	else
-	{
-		strTestContinue = _T("0");
-	}
-	WritePrivateProfileString(strItem, _T("strTestContinue"), strTestContinue, strPath);
-
-// 	SetAutoRun(_ttoi(strAutoRun));
 }
 
 void CUDE_OutlookDlg::LoadHistoryPath()
@@ -1797,20 +1804,10 @@ void CUDE_OutlookDlg::LoadHistoryPath()
 	GetPrivateProfileString(strItem, _T("strPassword"), _T(""), m_strPassword.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
 	GetPrivateProfileString(strItem, _T("strTimeCounter"), _T(""), m_strTimeCounter.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
 
-	GetPrivateProfileString(strItem, _T("strImageTrigger"), _T("0"), strImageTrigger.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
-	m_bImageTrigger = _ttoi(strImageTrigger);
-
-	GetPrivateProfileString(strItem, _T("strAutoRunCheck"), _T("0"), strAutoRunCheck.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
-	m_bAutoRunCheck = _ttoi(strAutoRunCheck);
-
 	GetPrivateProfileString(strItem, _T("strAutoFindFile"), _T("0"), strAutoFindFile.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
 	m_bAutoFindFile = _ttoi(strAutoFindFile);
 
-	GetPrivateProfileString(strItem, _T("strShowImageMode"), _T("0"), strShowImageMode.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
-	//m_nShowImageMode = _ttoi(strShowImageMode);
-
-	GetPrivateProfileString(strItem, _T("strTestContinue"), _T("0"), strTestContinue.GetBufferSetLength(MAX_PATH + 1), MAX_PATH, strPath);
-	//m_bTestContinue = _ttoi(strTestContinue);
+	
 }
 
 void CUDE_OutlookDlg::UpdateMenu()
@@ -1900,8 +1897,6 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 	((CBL_CheckBox *)(m_TestGroup.GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(FALSE);
 	m_BL_TestRunStatus.SetCaption(_T("測試運行中"));
 	m_BL_TestRunStatus.SetForeColor(RGB(0, 255, 255));
-	m_Menu.EnableItemByName(_T("檢測"), _T("對樣..."), FALSE);
-	m_Menu.EnableItemByName(_T("檢測"), _T("坐標校正..."), FALSE);
 
 	m_bSystemRunStatus = TRUE;
 	for (size_t nCounter0 = 0; nCounter0 < m_TopWnd.size(); nCounter0++)
@@ -1913,7 +1908,6 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 			m_TopWnd[nCounter0][nCounter1]->m_bSystemRunStatus = m_bSystemRunStatus;
 		}
 	}
-	_SetEnableMarkMenuItem(FALSE);
 	m_bFinishTest = TRUE;
 
 	m_vnGetImgCamCounter.clear();
@@ -1974,7 +1968,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 			//m_CamStc[i].UnregisterCallback();//停止回調函數顯示動態圖像
 		}
 	}
-	
+	LockCtrls(-1);
 }
 
 void CUDE_OutlookDlg::CreateChildWindow()
@@ -2213,7 +2207,8 @@ void CUDE_OutlookDlg::_NewFile()
 	EndWaitCursor();
 
 	//新建檔案完成後，禁止再次新建或打開檔案
-	m_bFileFinish = TRUE;
+	m_nCurFileStatus = NEW_FILE;
+
 	LockCtrls(-1);
 }
 
@@ -2260,7 +2255,7 @@ void CUDE_OutlookDlg::_SaveFile(BOOL bSaveAs)
 	ar.Close();
 	file.Close();
 
-	UpdateMenu();
+	UpdateMenu();//保存檔案刷新—使用打開路徑刷新最近開啟檔案路徑的菜單內容
 
 	CMsgBox MsgBox(this);
 
@@ -2329,15 +2324,14 @@ void CUDE_OutlookDlg::_LoadFile()
 	ar.Close();
 	file.Close();
 
-	UpdateMenu();
+	UpdateMenu();//加載檔案刷新—使用反串行化後的數據刷新菜單狀態
 	if (m_bAutoRunCheck)
 	{
 		m_BL_AllTestRun.SetStatus(TRUE);
 		_TestRunCheck();
 	}
 
-	//讀取檔案完成後，禁止再次新建或打開檔案
-	m_bFileFinish = TRUE;
+	m_nCurFileStatus = LOAD_FILE;
 
 	LockCtrls(-1);
 }
@@ -2399,8 +2393,6 @@ void CUDE_OutlookDlg::_SaveFileInfo()
 	ar.Flush();
 	ar.Close();
 	file.Close();
-
-	UpdateMenu();
 
 	CMsgBox MsgBox(this);
 	MsgBox.ShowMsg(_T("檔案信息保存成功"), _T("Save"), MB_OK | MB_ICONINFORMATION);
@@ -2514,9 +2506,7 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	ar.Close();
 	file.Close();
 
-	UpdateMenu();
-
-	m_Menu.EnableItemByName(_T("文件"), _T("打開檔案信息..."), FALSE);
+	m_nCurFileStatus = LOAD_FILE;
 
 	LockCtrls(-1);
 }
@@ -2626,7 +2616,7 @@ void CUDE_OutlookDlg::OpenprojectWithFilePath(CString strPath)
 	ar.Close();
 	file.Close();
 
-	UpdateMenu();
+	UpdateMenu();//加載檔案刷新—使用反串行化後的數據刷新菜單狀態
 	if (m_bAutoRunCheck)
 	{
 		m_BL_AllTestRun.SetStatus(TRUE);
@@ -2634,7 +2624,8 @@ void CUDE_OutlookDlg::OpenprojectWithFilePath(CString strPath)
 	}
 
 	//讀取檔案完成後，禁止再次新建或打開檔案
-	m_bFileFinish = TRUE;
+	m_nCurFileStatus = LOAD_FILE;
+	LockCtrls(-1);
 }
 
 
@@ -2672,16 +2663,9 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 		((CBL_CheckBox *)(m_TestGroup.GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(TRUE);
 		m_BL_TestRunStatus.SetCaption(_T("停止運行"));
 		m_BL_TestRunStatus.SetForeColor(RGB(155, 64, 64));
-		m_Menu.EnableItemByName(_T("檢測"), _T("對樣..."), TRUE);
-		m_Menu.EnableItemByName(_T("檢測"), _T("坐標校正..."), TRUE);
 		m_Menu.CheckItemByPos(_T("檢測"), 4, FALSE);
 		m_bStarTestBySpace = FALSE;
 		m_bFinishTest = FALSE;
-
-		if (m_TestGroup.m_nCurGroup >= 0 && m_TestGroup.m_nCurRow >= 0)
-		{
-			_SetEnableMarkMenuItem(TRUE);
-		}
 
 		timeKillEvent(m_TimerID);  
 		if (m_bTestContinue)
@@ -2697,7 +2681,7 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 			}
 		}
 		CTestResultChart:: m_bSaveData = FALSE;
-		
+		LockCtrls(-1);
 	}
 	// TODO: 在此处添加消息处理程序代码
 }
@@ -3783,21 +3767,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnRegister(WPARAM wParam, LPARAM lParam)
 			if (m_strHistoryPath.size() != 0)
 			{
 				OpenprojectWithFilePath(m_strHistoryPath[0]);
-// 				m_BL_MainMenu.EnableItemByName(_T("文件"), _T("新建"), FALSE);
-// 				m_BL_MainMenu.EnableItemByName(_T("文件"), _T("打開"), FALSE);
-// 				m_BL_MainMenu.EnableItemByName(_T("文件"), _T("最近開啟檔案"), FALSE);
 			}
-		}
-	}
-	if (wParam == REGISTERERROR)
-	{
-		for (int nCounter = 0; nCounter < 9; nCounter++)
-		{
-			m_Menu.EnableItemByPos(_T("文件"), nCounter, FALSE);
-		}
-		for (int nCounter = 0; nCounter < 9; nCounter++)
-		{
-			m_Menu.EnableItemByPos(_T("設置"), nCounter, FALSE);
 		}
 	}
 	return 0;
@@ -3813,7 +3783,7 @@ void CUDE_OutlookDlg::OnClose()
 		{
 			if (m_LightCtrl.m_Device->m_bChEnable[i])
 			{
-				m_LightCtrl.SetChannelIntensity(i + 1, 0);
+				//m_LightCtrl.SetChannelIntensity(i + 1, 0);
 			}
 		}
 	}
@@ -3984,6 +3954,8 @@ void CUDE_OutlookDlg::Serialize(CArchive& ar)
 		ar << m_bAutoSaveNGImg;
 		ar << m_nAllTestProjectCounter;
 		ar << m_nGetImageMode;
+		ar << m_bImageTrigger;
+		ar << m_bAutoRunCheck;
 	}
 	else
 	{	// loading code
@@ -4138,6 +4110,11 @@ void CUDE_OutlookDlg::Serialize(CArchive& ar)
 			{
 				ar >> m_nGetImageMode;
 			}
+			if (_ttoi(vstrTem[1]) >= 17)
+			{
+				ar >> m_bImageTrigger;
+				ar >> m_bAutoRunCheck;
+			}
 		}
 	}
 
@@ -4180,8 +4157,6 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 	CMsgBox MsgBox(this);
 	if (lParam == ROWS_ADD)
 	{
-		_SetEnableMarkMenuItem(TRUE);
-
 		CViewTop *TopWnd;
 		TopWnd = new CViewTop;
 		m_TopWnd[wParam].push_back(TopWnd);
@@ -4219,18 +4194,14 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 		m_bMouseMove = TRUE;
 
 		m_CurrentImage.release();
+
+		LockCtrls(-1);
 	}
 
 	if (lParam == ROWS_SELECT)
 	{
-		if (!m_BL_AllTestRun.GetStatus())
-		{
-			if (m_nShowImageMode == SHOW_IMAGE_SINGLE)
-			{
-				_SetEnableMarkMenuItem(TRUE);
-			}
-		}
-		
+		LockCtrls(-1);
+
 		for (size_t i = 0; i < m_TopWnd.size(); i++)
 		{
 			if (m_TopWnd[i].size() > 0)
@@ -4276,9 +4247,9 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 
 	if (lParam == NO_ROWS_SELECT)//如果沒有光標指定行
 	{
-		_SetEnableMarkMenuItem(FALSE);
 		m_CurrentImage.release();
 		m_bMouseMove = FALSE;
+		LockCtrls(-1);
 	}
 
 	if (lParam == DCLICK_TEST_NAME_ITEM)
@@ -4486,16 +4457,19 @@ afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 	if (lParam == GROUP_ADD)
 	{
 		m_TopWnd.push_back(m_TopWnd_Child);
-		m_Menu.EnableItemByName(_T("文件"), _T("打開檔案信息..."), FALSE);
+		m_nCurFileStatus = m_nCurFileStatus == NEW_FILE ? LOAD_FILE_INFO : LOAD_FILE;
+		LockCtrls(-1);
 	}
 	if (lParam == GROUP_CHANGE)
 	{
 		m_CurrentImage.release();//切換群組後，清除當前圖像
+		m_nCurFileStatus = m_nCurFileStatus == NEW_FILE ? LOAD_FILE_INFO : LOAD_FILE;
+		LockCtrls(-1);
 	}
 	if (lParam == GROUP_NO_ROWS)
 	{
-		_SetEnableMarkMenuItem(FALSE);
 		m_bMouseMove = FALSE;
+		LockCtrls(-1);
 	}
 	if (lParam == GROUP_TEST_RUN)//開始群組測試
 	{
@@ -5521,10 +5495,6 @@ void CUDE_OutlookDlg::_UpdateInterface()
 			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bIsWindowShow = TRUE;
 			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->Invalidate(FALSE);
 			m_bMouseMove = TRUE;
-			if (!m_BL_AllTestRun.GetStatus())
-			{
-				_SetEnableMarkMenuItem(TRUE);
-			}
 		}
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(FALSE);
 		break;
@@ -5536,9 +5506,7 @@ void CUDE_OutlookDlg::_UpdateInterface()
 		_IsShowParamPart(SW_SHOW);
 		_HideTopeWnd();
 		m_bMouseMove = FALSE;
-		_SetEnableMarkMenuItem(FALSE);
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(TRUE);
-
 		break;
 	case SHOW_IMAGE_SCREEN:
 		m_BL_AllTestRun.MoveWindow(12, nScreenPixelHeightNoTask - 35, 140, 30);
@@ -5548,13 +5516,13 @@ void CUDE_OutlookDlg::_UpdateInterface()
 		_IsShowParamPart(SW_HIDE);
 		_HideTopeWnd();
 		m_bMouseMove = FALSE;
-		_SetEnableMarkMenuItem(FALSE);
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(TRUE);
-
 		break;
 	default:
 		break;
 	}
+
+	LockCtrls(-1);
 
 	int nRows = 0;
 	int nSingleRowCounter = 1;
@@ -5642,6 +5610,9 @@ void CUDE_OutlookDlg::_UpdateInterface()
 			nTemp++;
 		}
 
+		if (nRows == 0)
+		 return;
+		
 		const int nMode = abs(m_nShowImageMode - 2);
 
 		const int nInterval = nSingleRowCounter - 1;//每行的間隙個數
@@ -5708,15 +5679,6 @@ void CUDE_OutlookDlg::_UpdateInterface()
 		}
 	}
 	Invalidate(FALSE);
-}
-
-
-void CUDE_OutlookDlg::_SetEnableMarkMenuItem(BOOL bEnable)
-{
-	for (int i = 0; i < 6; i++)
-	{
-		m_Menu.EnableItemByPos(_T("標記"), i, bEnable);//菜單欄使能配置
-	}
 }
 
 

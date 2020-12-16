@@ -61,23 +61,28 @@ void CVerisonManage::_ShowInfo()
 
 	UpdateInfo UpdateInfoTemp;
 
-	UpdateInfoTemp.strUpdateDate = m_BL_btVersion.GetCaption() + _T("  修改時間：2020年08月24日");
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年08月24日");
 	UpdateInfoTemp.strUpdateInfo = _T("1.新增IPQC點檢界面;2.修改字符檢測結果的字體格式;3.增加各測試結果初始化代碼");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
-	UpdateInfoTemp.strUpdateDate = m_BL_btVersion.GetCaption() + _T("  修改時間：2020年09月02日");
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年09月02日");
 	UpdateInfoTemp.strUpdateInfo = _T("1.修改後新建檔案，未選擇群組，無法添加測試項目;2.解決圖像處理腳本行數少於設置行數，軟件崩潰問題");
-
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
-	UpdateInfoTemp.strUpdateDate = m_BL_btVersion.GetCaption() + _T("  修改時間：2020年09月23日");
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年09月23日");
 	UpdateInfoTemp.strUpdateInfo = _T("1.修改後，鼠標可任意方向繪製矩形;2.新增刪除所有標記功能;3.解決了因界面繪製造成的程序崩潰問題");
-
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
-	UpdateInfoTemp.strUpdateDate = m_BL_btVersion.GetCaption() + _T("  修改時間：2020年12月08日");
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年12月08日");
 	UpdateInfoTemp.strUpdateInfo = _T("1.字符切割圖像保存在exe路徑下的Character文件夾;2.縮減代碼量");
+	deUpdateInfo.push_front(UpdateInfoTemp);
 
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年12月14日");
+	UpdateInfoTemp.strUpdateInfo = _T("1.版本升級為 V1.17;2.將信號輸出模式和自動檢測檔案保存在檔案中;3.添加菜單密碼權限");
+	deUpdateInfo.push_front(UpdateInfoTemp);
+
+	UpdateInfoTemp.strUpdateDate = _T("   修改時間：2020年12月16日");
+	UpdateInfoTemp.strUpdateInfo = _T("1.解決部分軟件每次開機需校正坐標的問題;2.取消關閉軟件時關閉光源功能");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	CValueCalculate ValueCalculate;

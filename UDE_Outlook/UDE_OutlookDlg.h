@@ -88,6 +88,7 @@ enum CHANGE_POS{MOUSE_TOPLEFT, MOUSE_TOPRIGHT, MOUSE_BOTTOMLEFT, MOUSE_BOTTOMRIG
 enum SHOW_WND_MODE{SHOW_IMAGE_SINGLE, SHOW_IMAGE_MULTIPLE, SHOW_IMAGE_SCREEN};//單畫面顯示,多畫面顯示,全屏顯示
 enum GET_IMG_MODE{GET_IMAGE_MODE_SYN, GET_IMAGE_MODE_ASY};//同時拍照,逐次拍照
 enum RUN_CHECK_ERR{RUN_CHECK_PROPOR_ERROR = 1, RUN_CHECK_CMP_ERROR};//坐标校正错误,对样错误
+enum FILE_INFO{NO_FILE, NEW_FILE, LOAD_FILE, LOAD_FILE_INFO};//加載檔案信息和加載檔案不同，新建後，可以加載檔案信息，但是不能加載檔案
 
 #define MAXHISTORYPATH 6
 
@@ -148,7 +149,7 @@ protected:
 
 	int m_nUSBCameras;//使用的USB相機數量
 
-	BOOL m_bFileFinish;//創建檔案或加載檔案完成
+	int m_nCurFileStatus;//當前文件狀態,與枚舉FILE_INFO配合使用
 
 public:
 	void ItemClickMenuAppMain(LPCTSTR strMenu, LPCTSTR strItem, short nItemPos, BOOL bChecked, long nFlags);
@@ -464,7 +465,6 @@ protected:
 	afx_msg LRESULT OnGrouptestRun(WPARAM wParam, LPARAM lParam);
 
 protected:
-	void _SetEnableMarkMenuItem(BOOL bEnable);//設置菜單中標記選項的使能狀態
 
 	/*
 	nScreenPhysicsWidth  顯示器的物理長度
