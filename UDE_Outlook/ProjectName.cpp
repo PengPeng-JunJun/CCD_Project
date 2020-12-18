@@ -70,7 +70,17 @@ void CProjectName::Serialize(CArchive& ar)
 void CProjectName::OnOK()
 {
 	// TODO: 在此添加专用代码和/或调用基类
-	m_strProjectName = m_BL_ProjectName.GetValueText();
+	const CString strName = m_BL_ProjectName.GetValueText();
+
+	HWND hWnd = ::FindWindow(NULL, strName);//查找目标窗口
+	if(hWnd != NULL)
+	{
+		CMsgBox MsgBox(this);
+		MsgBox.ShowMsg(_T("窗口名稱已存在，請確認。"), _T("窗口重命名"), MB_OK);
+		return;
+	}
+	
+	m_strProjectName = strName;
 	m_pProjectName->SendMessage(WM_PROJECTNAMECHANGE);
 	CTpLayerWnd::OnOK();
 }

@@ -57,6 +57,9 @@
     <ClCompile Include="ImageContourFilter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ParamCopy.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestConfiguraDll.def">
@@ -104,6 +107,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ImageContourFilter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ParamCopy.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

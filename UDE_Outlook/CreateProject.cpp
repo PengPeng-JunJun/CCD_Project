@@ -520,6 +520,17 @@ void CCreateProject::LBtClickedBlCreateok(long nFlags)
 	else
 	{
 		CMsgBox MsgBox(this);
+
+		const CString strName = ((CBL_Edit *)(GetDlgItem(IDC_BL_WindowName)))->GetValueText();//傳遞進程名稱
+		HWND hWnd = ::FindWindow(NULL, strName);//查找目标窗口
+		if(hWnd != NULL)
+		{
+			MsgBox.ShowMsg(_T("窗口名稱已存在，請重新輸入"), _T("窗口重命名"), MB_OK);
+			((CBL_Edit *)(GetDlgItem(IDC_BL_WindowName)))->SetValueText(_T(""));
+			return;
+		}
+		m_strWindowName = strName;
+
 		BOOL bChooseCam = FALSE;
 		for (int j = 0; j < MAX_CAM; j++)
 		{
@@ -567,8 +578,6 @@ void CCreateProject::LBtClickedBlCreateok(long nFlags)
 			}
 		}
 	}
-
-	m_strWindowName = ((CBL_Edit *)(GetDlgItem(IDC_BL_WindowName)))->GetValueText();//傳遞進程名稱
 
 	for (size_t i = 0; i < m_pUSBCamMgr->m_vFreeCamVIDPID.size(); i++)
 	{

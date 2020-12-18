@@ -89,6 +89,7 @@ enum SHOW_WND_MODE{SHOW_IMAGE_SINGLE, SHOW_IMAGE_MULTIPLE, SHOW_IMAGE_SCREEN};//
 enum GET_IMG_MODE{GET_IMAGE_MODE_SYN, GET_IMAGE_MODE_ASY};//同時拍照,逐次拍照
 enum RUN_CHECK_ERR{RUN_CHECK_PROPOR_ERROR = 1, RUN_CHECK_CMP_ERROR};//坐标校正错误,对样错误
 enum FILE_INFO{NO_FILE, NEW_FILE, LOAD_FILE, LOAD_FILE_INFO};//加載檔案信息和加載檔案不同，新建後，可以加載檔案信息，但是不能加載檔案
+enum COMMUNI_TYPE{PROCESS, MODBUS, CUSTOM, IO_CARD,IO_NET};//進程間通訊，MODBUS協議，自定義協議，IO板卡，網口IO
 
 #define MAXHISTORYPATH 6
 
@@ -150,6 +151,8 @@ protected:
 	int m_nUSBCameras;//使用的USB相機數量
 
 	int m_nCurFileStatus;//當前文件狀態,與枚舉FILE_INFO配合使用
+
+	int m_nCommuniType;//軟件通訊方式
 
 public:
 	void ItemClickMenuAppMain(LPCTSTR strMenu, LPCTSTR strItem, short nItemPos, BOOL bChecked, long nFlags);

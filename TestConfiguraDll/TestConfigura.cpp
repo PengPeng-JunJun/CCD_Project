@@ -7589,7 +7589,20 @@ void CTestConfigura::LBtClickedBlSetparamsame(long nFlags)
 void CTestConfigura::LBtClickedBlSetimgparamsame(long nFlags)
 {
 	// TODO: 在此处添加消息处理程序代码
-	m_pTestConfigura->PostMessage(gMsgTestConfiguraSetImgParamSame, m_nTestConfiguraNo);
+	CBlender<CParamCopy> Paramcopy;//參數複製
+	Paramcopy.CreateBlendWnd(IDD_PARAMCOPY, this);
+	Paramcopy->SetTitle(_T("圖像處理拷貝設置"));
+	Paramcopy->m_nMax = m_BL_SetImageList.GetRows();
+
+	if (Paramcopy.CreateTopWnd(TRUE, TRUE) == IDOK)
+	{
+		m_tagParamCopyInfo.nSelectType = Paramcopy->m_nSelectType;
+		m_tagParamCopyInfo.strParamCopyData = Paramcopy->m_strParamCopyData;
+		m_tagParamCopyInfo.nSelectType_SP = Paramcopy->m_nSelectType_SP;
+		m_tagParamCopyInfo.strParamCopyData_SP = Paramcopy->m_strParamCopyData_SP;
+
+		m_pTestConfigura->PostMessage(gMsgTestConfiguraSetImgParamSame, m_nTestConfiguraNo);
+	}
 }
 
 

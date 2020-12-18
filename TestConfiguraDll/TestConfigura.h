@@ -9,7 +9,6 @@
 #include <deque>
 #include <queue>
 
-#include "..\CRCDll\\ValueCalculate.h"
 #include "..\ImgProcDll\ImgBox.h"
 #include "..\ImgProcDll\ImgProc.h"
 #include "..\BlendWndDll\MsgBox.h"
@@ -27,19 +26,17 @@
 #include "ImageCHSplit.h"
 #include "ImageColBinary.h"
 #include "ImageContourFilter.h"
-
+#include "ParamCopy.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "..\\Debug\\ImgProcDll.lib")
 #pragma comment(lib, "..\\Debug\\BlendWndDll.lib")
-#pragma comment(lib, "..\\Debug\\CRCDll.lib")
 #pragma comment(lib, "..\\Debug\\MachineLearningDll.lib")
 #pragma comment(lib, "..\\Debug\\CodeSystemDll.lib")
 #pragma comment(lib, "..\\Debug\\DeepLearnDll.lib")
 #else
 #pragma comment(lib, "..\\Release\\ImgProcDll.lib")
 #pragma comment(lib, "..\\Release\\BlendWndDll.lib")
-#pragma comment(lib, "..\\Release\\CRCDll.lib")
 #pragma comment(lib, "..\\Release\\MachineLearningDll.lib")
 #pragma comment(lib, "..\\Release\\CodeSystemDll.lib")
 #pragma comment(lib, "..\\Release\\DeepLearnDll.lib")
@@ -368,6 +365,16 @@ public:
 	vector<tagSetImageText> m_vstrSetImage;
 	vector<tagSetImageText> m_vstrSetImageBkup;
 
+	typedef struct _tagParamCopyInfo
+	{
+		int     nSelectType;
+		CString strParamCopyData;
+		int     nSelectType_SP;
+		CString strParamCopyData_SP;
+	}tagParamCopyInfo;
+
+	tagParamCopyInfo m_tagParamCopyInfo;//øΩÿê–≈œ¢ΩYòãÛw
+	
 public:
 	int m_nTestProject;//úy‘áÌóƒø
 

@@ -198,6 +198,7 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_bSystemRunStatus(FALSE)
 	, m_nCurFileStatus(NO_FILE)
 	, m_bRegister(FALSE)
+	, m_nCommuniType(-1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_pControllerDlg.resize(247);
@@ -717,7 +718,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	
 	BOOL bLocked = _GetLockState(nLock, PSD_LEVEL_TE);
 
-	for (int nCounter = 5; nCounter < 8; nCounter++)
+	for (int nCounter = 4; nCounter < 8; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
 	}
@@ -748,7 +749,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 			break;
 		}
 		
-		for (int nCounter = 0; nCounter < 5; nCounter++)
+		for (int nCounter = 0; nCounter < 4; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
 		}
@@ -763,6 +764,10 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		for (int nCounter = 0; nCounter < 3; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
+		}
+		for (int nCounter = 0; nCounter < 5; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("通訊設置"), nCounter, TRUE);
 		}
 
 		for (int nCounter = 0; nCounter < 2; nCounter++)
@@ -806,6 +811,10 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		for (int nCounter = 0; nCounter < 3; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, FALSE);
+		}
+		for (int nCounter = 0; nCounter < 5; nCounter++)
+		{
+			m_Menu.EnableItemByPos(_T("通訊設置"), nCounter, FALSE);
 		}
 		m_Menu.EnableItemByName(_T("圖像"), _T("加載圖像..."), FALSE);
 		m_Menu.EnableItemByName(_T("圖像"), _T("製作模板圖像..."), FALSE);
@@ -938,15 +947,13 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		case 2:
 			break;
 		case 3:
-			m_ProjectName->m_BL_ProjectName.SetValueText(m_ProjectName->m_strProjectName);
-			m_ProjectName->ShowWindow(SW_SHOW);
-			m_ProjectName->CenterWindow(this);
-			break;
-		case 4:
 			m_LightCtrl.ShowParamWnd(TRUE);
 			break;
+		case 7:
+			
+			break;
 		case 8:
-			m_Menu.CheckItemByPos(_T("設置"), 8, !bChecked);
+			//m_Menu.CheckItemByPos(_T("設置"), 8, !bChecked);
 			//m_bTestContinue = !bChecked;
 			break;
 		default:
@@ -1603,6 +1610,21 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		}
 		_UpdateInterface();
 	}
+	if (strMenuName == _T("通訊設置"))
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			m_Menu.CheckItemByPos(_T("通訊設置"), i, FALSE);
+		}
+		if (strItemName == _T("進程間消息"))
+		{
+			m_ProjectName->m_BL_ProjectName.SetValueText(m_ProjectName->m_strProjectName);
+			m_ProjectName->ShowWindow(SW_SHOW);
+			m_ProjectName->CenterWindow(this);
+			m_Menu.CheckItemByPos(_T("通訊設置"), 0, TRUE);
+			m_nCommuniType = PROCESS;
+		}
+	}
 }
 
 
@@ -1632,10 +1654,11 @@ void CUDE_OutlookDlg::SetMainMenu()
 		m_Menu.AddPopByPosPosPos(1, 0, 4, 0,_T("最近開啟檔案"), strHistoryPath);
 	}
 
-	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;CRC循環冗餘校驗...;添加設備...;設置進程名稱...;光源設置...;拍照方式...;信號輸出模式...;顯示模式...;連續檢測..."));
-	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
-	m_Menu.AddPopByPosPosPos(1, 1, 6, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
-	m_Menu.AddPopByPosPosPos(1, 1, 7, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
+	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;CRC循環冗餘校驗...;添加設備...;光源設置...;拍照方式...;信號輸出模式...;顯示模式...;通訊設置...;連續檢測..."));
+	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
+	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
+	m_Menu.AddPopByPosPosPos(1, 1, 6, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
+	m_Menu.AddPopByPosPosPos(1, 1, 7, 0,_T("通訊設置"), _T("進程間消息;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
 	
 	m_Menu.AddPopByPosPosPos(0, 2, 0, 0, _T("功能"), _T("樣本採集...;機器學習..."));
 	m_Menu.AddPopByPosPosPos(0, 3, 0, 0, _T("視圖"), _T("參數變更記錄...;IPQC點檢界面...;"));
@@ -1683,6 +1706,30 @@ void CUDE_OutlookDlg::SetMainMenu()
 		m_Menu.CheckItemByPos(_T("顯示模式"), 0, FALSE);
 		m_Menu.CheckItemByPos(_T("顯示模式"), 1, FALSE);
 		m_Menu.CheckItemByPos(_T("顯示模式"), 2, TRUE);
+		break;
+	default:
+		break;
+	}
+	for (int i = 0; i < 5; i++)
+	{
+		m_Menu.CheckItemByPos(_T("通訊設置"), i, FALSE);
+	}
+	switch (m_nCommuniType)
+	{
+	case PROCESS:
+		m_Menu.CheckItemByPos(_T("通訊設置"), 0, TRUE);
+		break;
+	case MODBUS:
+		m_Menu.CheckItemByPos(_T("通訊設置"), 1, TRUE);
+		break;
+	case CUSTOM:
+		m_Menu.CheckItemByPos(_T("通訊設置"), 2, TRUE);
+		break;
+	case IO_CARD:
+		m_Menu.CheckItemByPos(_T("通訊設置"), 3, TRUE);
+		break;
+	case IO_NET:
+		m_Menu.CheckItemByPos(_T("通訊設置"), 4, TRUE);
 		break;
 	default:
 		break;
@@ -2260,6 +2307,8 @@ void CUDE_OutlookDlg::_SaveFile(BOOL bSaveAs)
 	CMsgBox MsgBox(this);
 
 	MsgBox.ShowMsg(_T("檔案保存成功"), _T("Save"), MB_OK | MB_ICONINFORMATION);
+
+	LockCtrls(-1);
 }
 
 void CUDE_OutlookDlg::_LoadFile()

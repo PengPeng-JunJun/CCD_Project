@@ -5738,35 +5738,406 @@ afx_msg LRESULT CViewTop::OnGmsgtestconfigurasetparamsame(WPARAM wParam, LPARAM 
 
 afx_msg LRESULT CViewTop::OnGmsgtestconfigurasetimgparamsame(WPARAM wParam, LPARAM lParam)
 {
-	for (size_t i = 0; i < m_rcTestScope.size(); i++)
-	{
-		if (i != wParam)
-		{
-			for(int j = (*m_TestConfig[i])->m_BL_SetImageList.GetRows(); j >= 0; j--)//刪除原有行
-			{
-				(*m_TestConfig[i])->m_BL_SetImageList.DeleteRow(j, FALSE);
-			}
-			for (int k = 0; k < (*m_TestConfig[wParam])->m_BL_SetImageList.GetRows(); k++)
-			{
+	const int     nSelectType = (*m_TestConfig[wParam])->m_tagParamCopyInfo.nSelectType;
+	const CString strParamCopyData = (*m_TestConfig[wParam])->m_tagParamCopyInfo.strParamCopyData;
+	const int     nSelectType_SP = (*m_TestConfig[wParam])->m_tagParamCopyInfo.nSelectType_SP;
+	const CString strParamCopyData_SP = (*m_TestConfig[wParam])->m_tagParamCopyInfo.strParamCopyData_SP;
 
-				(*m_TestConfig[i])->m_BL_SetImageList.AppendRow(TRUE);
-				
-				(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1));
-				(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 2));
-				if ((*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1)) != IMAGE_KEEP)
+	if (nSelectType == PARAM_COPY_ALL)
+	{
+		if (nSelectType_SP == PARAM_COPY_ALL)
+		{
+			for (size_t i = 0; i < m_rcTestScope.size(); i++)
+			{
+				if (i != wParam)
 				{
-					(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(k, 2, TRUE);
-					(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(k, 2, FALSE);
+					for(int j = (*m_TestConfig[i])->m_BL_SetImageList.GetRows(); j >= 0; j--)//刪除原有行
+					{
+						(*m_TestConfig[i])->m_BL_SetImageList.DeleteRow(j, FALSE);
+					}
+					for (int k = 0; k < (*m_TestConfig[wParam])->m_BL_SetImageList.GetRows(); k++)
+					{
+						(*m_TestConfig[i])->m_BL_SetImageList.AppendRow(TRUE);
+
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1));
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 2));
+						const BOOL bEnable = (*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(k, 2, bEnable);
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(k, 2, !bEnable);
+					}
+					(*m_TestConfig[i])->_UpdateSetImage();
+				}
+			}
+		}
+		else
+		{
+			vector<CString> vstrTemp;
+			if (strParamCopyData_SP.Find(',') >= 0)
+			{
+				vstrTemp.clear();
+				vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData_SP, ',');
+
+				for (size_t k = 0; k < vstrTemp.size(); k++)
+				{
+					if (_ttoi(vstrTemp[k]) > m_rcTestScope.size())
+					{
+						continue;
+					}
+					const int nTemp = _ttoi(vstrTemp[k]) - 1;
+					if (nTemp != wParam)
+					{
+						for(int j = (*m_TestConfig[nTemp])->m_BL_SetImageList.GetRows(); j >= 0; j--)//刪除原有行
+						{
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.DeleteRow(j, FALSE);
+						}
+						for (int k = 0; k < (*m_TestConfig[wParam])->m_BL_SetImageList.GetRows(); k++)
+						{
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.AppendRow(TRUE);
+
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemText(k, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1));
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemText(k, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 2));
+							const BOOL bEnable = (*m_TestConfig[nTemp])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemReadOnly(k, 2, bEnable);
+							(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemNumberOnly(k, 2, !bEnable);
+						}
+						(*m_TestConfig[nTemp])->_UpdateSetImage();
+					}
+				}
+			}
+			else if(strParamCopyData_SP.Find('-') >= 0)
+			{
+				vstrTemp.clear();
+				vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData_SP, '-');
+
+				const int nMin = _ttoi(vstrTemp[0]) > (int)m_rcTestScope.size() ? (int)m_rcTestScope.size() : _ttoi(vstrTemp[0]);
+				const int nMax = _ttoi(vstrTemp[1]) > (int)m_rcTestScope.size() ? (int)m_rcTestScope.size() : _ttoi(vstrTemp[1]);
+
+				if (nMin > nMax)
+				{
+					return 0;
+				}
+				for (size_t i = nMin - 1; i <nMax; i++)
+				{
+					if (i != wParam)
+					{
+						for(int j = (*m_TestConfig[i])->m_BL_SetImageList.GetRows(); j >= 0; j--)//刪除原有行
+						{
+							(*m_TestConfig[i])->m_BL_SetImageList.DeleteRow(j, FALSE);
+						}
+						for (int k = 0; k < (*m_TestConfig[wParam])->m_BL_SetImageList.GetRows(); k++)
+						{
+							(*m_TestConfig[i])->m_BL_SetImageList.AppendRow(TRUE);
+
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1));
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 2));
+							const BOOL bEnable = (*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(k, 2, bEnable);
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(k, 2, !bEnable);
+						}
+						(*m_TestConfig[i])->_UpdateSetImage();
+					}
+				}
+			}
+			else
+			{
+				const int nTemp = _ttoi(strParamCopyData_SP) - 1;
+				
+				if (_ttoi(strParamCopyData_SP) > m_rcTestScope.size())
+					return 0;
+
+				if (nTemp != wParam)
+				{
+					for(int j = (*m_TestConfig[nTemp])->m_BL_SetImageList.GetRows(); j >= 0; j--)//刪除原有行
+					{
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.DeleteRow(j, FALSE);
+					}
+					for (int k = 0; k < (*m_TestConfig[wParam])->m_BL_SetImageList.GetRows(); k++)
+					{
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.AppendRow(TRUE);
+
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemText(k, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1));
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemText(k, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 2));
+						const BOOL bEnable = (*m_TestConfig[nTemp])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemReadOnly(k, 2, bEnable);
+						(*m_TestConfig[nTemp])->m_BL_SetImageList.SetItemNumberOnly(k, 2, !bEnable);
+					}
+					(*m_TestConfig[nTemp])->_UpdateSetImage();
+				}
+			}
+		}
+	}
+	else
+	{
+		if (nSelectType_SP == PARAM_COPY_ALL)
+		{
+			vector<CString> vstrTemp;
+			if (strParamCopyData.Find(',') >= 0)
+			{
+				vstrTemp.clear();
+				vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, ',');
+				for (size_t i = 0; i < m_rcTestScope.size(); i++)
+				{
+					if (i != wParam)
+					{
+						for (size_t k = 0; k < vstrTemp.size(); k++)
+						{
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1));
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 2));
+							const BOOL bEnable = (*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(_ttoi(vstrTemp[k]) - 1, 2, bEnable);
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(_ttoi(vstrTemp[k]) - 1, 2, !bEnable);
+						}
+						(*m_TestConfig[i])->_UpdateSetImage();
+					}
+				}
+			}
+			else if(strParamCopyData.Find('-') >= 0)
+			{
+				vstrTemp.clear();
+				vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, '-');
+				if (_ttoi(vstrTemp[0]) > _ttoi(vstrTemp[1]))
+					return 0;
+
+				for (size_t i = 0; i < m_rcTestScope.size(); i++)
+				{
+					if (i != wParam)
+					{
+						for (size_t k = _ttoi(vstrTemp[0]); k <= _ttoi(vstrTemp[1]); k++)
+						{
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1));
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(k - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 2));
+							const BOOL bEnable = (*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(k - 1, 2, bEnable);
+							(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(k - 1, 2, !bEnable);
+						}
+						(*m_TestConfig[i])->_UpdateSetImage();
+					}
+				}
+			}
+			else
+			{
+				const int nTemp = _ttoi(strParamCopyData) - 1;
+				for (size_t i = 0; i < m_rcTestScope.size(); i++)
+				{
+					if (i != wParam)
+					{
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(nTemp, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1));
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemText(nTemp, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 2));
+						const BOOL bEnable = (*m_TestConfig[i])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(nTemp, 2, bEnable);
+						(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(nTemp, 2, !bEnable);
+
+						(*m_TestConfig[i])->_UpdateSetImage();
+					}
+				}
+			}
+		}
+		else
+		{
+			vector<CString> vstrTemp;
+			vector<CString> vstrTemp_SP;
+
+			if (strParamCopyData_SP.Find(',') >= 0)
+			{
+				vstrTemp_SP.clear();
+				vstrTemp_SP = m_ValueCalculate.CutStringElse(strParamCopyData_SP, ',');
+
+				for (size_t a = 0; a < vstrTemp_SP.size(); a++)
+				{
+					if (_ttoi(vstrTemp_SP[a]) > m_rcTestScope.size())
+					{
+						continue;
+					}
+					const int nSp = _ttoi(vstrTemp_SP[a]) - 1;
+
+					if (strParamCopyData.Find(',') >= 0)
+					{
+						vstrTemp.clear();
+						vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, ',');
+
+						if (nSp != wParam)
+						{
+							for (size_t k = 0; k < vstrTemp.size(); k++)
+							{
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1));
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 2));
+								const BOOL bEnable = (*m_TestConfig[nSp])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemReadOnly(_ttoi(vstrTemp[k]) - 1, 2, bEnable);
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemNumberOnly(_ttoi(vstrTemp[k]) - 1, 2, !bEnable);
+							}
+							(*m_TestConfig[nSp])->_UpdateSetImage();
+						}
+					}
+					else if(strParamCopyData.Find('-') >= 0)
+					{
+						vstrTemp.clear();
+						vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, '-');
+						if (_ttoi(vstrTemp[0]) > _ttoi(vstrTemp[1]))
+							return 0;
+
+						if (nSp != wParam)
+						{
+							for (size_t k = _ttoi(vstrTemp[0]); k <= _ttoi(vstrTemp[1]); k++)
+							{
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(k - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1));
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(k - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 2));
+								const BOOL bEnable = (*m_TestConfig[nSp])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemReadOnly(k - 1, 2, bEnable);
+								(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemNumberOnly(k - 1, 2, !bEnable);
+							}
+							(*m_TestConfig[nSp])->_UpdateSetImage();
+						}
+					}
+					else
+					{
+						const int nTemp = _ttoi(strParamCopyData) - 1;
+						if (nSp != wParam)
+						{
+							(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(nTemp, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1));
+							(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemText(nTemp, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 2));
+							const BOOL bEnable = (*m_TestConfig[nSp])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemReadOnly(nTemp, 2, bEnable);
+							(*m_TestConfig[nSp])->m_BL_SetImageList.SetItemNumberOnly(nTemp, 2, !bEnable);
+
+							(*m_TestConfig[nSp])->_UpdateSetImage();
+						}
+					}
+				}
+			}
+			else if (strParamCopyData_SP.Find('-') >= 0)
+			{
+				vstrTemp_SP.clear();
+				vstrTemp_SP = m_ValueCalculate.CutStringElse(strParamCopyData_SP, '-');
+
+				const int nMin = _ttoi(vstrTemp_SP[0]) > (int)m_rcTestScope.size() ? (int)m_rcTestScope.size() : _ttoi(vstrTemp_SP[0]);
+				const int nMax = _ttoi(vstrTemp_SP[1]) > (int)m_rcTestScope.size() ? (int)m_rcTestScope.size() : _ttoi(vstrTemp_SP[1]);
+
+				if (nMin > nMax)
+				{
+					return 0;
+				}
+				for (size_t a = nMin - 1; a <nMax; a++)
+				{
+					vector<CString> vstrTemp;
+					if (strParamCopyData.Find(',') >= 0)
+					{
+						vstrTemp.clear();
+						vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, ',');
+						
+						if (a != wParam)
+						{
+							for (size_t k = 0; k < vstrTemp.size(); k++)
+							{
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1));
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 2));
+								const BOOL bEnable = (*m_TestConfig[a])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemReadOnly(_ttoi(vstrTemp[k]) - 1, 2, bEnable);
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemNumberOnly(_ttoi(vstrTemp[k]) - 1, 2, !bEnable);
+							}
+							(*m_TestConfig[a])->_UpdateSetImage();
+						}
+					}
+					else if(strParamCopyData.Find('-') >= 0)
+					{
+						vstrTemp.clear();
+						vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, '-');
+						if (_ttoi(vstrTemp[0]) > _ttoi(vstrTemp[1]))
+							return 0;
+
+						if (a != wParam)
+						{
+							for (size_t k = _ttoi(vstrTemp[0]); k <= _ttoi(vstrTemp[1]); k++)
+							{
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(k - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1));
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(k - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 2));
+								const BOOL bEnable = (*m_TestConfig[a])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemReadOnly(k - 1, 2, bEnable);
+								(*m_TestConfig[a])->m_BL_SetImageList.SetItemNumberOnly(k - 1, 2, !bEnable);
+							}
+							(*m_TestConfig[a])->_UpdateSetImage();
+						}
+					}
+					else
+					{
+						const int nTemp = _ttoi(strParamCopyData) - 1;
+						
+						if (a != wParam)
+						{
+							(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(nTemp, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1));
+							(*m_TestConfig[a])->m_BL_SetImageList.SetItemText(nTemp, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 2));
+							const BOOL bEnable = (*m_TestConfig[a])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[a])->m_BL_SetImageList.SetItemReadOnly(nTemp, 2, bEnable);
+							(*m_TestConfig[a])->m_BL_SetImageList.SetItemNumberOnly(nTemp, 2, !bEnable);
+
+							(*m_TestConfig[a])->_UpdateSetImage();
+						}
+					}
+				}
+			}
+			else
+			{
+				const int nTempSP = _ttoi(strParamCopyData_SP) - 1;
+
+				if (_ttoi(strParamCopyData_SP) > m_rcTestScope.size())
+					return 0;
+
+				if (strParamCopyData.Find(',') >= 0)
+				{
+					vstrTemp.clear();
+					vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, ',');
+					
+					if (nTempSP != wParam)
+					{
+						for (size_t k = 0; k < vstrTemp.size(); k++)
+						{
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1));
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(_ttoi(vstrTemp[k]) - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 2));
+							const BOOL bEnable = (*m_TestConfig[nTempSP])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(_ttoi(vstrTemp[k]) - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemReadOnly(_ttoi(vstrTemp[k]) - 1, 2, bEnable);
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemNumberOnly(_ttoi(vstrTemp[k]) - 1, 2, !bEnable);
+						}
+						(*m_TestConfig[nTempSP])->_UpdateSetImage();
+					}
+				}
+				else if(strParamCopyData.Find('-') >= 0)
+				{
+					vstrTemp.clear();
+					vstrTemp = m_ValueCalculate.CutStringElse(strParamCopyData, '-');
+					if (_ttoi(vstrTemp[0]) > _ttoi(vstrTemp[1]))
+						return 0;
+
+					if (nTempSP != wParam)
+					{
+						for (size_t k = _ttoi(vstrTemp[0]); k <= _ttoi(vstrTemp[1]); k++)
+						{
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(k - 1, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1));
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(k - 1, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 2));
+							const BOOL bEnable = (*m_TestConfig[nTempSP])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(k - 1, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemReadOnly(k - 1, 2, bEnable);
+							(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemNumberOnly(k - 1, 2, !bEnable);
+						}
+						(*m_TestConfig[nTempSP])->_UpdateSetImage();
+					}
+					
 				}
 				else
 				{
-					(*m_TestConfig[i])->m_BL_SetImageList.SetItemReadOnly(k, 2, FALSE);
-					(*m_TestConfig[i])->m_BL_SetImageList.SetItemNumberOnly(k, 2, TRUE);
+					const int nTemp = _ttoi(strParamCopyData) - 1;
+					
+					if (nTempSP != wParam)
+					{
+						(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(nTemp, 1, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1));
+						(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemText(nTemp, 2, (*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 2));
+						const BOOL bEnable = (*m_TestConfig[nTempSP])->GetImageProcessMode((*m_TestConfig[wParam])->m_BL_SetImageList.GetItemText(nTemp, 1)) != IMAGE_KEEP ? TRUE : FALSE;
+						(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemReadOnly(nTemp, 2, bEnable);
+						(*m_TestConfig[nTempSP])->m_BL_SetImageList.SetItemNumberOnly(nTemp, 2, !bEnable);
+
+						(*m_TestConfig[nTempSP])->_UpdateSetImage();
+					}
 				}
 			}
-			(*m_TestConfig[i])->_UpdateSetImage();
 		}
-
+		
 	}
 
 	return 0;
