@@ -394,6 +394,7 @@ public:
 	BOOL m_bFinishTest;//自動測試完成
 	int m_nFinishTest;//測試完成數量
 	int m_nFinishGetImg;//拍照完成数量
+	int m_nTestGroupBkup;//測試群組備份，用於判斷是否需要重新打開光源，提升效率
 
 	CString m_strDstWnd;//測試目標窗口名稱
 

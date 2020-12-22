@@ -93,6 +93,10 @@ void CVerisonManage::_ShowInfo()
 	UpdateInfoTemp.strUpdateInfo = _T("1.保存檔案信息時，加入了信號輸出模式和自動檢測;2.修改退出程序BUG");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
+	UpdateInfoTemp.strUpdateDate = _T("V1.8    修改時間：2020年12月22日");
+	UpdateInfoTemp.strUpdateInfo = _T("1.若控制光源拍照，新增控制情況判斷代碼，提升拍照效率;2.修改通群組控制光源觸發BUG");
+	deUpdateInfo.push_front(UpdateInfoTemp);
+
 	CValueCalculate ValueCalculate;
 	for (size_t i = 0; i < deUpdateInfo.size(); i++)
 	{

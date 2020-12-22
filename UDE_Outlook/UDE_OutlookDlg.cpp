@@ -199,6 +199,7 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_nCurFileStatus(NO_FILE)
 	, m_bRegister(FALSE)
 	, m_nCommuniType(-1)
+	, m_nTestGroupBkup(-1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_pControllerDlg.resize(247);
@@ -1980,6 +1981,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 		}
 	}
 	m_bFinishTest = TRUE;
+	m_nTestGroupBkup = -1;
 
 	m_vnGetImgCamCounter.clear();
 	m_vnTestProjectCounter.clear();
@@ -2017,6 +2019,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 					if (vnCamTemp_1[i] == vnCamTemp_2[j])
 					{
 						bSame = TRUE;
+						vnCamTemp_2.push_back(-1);
 						break;
 					}
 				}
@@ -2439,6 +2442,7 @@ void CUDE_OutlookDlg::_SaveFileInfo()
 
 	CArchive ar(&file, CArchive::store);
 
+	m_strSoftwareVersion = (*m_pVerisonMange)->m_BL_btVersion.GetCaption();
 	ar << m_strSoftwareVersion;
 
 	ar << m_TopWnd.size();
@@ -2521,7 +2525,6 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	for (int nCounter1 = 0; nCounter1 < nPP_Counter; nCounter1++)
 	{
 		ar >> nP_Counter;
-		nP_Counter = 4;
 		for (int nCounter2 = 0; nCounter2 < nP_Counter; nCounter2++)
 		{
 			CViewTop *TopWnd;
@@ -4590,6 +4593,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 						if (vnCamTemp_1[i] == vnCamTemp_2[j])
 						{
 							bSame = TRUE;
+							vnCamTemp_2.push_back(-1);
 							break;
 						}
 					}
@@ -4918,6 +4922,8 @@ void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
  	for (int nCounter0 = 0; nCounter0 < nSize; nCounter0++)//從首行開始呢執行
  	{
  		const int nCam = m_vnGroupGetImgCam[nGroup][nCounter0];//取相機編號
+		if (nCam < 0)
+			continue;
  		m_CamStc[nCam - 1].m_nCamRes = 2;
  		if (!m_bGetImageFinish[nCam - 1])//查找該相機是否拍過圖像
  		{
@@ -4938,27 +4944,31 @@ void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 						bUesLight = TRUE;
 					}
 				}
+
 				if (bUesLight)
 				{
-					for (int i = 0; i < CHANNEL_SUM; i++)
-					{
-						if (bChannelStatus[i])
-						{
-							m_LightCtrl.SetChannelIntensity(i + 1, nLightVaule[i]);
-							m_LightCtrl.SetChannelStatus(i + 1, TRUE);
-						}
-					}
-
-					DelayMs(m_TopWnd[nGroup][nCounter0]->m_TestLightInfo->m_nTriggerTime);
-					GetImageFromCam(nCam, m_vrcAOI[nCam - 1], m_vAllCamImage[nCam - 1]);
-
-					if (m_TopWnd[nGroup][nCounter0]->m_TestLightInfo->m_nLightStatus == LIGHT_CLOSE)
+					if (m_TopWnd[nGroup][nCounter0]->m_TestLightInfo->m_nLightStatus == LIGHT_CLOSE || m_nTestGroupBkup != nGroup)
 					{
 						for (int i = 0; i < CHANNEL_SUM; i++)
 						{
 							if (bChannelStatus[i])
 							{
-								m_LightCtrl.SetChannelStatus(i + 1, FALSE);
+								m_LightCtrl.SetChannelIntensity(i + 1, nLightVaule[i]);
+								m_LightCtrl.SetChannelStatus(i + 1, TRUE);
+							}
+						}
+
+						DelayMs(m_TopWnd[nGroup][nCounter0]->m_TestLightInfo->m_nTriggerTime);
+						GetImageFromCam(nCam, m_vrcAOI[nCam - 1], m_vAllCamImage[nCam - 1]);
+
+						if (m_TopWnd[nGroup][nCounter0]->m_TestLightInfo->m_nLightStatus == LIGHT_CLOSE)
+						{
+							for (int i = 0; i < CHANNEL_SUM; i++)
+							{
+								if (bChannelStatus[i])
+								{
+									m_LightCtrl.SetChannelStatus(i + 1, FALSE);
+								}
 							}
 						}
 					}
@@ -5026,6 +5036,8 @@ void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 	{
 		m_TimerID = timeSetEvent(3, 1, &TimerCallBack_GroupTestRun, (DWORD)this, TIME_ONESHOT);
 	}
+
+	m_nTestGroupBkup = nGroup;
 }
 
 
