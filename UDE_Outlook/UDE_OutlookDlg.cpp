@@ -397,7 +397,6 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 #ifdef _DEBUG
 	m_swBaseLock.SetStatus(FALSE);
 #endif
-
 	LockCtrls(-1);
 // 	CExcel Excel;
 // 
@@ -928,7 +927,32 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 			m_bAutoRunCheck = !bChecked;
 			break;
 		case 9:
-			OnClose();
+#ifdef _DEBUG
+			SaveHistoryPath();
+#else
+			if (IDCANCEL == MsgBox.ShowMsg(_T("确认退出软件？"), _T("退出"), MB_OKCANCEL | MB_ICONQUESTION))
+			{
+				return;
+			}
+			SaveHistoryPath();
+#endif
+
+			if (m_LightCtrl.m_Device->m_bConnected)//有連接光源控制器
+			{
+				for (int i = 0; i < LIT_CHANNEL_SUM; i++)
+				{
+					if (m_LightCtrl.m_Device->m_bChEnable[i])
+					{
+						//m_LightCtrl.SetChannelIntensity(i + 1, 0);
+					}
+				}
+			}
+
+			delete m_pCollection;
+			delete m_pParamMange;
+			delete m_pQualityMange;
+			delete m_pVerisonMange;
+			delete m_pMLTrain;
 			OnCancel();
 			break;
 		default:
@@ -2432,6 +2456,8 @@ void CUDE_OutlookDlg::_SaveFileInfo()
 	ar << m_bAutoSaveNGImg;
 	ar << m_nAllTestProjectCounter;
 	ar << m_nGetImageMode;
+	ar << m_bImageTrigger;
+	ar << m_bAutoRunCheck;
 
 	m_TestGroup.Serialize(ar);
 
@@ -2495,6 +2521,7 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	for (int nCounter1 = 0; nCounter1 < nPP_Counter; nCounter1++)
 	{
 		ar >> nP_Counter;
+		nP_Counter = 4;
 		for (int nCounter2 = 0; nCounter2 < nP_Counter; nCounter2++)
 		{
 			CViewTop *TopWnd;
@@ -2528,9 +2555,14 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
 	if (vstrTem.size() > 1)
 	{
-		if (_ttoi(vstrTem[1]) >= 6)
+		if (_ttoi(vstrTem[1]) >= 7)
 		{
 			ar >> m_nGetImageMode;
+		}
+		if (_ttoi(vstrTem[1]) >= 18)
+		{
+			ar >> m_bImageTrigger;
+			ar >> m_bAutoRunCheck;
 		}
 	}
 
@@ -3826,6 +3858,17 @@ afx_msg LRESULT CUDE_OutlookDlg::OnRegister(WPARAM wParam, LPARAM lParam)
 void CUDE_OutlookDlg::OnClose()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
+#ifdef _DEBUG
+	SaveHistoryPath();
+#else
+	CMsgBox MsgBox(this);
+	if (IDCANCEL == MsgBox.ShowMsg(_T("确认退出软件？"), _T("退出"), MB_OKCANCEL | MB_ICONQUESTION))
+	{
+		return;
+	}
+	SaveHistoryPath();
+#endif
+
 	if (m_LightCtrl.m_Device->m_bConnected)//有連接光源控制器
 	{
 		for (int i = 0; i < LIT_CHANNEL_SUM; i++)
@@ -3837,17 +3880,6 @@ void CUDE_OutlookDlg::OnClose()
 		}
 	}
 
-#ifdef _DEBUG
-
-	SaveHistoryPath();
-#else
-	SaveHistoryPath();
-	CMsgBox MsgBox(this);
-	if (IDNO == MsgBox.ShowMsg(_T("确认退出软件？"), _T("退出"), MB_YESNO | MB_ICONQUESTION))
-	{
-		return;
-	}
-#endif
 	delete m_pCollection;
 	delete m_pParamMange;
 	delete m_pQualityMange;
