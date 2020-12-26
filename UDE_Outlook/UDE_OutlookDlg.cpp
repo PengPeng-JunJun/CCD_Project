@@ -1966,7 +1966,9 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 	m_TestGroup.m_bTesting = TRUE;
 	m_TestGroup.m_BL_RunGroup.SetEnabled(FALSE);
 	m_TestGroup.m_BL_StartCode.SetEnabled(FALSE);
+	m_TestGroup.m_BL_Delete.SetEnabled(FALSE);
 	((CBL_CheckBox *)(m_TestGroup.GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(FALSE);
+	m_TestGroup.m_BL_Add.SetEnabled(FALSE);
 	m_BL_TestRunStatus.SetCaption(_T("測試運行中"));
 	m_BL_TestRunStatus.SetForeColor(RGB(0, 255, 255));
 
@@ -2400,6 +2402,8 @@ void CUDE_OutlookDlg::_LoadFile()
 	ar.Close();
 	file.Close();
 
+	m_nCurFileStatus = LOAD_FILE;
+
 	UpdateMenu();//加載檔案刷新—使用反串行化後的數據刷新菜單狀態
 	if (m_bAutoRunCheck)
 	{
@@ -2407,7 +2411,7 @@ void CUDE_OutlookDlg::_LoadFile()
 		_TestRunCheck();
 	}
 
-	m_nCurFileStatus = LOAD_FILE;
+	
 
 	LockCtrls(-1);
 }
@@ -2592,6 +2596,8 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 
 	m_nCurFileStatus = LOAD_FILE;
 
+	UpdateMenu();
+
 	LockCtrls(-1);
 }
 
@@ -2700,6 +2706,7 @@ void CUDE_OutlookDlg::OpenprojectWithFilePath(CString strPath)
 	ar.Close();
 	file.Close();
 
+	m_nCurFileStatus = LOAD_FILE;
 	UpdateMenu();//加載檔案刷新—使用反串行化後的數據刷新菜單狀態
 	if (m_bAutoRunCheck)
 	{
@@ -2708,7 +2715,7 @@ void CUDE_OutlookDlg::OpenprojectWithFilePath(CString strPath)
 	}
 
 	//讀取檔案完成後，禁止再次新建或打開檔案
-	m_nCurFileStatus = LOAD_FILE;
+	
 	LockCtrls(-1);
 }
 
@@ -2744,7 +2751,9 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 		m_TestGroup.m_bTesting = FALSE;
 		m_TestGroup.m_BL_RunGroup.SetEnabled(TRUE);
 		m_TestGroup.m_BL_StartCode.SetEnabled(TRUE);
+		m_TestGroup.m_BL_Delete.SetEnabled(TRUE);
 		((CBL_CheckBox *)(m_TestGroup.GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(TRUE);
+		m_TestGroup.m_BL_Add.SetEnabled(TRUE);
 		m_BL_TestRunStatus.SetCaption(_T("停止運行"));
 		m_BL_TestRunStatus.SetForeColor(RGB(155, 64, 64));
 		m_Menu.CheckItemByPos(_T("檢測"), 4, FALSE);
@@ -4253,7 +4262,6 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 
 		m_TopWnd[wParam][m_TestGroup.m_nCurRow]->MoveWindow(m_rcTopWnd);
 
-
 		///////*建立該測試項目的不良圖片文件夾*//////
 
 		CString strFolderName;
@@ -4281,7 +4289,29 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 
 		LockCtrls(-1);
 	}
+	if (lParam == ROWS_DELETE)
+	{
+		const vector<int> vnSelectRows = m_TestGroup.m_vnSelectRows;
+		if (!vnSelectRows.size())
+		{
+			MsgBox.ShowMsg(_T("無待删除项目"),_T("删除错误"), MB_OK | MB_ICONWARNING);
+			return 0;
+		}
+		if (IDCANCEL == MsgBox.ShowMsg(_T("是否刪除選中項目？"),_T("提示"), MB_OKCANCEL | MB_ICONINFORMATION))
+		{
+			return 0;
+		}
 
+		int i = (int)vnSelectRows.size() - 1;
+		for (; i >= 0; i--)
+		{
+			delete m_TopWnd[wParam][vnSelectRows[i]];
+			m_TopWnd[wParam].erase(m_TopWnd[wParam].begin() + vnSelectRows[i]);
+		}
+
+		m_TestGroup.m_bDelete = TRUE;	
+		
+	}
 	if (lParam == ROWS_SELECT)
 	{
 		LockCtrls(-1);
@@ -4538,6 +4568,8 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 
 afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 {
+	CMsgBox MsgBox(this);
+
 	if (lParam == GROUP_ADD)
 	{
 		m_TopWnd.push_back(m_TopWnd_Child);
@@ -4610,6 +4642,33 @@ afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 		}
 
 		GroupTestRun(m_TestGroup.m_nCurGroup);
+	}
+	if (lParam == GROUP_DELETE)
+	{
+		if (!m_TopWnd.size())
+		{
+			MsgBox.ShowMsg(_T("無待删除群組"),_T("删除错误"), MB_OK | MB_ICONWARNING);
+			return 0;
+		}
+
+		CString strDelete;
+		strDelete.Format(_T("是否刪除群組  %d？"), wParam + 1);
+		if (IDCANCEL == MsgBox.ShowMsg(strDelete,_T("提示"), MB_OKCANCEL | MB_ICONINFORMATION))
+		{
+			return 0;
+		}
+
+		int i = (int)m_TopWnd[wParam].size() - 1;
+		for (; i >= 0; i--)
+		{
+			delete m_TopWnd[wParam][i];
+		}
+
+		m_TopWnd[wParam].clear();
+
+		m_TopWnd.erase(m_TopWnd.begin() + wParam);
+
+		m_TestGroup.m_bDelete = TRUE;	
 	}
 	return 0;
 }
@@ -4876,7 +4935,6 @@ BOOL CUDE_OutlookDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				}
 			}
 		}
-		
 	}
 	return CAppBase::OnCopyData(pWnd, pCopyDataStruct);
 }
@@ -4971,6 +5029,10 @@ void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 								}
 							}
 						}
+					}
+					else
+					{
+						GetImageFromCam(nCam, m_vrcAOI[nCam - 1], m_vAllCamImage[nCam - 1]);
 					}
 				}
 				else

@@ -43,9 +43,10 @@ void CTestGroup::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BL_TestProjectList, m_BL_TestProjectList);
-	DDX_Control(pDX, IDC_BL_DeletGroup, m_BL_DeletGroup);
 	DDX_Control(pDX, IDC_BL_StartCode, m_BL_StartCode);
 	DDX_Control(pDX, IDC_BL_RunGroup, m_BL_RunGroup);
+	DDX_Control(pDX, IDC_BL_Delete, m_BL_Delete);
+	DDX_Control(pDX, IDC_BL_Add, m_BL_Add);
 	
 }
 
@@ -64,14 +65,23 @@ void CTestGroup::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	// TODO: 在此处添加消息处理程序代码
 	// 不为绘图消息调用 CDialogEx::OnPaint()
+	m_BL_TestProjectList.SetNoRtMenu(TRUE);
 
-	if (m_nCurGroup > (MAX_GROUP - 1))
+	if (m_nCurGroup > (MAX_GROUP - 1) || m_bTesting)//
 	{
-		m_BL_TestProjectList.SetNoRtMenu(TRUE);
+		m_BL_StartCode.SetEnabled(FALSE);
+		m_BL_RunGroup.SetEnabled(FALSE);
+		m_BL_Delete.SetEnabled(FALSE);
+		m_BL_Add.SetEnabled(FALSE);
+		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(FALSE);
 	}
-	else
+	if (m_nCurGroup < (MAX_GROUP - 1) && !m_bTesting)//
 	{
-		m_BL_TestProjectList.SetNoRtMenu(FALSE);
+		m_BL_StartCode.SetEnabled(TRUE);
+		m_BL_RunGroup.SetEnabled(TRUE);
+		m_BL_Delete.SetEnabled(TRUE);
+		m_BL_Add.SetEnabled(TRUE);
+		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(TRUE);
 	}
 
 	if (m_bItemInputFinish)
@@ -107,7 +117,6 @@ void CTestGroup::OnPaint()
 
 		//MemDC.Rectangle(rc);
 
-
 		if (m_rcGroup.size() == 0)//不存在測試群組
 		{
 			CPoint pt_RcAdd_0(12,5);
@@ -124,9 +133,10 @@ void CTestGroup::OnPaint()
 			MemDC.LineTo(610,30);
 
 			m_BL_TestProjectList.ShowWindow(SW_HIDE);
-			m_BL_DeletGroup.ShowWindow(SW_HIDE);
+			m_BL_Delete.ShowWindow(SW_HIDE);
 			m_BL_StartCode.ShowWindow(SW_HIDE);
 			m_BL_RunGroup.ShowWindow(SW_HIDE);
+			m_BL_Add.ShowWindow(SW_HIDE);
 			((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->ShowWindow(SW_HIDE);
 
 			//畫加號
@@ -147,9 +157,10 @@ void CTestGroup::OnPaint()
 		else//有測試群組
 		{
 			m_BL_TestProjectList.ShowWindow(SW_SHOW);
-			//m_BL_DeletGroup.ShowWindow(SW_SHOW);
+			m_BL_Delete.ShowWindow(SW_SHOW);
 			//m_BL_StartCode.ShowWindow(SW_SHOW);
 			m_BL_RunGroup.ShowWindow(SW_SHOW);
+			m_BL_Add.ShowWindow(SW_SHOW);
 			((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->ShowWindow(SW_SHOW);
 
 			CPoint pt_RcAdd_0(m_rcGroup[m_rcGroup.size() - 1].right, 5);
@@ -318,7 +329,6 @@ void CTestGroup::OnLButtonUp(UINT nFlags, CPoint point)
 					}
 					m_strAllInfo.push_back(strListInfo);
 
-
 					//更新畫面
 					Invalidate(FALSE);
 					//====每添加一個群組，都需要在表格和行數的向量中添加內容,新添加时，传入初始化数据====//
@@ -352,9 +362,10 @@ void CTestGroup::OnLButtonUp(UINT nFlags, CPoint point)
 						UpdateList();
 						Invalidate(FALSE);
 						m_BL_TestProjectList.ShowWindow(SW_SHOW);
-						//m_BL_DeletGroup.ShowWindow(SW_SHOW);
+						m_BL_Delete.ShowWindow(SW_SHOW);
 						//m_BL_StartCode.ShowWindow(SW_SHOW);
 						m_BL_RunGroup.ShowWindow(SW_SHOW);
+						m_BL_Add.ShowWindow(SW_SHOW);
 						((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->ShowWindow(SW_SHOW);
 						if (nGroupOld != (int)i)
 						{
@@ -407,6 +418,7 @@ void CTestGroup::UpdateList()
 	m_BL_TestProjectList.AppendColumn(_T("項目狀態"), DT_CENTER, 80, FALSE);
 	m_BL_TestProjectList.AppendColumn(_T("定位方式"), DT_CENTER, 80, FALSE);
 	m_BL_TestProjectList.AppendColumn(_T("測試結果"), DT_CENTER, 80, FALSE);
+	m_BL_TestProjectList.SetNoHotKey(TRUE);
 	m_BL_TestProjectList.SetColumnReadOnly(0, TRUE);
 	m_BL_TestProjectList.SetColumnReadOnly(COL_MAX - 1, TRUE);
 	m_bAutoAdd = TRUE;
@@ -441,25 +453,25 @@ BEGIN_EVENTSINK_MAP(CTestGroup, CDialogEx)
 	ON_EVENT(CTestGroup, IDC_BL_TestProjectList, 2, CTestGroup::ItemChangedBlTestprojectlist, VTS_I4 VTS_I4 VTS_BSTR VTS_BSTR)
 	ON_EVENT(CTestGroup, IDC_BL_TestProjectList, 6, CTestGroup::ItemEditFinishBlTestprojectlist, VTS_I4 VTS_I4 VTS_BSTR)
 	ON_EVENT(CTestGroup, IDC_BL_RunGroup, 1, CTestGroup::LBtClickedBlRungroup, VTS_I4)
-	ON_EVENT(CTestGroup, IDC_BL_DeletGroup, 1, CTestGroup::LBtClickedBlDeletgroup, VTS_I4)
 	ON_EVENT(CTestGroup, IDC_BL_ckMergeResult, 1, CTestGroup::StatusChangedBlckmergeresult, VTS_I2)
+	ON_EVENT(CTestGroup, IDC_BL_TestProjectList, 7, CTestGroup::RButtonUpBlTestprojectlist, VTS_I4 VTS_I4 VTS_PI2 VTS_I2 VTS_I2)
+	ON_EVENT(CTestGroup, IDC_BL_Delete, 1, CTestGroup::LBtClickedBlDelete, VTS_I4)
+	ON_EVENT(CTestGroup, IDC_BL_Add, 1, CTestGroup::LBtClickedBlAdd, VTS_I4)
 END_EVENTSINK_MAP()
 
 
 void CTestGroup::RowsChangedBlTestprojectlist(long nOldRows, long nNewRows, BOOL bAppend)
 {
 	// TODO: 在此处添加消息处理程序代码
-	if (!m_bAutoAdd)
+	if (!m_bAutoAdd && bAppend)
 	{
-		if (nOldRows < nNewRows)//新添加行
+		m_nCurRow = m_BL_TestProjectList.GetCurRow();
+		for (size_t i = 0; i < COL_MAX; i++)
 		{
-			m_nCurRow = m_BL_TestProjectList.GetCurRow();
-			for (size_t i = 0; i < COL_MAX; i++)
-			{
-				m_strAllInfo[m_nCurGroup][i].push_back(_T(""));
-			}
-			m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, ROWS_ADD);//表格添加行消息，用来添加透明画面
+			m_strAllInfo[m_nCurGroup][i].push_back(_T(""));
 		}
+		m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, ROWS_ADD);//表格添加行消息，用来添加透明画面
+		
 	}
 }
 
@@ -473,11 +485,11 @@ void CTestGroup::SelectChangedBlTestprojectlist(long nOldSels, long nNewSels)
 	{
 		if (m_nCurRow >= 0)
 		{
-			m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, ROWS_SELECT);//表格行切换消息，用来切换透明对话框
+			m_pTestGroup->SendMessage(WM_LISTCHANGE, m_nCurGroup, ROWS_SELECT);//表格行切换消息，用来切换透明对话框
 		}
 		else
 		{
-			m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, NO_ROWS_SELECT);//表格行切换消息，用来切换透明对话框
+			m_pTestGroup->SendMessage(WM_LISTCHANGE, m_nCurGroup, NO_ROWS_SELECT);//表格行切换消息，用来切换透明对话框
 		}
 		m_bGroupChange = FALSE;
 	}
@@ -627,6 +639,13 @@ void CTestGroup::ItemChangedBlTestprojectlist(long nRow, long nCol, LPCTSTR strO
 		m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, MARK_ITEM_CHANGE);
 	}
 	m_strAllInfo[m_nCurGroup][nCol][nRow] = strNew;
+}
+
+void CTestGroup::RButtonUpBlTestprojectlist(long nRow, long nCol, short* pnParam, short nX, short nY)
+{
+	// TODO: 在此处添加消息处理程序代码
+	//m_BL_TestProjectList.
+	* pnParam = 2;
 }
 
 
@@ -780,6 +799,7 @@ void CTestGroup::Serialize(CArchive& ar)
 		m_BL_TestProjectList.AppendColumn(_T("項目狀態"), DT_CENTER, 80, FALSE);
 		m_BL_TestProjectList.AppendColumn(_T("定位方式"), DT_CENTER, 80, FALSE);
 		m_BL_TestProjectList.AppendColumn(_T("測試結果"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.SetNoHotKey(TRUE);
 		m_BL_TestProjectList.SetColumnReadOnly(0, TRUE);
 		m_BL_TestProjectList.SetColumnReadOnly(COL_MAX - 1, TRUE);
 		m_bAutoAdd = TRUE;
@@ -843,15 +863,6 @@ void CTestGroup::UpdateTestInfo()
 }
 
 
-
-void CTestGroup::LBtClickedBlDeletgroup(long nFlags)
-{
-	// TODO: 在此处添加消息处理程序代码
-	
-
-}
-
-
 void CTestGroup::StatusChangedBlckmergeresult(short nNewStatus)
 {
 	CMsgBox MsgBox(this);
@@ -886,3 +897,150 @@ void CTestGroup::StatusChangedBlckmergeresult(short nNewStatus)
 		m_vbMergeResult[m_nCurGroup] = FALSE;
 	}
 }
+
+void CTestGroup::LBtClickedBlAdd(long nFlags)
+{
+	// TODO: 在此处添加消息处理程序代码
+	m_BL_TestProjectList.AppendRow(FALSE);
+}
+
+
+void CTestGroup::LBtClickedBlDelete(long nFlags)
+{
+	// TODO: 在此处添加消息处理程序代码
+	if (nFlags & MK_CONTROL)//刪除群組
+	{
+		m_bDelete = FALSE;
+
+		m_pTestGroup->SendMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_DELETE);
+		if (!m_bDelete)
+			return;
+
+
+		const int nDeleteGroup = m_nCurGroup;
+		const int nGroupCounter = (int)m_rcGroup.size();
+
+		m_vbMergeResult.erase(m_vbMergeResult.begin() + m_nCurGroup);
+		m_vbMergeResult.push_back(FALSE);
+
+
+		m_nListRowsCounter.erase(m_nListRowsCounter.begin() + m_nCurGroup);
+		m_nStartCode.erase(m_nStartCode.begin() + m_nCurGroup);
+		m_bLBtClick.erase(m_bLBtClick.begin() + m_nCurGroup);
+		m_strAllInfo.erase(m_strAllInfo.begin() + m_nCurGroup);
+		m_rcGroup.pop_back();
+
+		if (m_rcGroup.size() > 0)//刪除群組後有剩餘群組
+		{
+			for (size_t i = 0; i < m_rcGroup.size(); i++)
+			{
+				m_bLBtClick[i] = FALSE;
+			}
+			m_nCurGroup = nDeleteGroup == nGroupCounter - 1 ? nDeleteGroup - 1 : nDeleteGroup;//刪除最後一個群組，指向前一個，反之指向下一個
+			
+			m_bLBtClick[m_nCurGroup] = TRUE;
+			m_BL_StartCode.SetValue(m_nStartCode[m_nCurGroup]);
+			m_pTestGroup->PostMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_CHANGE);//添加群组消息
+			((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetStatus(m_vbMergeResult[m_nCurGroup]);
+		}
+
+		
+
+		m_BL_TestProjectList.DeleteAll(FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("序號"), DT_CENTER, 45, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("檢測類型"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("檢測項目"), DT_CENTER, 130, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("相機編號"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("項目狀態"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("定位方式"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.AppendColumn(_T("測試結果"), DT_CENTER, 80, FALSE);
+		m_BL_TestProjectList.SetNoHotKey(TRUE);
+		m_BL_TestProjectList.SetColumnReadOnly(0, TRUE);
+		m_BL_TestProjectList.SetColumnReadOnly(COL_MAX - 1, TRUE);
+		m_bAutoAdd = TRUE;
+		for (int nCounter = 0; nCounter < m_nListRowsCounter[m_nCurGroup]; nCounter++)
+		{
+			m_BL_TestProjectList.AppendRow(FALSE);
+		}
+		if (m_BL_TestProjectList.GetRows() > 0)//如果表格中有內容
+		{
+			for (int nColCounter = 0; nColCounter < COL_MAX; nColCounter++)
+			{
+				for (int nRowCounter = 0; nRowCounter < m_BL_TestProjectList.GetRows(); nRowCounter++)
+				{
+					m_BL_TestProjectList.SetItemText(nRowCounter, nColCounter, m_strAllInfo[m_nCurGroup][nColCounter][nRowCounter]);
+				}
+			}
+			m_bGroupChange = TRUE;
+			m_BL_TestProjectList.SelectRow(0);
+		}
+		else
+		{
+			m_pTestGroup->SendMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_NO_ROWS);//群組切換，但表格中無內容
+		}
+		m_bAutoAdd = FALSE;
+
+		Invalidate(FALSE);
+	}
+	else if (nFlags & MK_SHIFT)
+	{
+	
+	}
+	else//刪除測試項目
+	{
+		m_bDelete = FALSE;
+
+		_GetSelectRows();
+		m_pTestGroup->SendMessage(WM_LISTCHANGE, m_nCurGroup, ROWS_DELETE);
+		if (!m_bDelete)
+			return;
+
+		const int nRowsBkup = m_BL_TestProjectList.GetRows();
+
+		if ((int)m_vnSelectRows.size() < nRowsBkup)
+		{
+			if ((int)m_vnSelectRows.size() == 1)
+			{
+				m_nCurRow = m_vnSelectRows[0] == nRowsBkup - 1 ? m_vnSelectRows[0] - 1 : m_vnSelectRows[0];//刪除最後一個項目，指向前一個，反之指向下一個
+			}
+			else
+			{
+				m_nCurRow = 0;
+			}
+		}
+
+		int i = (int)m_vnSelectRows.size() - 1;
+		for (; i >= 0; i--)
+		{
+			m_BL_TestProjectList.DeleteRow(m_vnSelectRows[i], FALSE);
+		}
+		
+		if ((int)m_vnSelectRows.size() < nRowsBkup)
+		{
+			m_BL_TestProjectList.SelectRow(m_nCurRow);
+		}
+		else
+		{
+			m_nCurRow = -1;
+			m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, NO_ROWS_SELECT);
+		}
+
+		UpdateTestInfo();
+	}
+}
+
+vector<int> CTestGroup::_GetSelectRows()
+{
+	m_vnSelectRows.clear();
+	for (int i = 0; i < m_BL_TestProjectList.GetRows(); i++)
+	{
+		if (m_BL_TestProjectList.IsRowSelected(i))
+		{
+			m_vnSelectRows.push_back(i);
+		}
+	}
+	return m_vnSelectRows;
+}
+
+
+

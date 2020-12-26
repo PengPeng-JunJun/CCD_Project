@@ -123,6 +123,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraCalibrationDll", "Cam
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoftwareManageDll", "SoftwareManageDll\SoftwareManageDll.vcxproj", "{FEF5F16E-E663-4108-AC4D-90977B6CF3A7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CodeLoggerDll", "CodeLoggerDll\CodeLoggerDll.vcxproj", "{F8C1D403-B840-4F95-9578-2A6991F218CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -233,6 +235,10 @@ Global
 		{FEF5F16E-E663-4108-AC4D-90977B6CF3A7}.Debug|Win32.Build.0 = Debug|Win32
 		{FEF5F16E-E663-4108-AC4D-90977B6CF3A7}.Release|Win32.ActiveCfg = Release|Win32
 		{FEF5F16E-E663-4108-AC4D-90977B6CF3A7}.Release|Win32.Build.0 = Release|Win32
+		{F8C1D403-B840-4F95-9578-2A6991F218CD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F8C1D403-B840-4F95-9578-2A6991F218CD}.Debug|Win32.Build.0 = Debug|Win32
+		{F8C1D403-B840-4F95-9578-2A6991F218CD}.Release|Win32.ActiveCfg = Release|Win32
+		{F8C1D403-B840-4F95-9578-2A6991F218CD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

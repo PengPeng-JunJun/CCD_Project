@@ -126,13 +126,8 @@ public:
 	virtual void DrawFigure(CDC * pDC, CRect rcDraw);
 	
 public:
-	CCamStc *m_pCamStc;//相机指针
-
-	int m_nCam;//相机编号
 
 	int m_nImageChannel;
-
-	CStCamera *m_pCamera;
 
 	int m_nGetImageCounter;
 

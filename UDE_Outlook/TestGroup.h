@@ -23,8 +23,8 @@ using namespace std;
 #define MOUSE_IN_GROUP 3
 #define MAX_GROUP 10
 
-#define ROWS_MIN 0//表格行数增加
-#define ROWS_ADD 1//表格行数减少
+#define ROWS_DELETE 0//表格行数减少
+#define ROWS_ADD 1//表格行数增加
 #define ROWS_SELECT 2//行光标移动
 #define NO_ROWS_SELECT 3//沒有光標指定行
 #define DCLICK_LIGHT_ITEM 4//左鍵雙擊光源單元格
@@ -44,6 +44,7 @@ using namespace std;
 #define GROUP_CHANGE 2
 #define GROUP_NO_ROWS 3
 #define GROUP_TEST_RUN 4//開始群組測試
+#define GROUP_DELETE   5
 
 #define COL_MAX  7//表格的總列數
 
@@ -82,7 +83,7 @@ public:
 	afx_msg void OnPaint();
 public:
 	vector<CRect> m_rcGroup;//組矩形
-	vector<BOOL> m_bLBtClick;
+	vector<BOOL> m_bLBtClick;//點擊後群組被選中的情況向量
 	CRect m_rcAdd;//添加組矩形
 	BOOL m_bAutoAdd;
 	int m_nFocusGroup;
@@ -97,7 +98,7 @@ public:
 
 	BOOL m_bItemInputFinish;
 
-	vector<int> m_vnUsedCam;//使用的相機編號
+	vector<int> m_vnUsedCam;//可以使用的相機編號
 	BOOL m_bTesting;//軟件在自動測試中
 
 	vector<vector<vector<CString>>> m_strAllInfo;//所有表格信息
@@ -107,9 +108,10 @@ public:
 	CString m_strSoftwareVersion;//軟件版本號
 public:
 	CBL_List m_BL_TestProjectList;
-	CBL_Button m_BL_DeletGroup;
 	CBL_Edit m_BL_StartCode;
 	CBL_Button m_BL_RunGroup;
+	CBL_Button m_BL_Delete;
+	CBL_Button m_BL_Add;
 	//CBL_CheckBox m_BL_ckMergeResult;
 
 public:
@@ -133,6 +135,13 @@ public:
 	virtual void Serialize(CArchive& ar);
 	void ItemEditFinishBlTestprojectlist(long nRow, long nCol, LPCTSTR strNew);
 	void LBtClickedBlRungroup(long nFlags);
-	void LBtClickedBlDeletgroup(long nFlags);
 	void StatusChangedBlckmergeresult(short nNewStatus);
+	void RButtonUpBlTestprojectlist(long nRow, long nCol, short* pnParam, short nX, short nY);
+	void LBtClickedBlDelete(long nFlags);//响应删除按钮事件函数
+
+public:
+	vector<int> m_vnSelectRows;
+	vector<int> _GetSelectRows();//被选中行的行号
+	BOOL m_bDelete;//確認是否刪除
+	void LBtClickedBlAdd(long nFlags);
 };

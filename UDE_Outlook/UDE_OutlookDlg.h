@@ -28,13 +28,13 @@
 #include "..\\SoftwareManageDll\\ParamManage.h"
 #include "..\\SoftwareManageDll\\QualityManage.h"
 #include "..\\SoftwareManageDll\\VerisonManage.h"
+#include "..\\CodeLoggerDll\\Logger.h"
 
-
+#include <iostream> 
 #include <vector>
 #include <math.h>
 #include <memory>
 #include <array>
-#include <iostream> 
 #include <iomanip>  
 #include <deque>
 #include <Windows.h>
@@ -46,6 +46,7 @@
 
 #include "tlhelp32.h"
 
+
 #ifdef _DEBUG
 #pragma comment(lib, "..\\Debug\\BlendWndDll.lib")
 #pragma comment(lib, "..\\Debug\\CRCDll.lib")
@@ -55,6 +56,7 @@
 #pragma comment(lib, "..\\Debug\\LightDll.lib")
 #pragma comment(lib, "..\\Debug\\ExcelDll.lib")
 #pragma comment(lib, "..\\Debug\\SoftwareManageDll.lib")
+#pragma comment(lib, "..\\Debug\\CodeLoggerDll.lib")
 
 #define DEBUGSTYLE   0
 #else
@@ -66,7 +68,7 @@
 #pragma comment(lib, "..\\Release\\LightDll.lib")
 #pragma comment(lib, "..\\Release\\ExcelDll.lib")
 #pragma comment(lib, "..\\Release\\SoftwareManageDll.lib")
-
+#pragma comment(lib, "..\\Release\\CodeLoggerDll.lib")
 
 #define RELEASESTYLE   1
 #endif
@@ -115,6 +117,7 @@ static void PASCAL  TimerCallBack_GroupTestRun(UINT nTimerID, UINT uMsg, DWORD d
 
 
 // CUDE_OutlookDlg ¶Ô»°¿ò
+using namespace LOGGER;
 
 class CUDE_OutlookDlg : public CAppBase
 {
@@ -512,4 +515,6 @@ public:
 protected:
 	
 	afx_msg LRESULT OnGmsgappbaseunlockui(WPARAM wParam, LPARAM lParam);
+
+public:
 };
