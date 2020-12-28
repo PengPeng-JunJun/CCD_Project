@@ -916,19 +916,18 @@ void CTestGroup::LBtClickedBlDelete(long nFlags)
 		if (!m_bDelete)
 			return;
 
-
 		const int nDeleteGroup = m_nCurGroup;
 		const int nGroupCounter = (int)m_rcGroup.size();
 
 		m_vbMergeResult.erase(m_vbMergeResult.begin() + m_nCurGroup);
 		m_vbMergeResult.push_back(FALSE);
 
-
 		m_nListRowsCounter.erase(m_nListRowsCounter.begin() + m_nCurGroup);
 		m_nStartCode.erase(m_nStartCode.begin() + m_nCurGroup);
 		m_bLBtClick.erase(m_bLBtClick.begin() + m_nCurGroup);
 		m_strAllInfo.erase(m_strAllInfo.begin() + m_nCurGroup);
 		m_rcGroup.pop_back();
+		m_BL_TestProjectList.DeleteAll(FALSE);
 
 		if (m_rcGroup.size() > 0)//刪除群組後有剩餘群組
 		{
@@ -942,44 +941,43 @@ void CTestGroup::LBtClickedBlDelete(long nFlags)
 			m_BL_StartCode.SetValue(m_nStartCode[m_nCurGroup]);
 			m_pTestGroup->PostMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_CHANGE);//添加群组消息
 			((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetStatus(m_vbMergeResult[m_nCurGroup]);
-		}
 
-		
+			m_BL_TestProjectList.AppendColumn(_T("序號"), DT_CENTER, 45, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("檢測類型"), DT_CENTER, 80, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("檢測項目"), DT_CENTER, 130, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("相機編號"), DT_CENTER, 80, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("項目狀態"), DT_CENTER, 80, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("定位方式"), DT_CENTER, 80, FALSE);
+			m_BL_TestProjectList.AppendColumn(_T("測試結果"), DT_CENTER, 80, FALSE);
+			m_BL_TestProjectList.SetNoHotKey(TRUE);
+			m_BL_TestProjectList.SetColumnReadOnly(0, TRUE);
+			m_BL_TestProjectList.SetColumnReadOnly(COL_MAX - 1, TRUE);
+			m_bAutoAdd = TRUE;
 
-		m_BL_TestProjectList.DeleteAll(FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("序號"), DT_CENTER, 45, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("檢測類型"), DT_CENTER, 80, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("檢測項目"), DT_CENTER, 130, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("相機編號"), DT_CENTER, 80, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("項目狀態"), DT_CENTER, 80, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("定位方式"), DT_CENTER, 80, FALSE);
-		m_BL_TestProjectList.AppendColumn(_T("測試結果"), DT_CENTER, 80, FALSE);
-		m_BL_TestProjectList.SetNoHotKey(TRUE);
-		m_BL_TestProjectList.SetColumnReadOnly(0, TRUE);
-		m_BL_TestProjectList.SetColumnReadOnly(COL_MAX - 1, TRUE);
-		m_bAutoAdd = TRUE;
-		for (int nCounter = 0; nCounter < m_nListRowsCounter[m_nCurGroup]; nCounter++)
-		{
-			m_BL_TestProjectList.AppendRow(FALSE);
-		}
-		if (m_BL_TestProjectList.GetRows() > 0)//如果表格中有內容
-		{
-			for (int nColCounter = 0; nColCounter < COL_MAX; nColCounter++)
+			for (int nCounter = 0; nCounter < m_nListRowsCounter[m_nCurGroup]; nCounter++)
 			{
-				for (int nRowCounter = 0; nRowCounter < m_BL_TestProjectList.GetRows(); nRowCounter++)
-				{
-					m_BL_TestProjectList.SetItemText(nRowCounter, nColCounter, m_strAllInfo[m_nCurGroup][nColCounter][nRowCounter]);
-				}
+				m_BL_TestProjectList.AppendRow(FALSE);
 			}
-			m_bGroupChange = TRUE;
-			m_BL_TestProjectList.SelectRow(0);
+			if (m_BL_TestProjectList.GetRows() > 0)//如果表格中有內容
+			{
+				for (int nColCounter = 0; nColCounter < COL_MAX; nColCounter++)
+				{
+					for (int nRowCounter = 0; nRowCounter < m_BL_TestProjectList.GetRows(); nRowCounter++)
+					{
+						m_BL_TestProjectList.SetItemText(nRowCounter, nColCounter, m_strAllInfo[m_nCurGroup][nColCounter][nRowCounter]);
+					}
+				}
+				m_bGroupChange = TRUE;
+				m_BL_TestProjectList.SelectRow(0);
+				m_bAutoAdd = FALSE;
+			}
 		}
 		else
 		{
+			m_nCurGroup = 16;
 			m_pTestGroup->SendMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_NO_ROWS);//群組切換，但表格中無內容
 		}
-		m_bAutoAdd = FALSE;
-
+		
 		Invalidate(FALSE);
 	}
 	else if (nFlags & MK_SHIFT)
