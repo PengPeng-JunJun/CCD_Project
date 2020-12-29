@@ -24,6 +24,7 @@ CTestGroup::CTestGroup(CWnd* pParent /*=NULL*/)
 	, m_bGroupChange(FALSE)
 	, m_bItemInputFinish(TRUE)
 	, m_bTesting(FALSE)
+	, m_bLock(FALSE)
 {
 	m_strAllInfo.clear();
 	m_vnUsedCam.clear();
@@ -67,22 +68,7 @@ void CTestGroup::OnPaint()
 	// 不为绘图消息调用 CDialogEx::OnPaint()
 	m_BL_TestProjectList.SetNoRtMenu(TRUE);
 
-	if (m_nCurGroup > (MAX_GROUP - 1) || m_bTesting)//
-	{
-		m_BL_StartCode.SetEnabled(FALSE);
-		m_BL_RunGroup.SetEnabled(FALSE);
-		m_BL_Delete.SetEnabled(FALSE);
-		m_BL_Add.SetEnabled(FALSE);
-		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(FALSE);
-	}
-	if (m_nCurGroup < (MAX_GROUP - 1) && !m_bTesting)//
-	{
-		m_BL_StartCode.SetEnabled(TRUE);
-		m_BL_RunGroup.SetEnabled(TRUE);
-		m_BL_Delete.SetEnabled(TRUE);
-		m_BL_Add.SetEnabled(TRUE);
-		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(TRUE);
-	}
+	_SetLockStatus();
 
 	if (m_bItemInputFinish)
 	{
@@ -440,7 +426,7 @@ void CTestGroup::UpdateList()
 	}
 	else
 	{
-		m_pTestGroup->PostMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_NO_ROWS);//群組切換，但表格中無內容
+		m_pTestGroup->SendMessage(WM_GROUPCHANGE, m_nCurGroup, GROUP_NO_ROWS);//群組切換，但表格中無內容
 	}
 	m_bAutoAdd = FALSE;
 }
@@ -506,6 +492,8 @@ void CTestGroup::LBtDbClickBlTestprojectlist(long nRow, long nCol, short* pnPara
 		CString strItemInfo;
 		if (nFlags & MK_CONTROL)
 		{
+			if (m_bLock)
+				return;
 			if (nCol == 0)
 			{
 				m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, CHECK_RUN);
@@ -520,10 +508,11 @@ void CTestGroup::LBtDbClickBlTestprojectlist(long nRow, long nCol, short* pnPara
 				m_BL_TestProjectList.SetColumnReadOnly(3, TRUE);
 				m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, DCLICK_LIGHT_ITEM);
 			}
-
 		}
 		else if (nFlags & MK_SHIFT)
 		{
+			if (m_bLock)
+				return;
 			if (nCol == 0)
 			{
 				m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, CMP_RUN);
@@ -531,7 +520,7 @@ void CTestGroup::LBtDbClickBlTestprojectlist(long nRow, long nCol, short* pnPara
 		}
 		else
 		{
-			if (nCol != 0 && nCol != 6)
+			if (nCol != 0 && nCol != 6 && !m_bLock)
 			{
 				m_bItemInputFinish = FALSE;
 			}
@@ -582,7 +571,6 @@ void CTestGroup::LBtDbClickBlTestprojectlist(long nRow, long nCol, short* pnPara
 	{
 		m_pTestGroup->PostMessage(WM_LISTCHANGE, m_nCurGroup, SHOW_TEST_RESULT);
 	}
-	
 }
 
 
@@ -1040,5 +1028,27 @@ vector<int> CTestGroup::_GetSelectRows()
 	return m_vnSelectRows;
 }
 
+
+void CTestGroup::_SetLockStatus()
+{
+	if (m_nCurGroup > (MAX_GROUP - 1) || m_bTesting || m_bLock)//
+	{
+		m_BL_TestProjectList.SetReadOnly(TRUE);
+		m_BL_StartCode.SetEnabled(FALSE);
+		m_BL_RunGroup.SetEnabled(FALSE);
+		m_BL_Delete.SetEnabled(FALSE);
+		m_BL_Add.SetEnabled(FALSE);
+		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(FALSE);
+	}
+	if (m_nCurGroup < (MAX_GROUP - 1) && !m_bTesting && !m_bLock)//
+	{
+		m_BL_TestProjectList.SetReadOnly(FALSE);
+		m_BL_StartCode.SetEnabled(TRUE);
+		m_BL_RunGroup.SetEnabled(TRUE);
+		m_BL_Delete.SetEnabled(TRUE);
+		m_BL_Add.SetEnabled(TRUE);
+		((CBL_CheckBox *)(GetDlgItem(IDC_BL_ckMergeResult)))->SetEnabled(TRUE);
+	}
+}
 
 

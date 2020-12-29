@@ -100,6 +100,7 @@ public:
 
 	vector<int> m_vnUsedCam;//可以使用的相機編號
 	BOOL m_bTesting;//軟件在自動測試中
+	BOOL m_bLock;//鎖定狀態
 
 	vector<vector<vector<CString>>> m_strAllInfo;//所有表格信息
 
@@ -144,4 +145,7 @@ public:
 	vector<int> _GetSelectRows();//被选中行的行号
 	BOOL m_bDelete;//確認是否刪除
 	void LBtClickedBlAdd(long nFlags);
+
+public:
+	void _SetLockStatus();
 };

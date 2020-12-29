@@ -36,6 +36,7 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
 public:
+	BOOL m_bSystemRunStatus;
 	BOOL m_bParamChange;//ÊÇ·ñÐÞ¸ÄÁË…¢”µ
 	CString m_strDistance;
 	CBL_Edit m_BL_LocatorDistance;

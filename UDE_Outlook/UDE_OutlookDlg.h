@@ -342,7 +342,7 @@ public:
 	void _SaveFileInfo();//保存檔案信息，除相機外
 	void _LoadFileInfo();//讀取檔案信息，除相機外
 
-	BOOL MouseMoveTranslate(CPoint ptInfo, CRect rcInfo);//轉化不同邊框小矩形的消息
+	BOOL MouseMoveTranslate(CPoint ptInfo, CRect rcInfo);//判斷點是否在矩形內
 protected:
 	afx_msg LRESULT OnRegister(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDrawImage(WPARAM wParam, LPARAM lParam);//收到網口相機發送消息

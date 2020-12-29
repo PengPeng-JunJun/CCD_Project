@@ -2,5 +2,6 @@
 *.sdf
 *.txt
 *.opensdf
+*.ipch
 Debug/
 Release/

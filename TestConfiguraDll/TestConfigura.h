@@ -269,6 +269,7 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	void ShowTestConfigWnd();
+	virtual void LockCtrls(int nLock);//相应锁定控件消息
 
 public:
 	vector<COL_SORT_LIMIT> m_vColSortLimit;
@@ -383,6 +384,8 @@ public:
 	int m_nTestConfiguraNo;//测试范围编号
 
 	int m_nTestTargetCounter;//測試目標數量
+
+	BOOL m_bSystemRunStatus;//系統運行狀態 TRUE-自動  FALSE-手動
 
 	BOOL m_bTestTargetSamePlane;//测试目标与定位目标是否共面,TRUE共面 FALSE异面
 

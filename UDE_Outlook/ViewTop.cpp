@@ -699,7 +699,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				{
 					pDC->Rectangle(m_vrcSpecialScopeChange[i]);
 				}
-				strText = _T("基準線標定");
+				strText = _T("基準線標記");
 				pDC->SetTextColor(RGB(255,255,255));
 				rcText.TopLeft().x = m_rcSpecialScope.TopLeft().x + 5;
 				rcText.TopLeft().y = m_rcSpecialScope.TopLeft().y - 17;
@@ -3131,6 +3131,59 @@ int CViewTop::GetSizeByAOI(CRect rcTop, CRect rcAOI, CSmartImage * ImgSrc, int n
 	m_rcTopWnd = rcTop;
 	m_rcAOI = rcAOI;
 	
+	CRect rcSrc;//源矩形
+	CRect rcTarget;//目標矩形
+
+	switch (nRCPosMode)
+	{
+	case RC_MAIN_POS:
+		if (m_rcMainPos.IsRectEmpty())
+			return MIAN_POS_EMPTY_ERROR;
+
+		(*pTestConfig)->m_nTestProject = m_nTestProject;
+		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
+		rcSrc = m_rcMainPos;
+		break;
+	case RC_SLAVE_POS:
+		if (m_rcSlavePos.IsRectEmpty())
+			return SLAVE_POS_EMPTY_ERROR;
+
+		(*pTestConfig)->m_nTestProject = m_nTestProject;
+		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
+		rcSrc = m_rcSlavePos;
+		break;
+	case RC_TEST_POS:
+		if (m_rcTestScope[nRCCounter].IsRectEmpty())
+			return TEST_POS_EMPTY_ERROR;
+
+		if (m_vrcTestScopeTem.size() > 0)
+		{
+			rcSrc = m_vrcTestScopeTem[nRCCounter];
+		}
+		else
+		{
+			rcSrc = m_rcTestScope[nRCCounter];
+		}
+		break;
+	case RC_SPECIAL_POS:
+		if (m_rcSpecialScope.IsRectEmpty())
+			return SPECIAL_POS_EMPTY_ERROR;
+
+		(*pTestConfig)->m_nTestProject = m_nTestProject;
+		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
+		rcSrc = m_rcSpecialScope;
+		break;
+	default:
+		break;
+	}
+
+	if (rcAOI.IsRectEmpty() || (*ImgSrc).empty())
+	{
+		(*pTestConfig)->m_ImgShow.release();
+		(*pTestConfig)->m_ImgBkup.release();
+		return NO_CIRCLR_ERROR;
+	}
+
 	float frcAOI_Width = rcAOI.Width() * 1.00f;
 	float frcAOI_Height = rcAOI.Height() * 1.00f;
 	float frcTopWnd_Width = rcTop.Width() * 1.00f;
@@ -3153,52 +3206,6 @@ int CViewTop::GetSizeByAOI(CRect rcTop, CRect rcAOI, CSmartImage * ImgSrc, int n
 	{
 		HalfSub = (int)((rcTop.Width() - frcAOI_Width / fHeightProportion) / 2);
 		fProportion = fHeightProportion;
-	}
-
-	CRect rcSrc;//源矩形
-	CRect rcTarget;//目標矩形
-
-	switch (nRCPosMode)
-	{
-	case RC_MAIN_POS:
-		if (m_rcMainPos.IsRectEmpty())
-			return MIAN_POS_EMPTY_ERROR;
-
-		(*pTestConfig)->m_nTestProject = m_nTestProject;
-		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
-		rcSrc = m_rcMainPos;
-		break;
-	case RC_SLAVE_POS:
-		if (m_rcSlavePos.IsRectEmpty())
-			return SLAVE_POS_EMPTY_ERROR;
-		
-		(*pTestConfig)->m_nTestProject = m_nTestProject;
-		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
-		rcSrc = m_rcSlavePos;
-		break;
-	case RC_TEST_POS:
-		if (m_rcTestScope[nRCCounter].IsRectEmpty())
-			return TEST_POS_EMPTY_ERROR;
-		
-		if (m_vrcTestScopeTem.size() > 0)
-		{
-			rcSrc = m_vrcTestScopeTem[nRCCounter];
-		}
-		else
-		{
-			rcSrc = m_rcTestScope[nRCCounter];
-		}
-		break;
-	case RC_SPECIAL_POS:
-		if (m_rcSpecialScope.IsRectEmpty())
-			return SPECIAL_POS_EMPTY_ERROR;
-
-		(*pTestConfig)->m_nTestProject = m_nTestProject;
-		(*pTestConfig)->m_nTestConfigWndType = nRCPosMode;
-		rcSrc = m_rcSpecialScope;
-		break;
-	default:
-		break;
 	}
 
 	float fPtLeft = 0;
@@ -5616,6 +5623,8 @@ void CViewTop::CreateTestConfig()
 
 void CViewTop::ShowTestConfig(int nConfig)
 {
+	(*m_TestConfig[nConfig])->m_bSystemRunStatus = m_bSystemRunStatus;
+
 	CString strTitle;
 	(*m_TestConfig[nConfig])->m_nTestConfiguraNo = nConfig;
 	(*m_TestConfig[nConfig])->m_bWndShow = !(*m_TestConfig[nConfig])->IsWindowVisible();
@@ -5651,6 +5660,7 @@ void CViewTop::ShowTestLoc(int nLocMode)
 		break;
 	}
 	
+	(*pPosTemp)->m_bSystemRunStatus = m_bSystemRunStatus;
 	(*pPosTemp)->SetTitle(strTitle);
 	(*pPosTemp)->m_bWndShow = !(*pPosTemp)->IsWindowVisible();
 	(*pPosTemp)->ShowTestConfigWnd();

@@ -22,6 +22,7 @@ CLocatorDistance::CLocatorDistance(CWnd* pParent /*=NULL*/)
 	, m_bParamChange(FALSE)
 	, m_strLocPtStrat(_T("0"))
 	, m_strLocPtEnd(_T("0"))
+	, m_bSystemRunStatus(FALSE)
 {
 
 }
@@ -38,6 +39,7 @@ CLocatorDistance::CLocatorDistance(UINT nIDTemplate, CWnd * pParent/* = nullptr*
 	, m_bParamChange(FALSE)
 	, m_strLocPtStrat(_T("0"))
 	, m_strLocPtEnd(_T("0"))
+	, m_bSystemRunStatus(FALSE)
 {
 	
 }
@@ -70,6 +72,7 @@ BOOL CLocatorDistance::OnInitDialog()
 
 // 	m_BtBaseOk.ShowWindow(SW_HIDE);
 // 	m_BtBaseCancel.ShowWindow(SW_HIDE);
+
 	m_bParamChange = FALSE;
 	m_BL_LocatorDistance.SetValueText(m_strDistance);
 	((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetX)))->SetValueText(m_strLocOffsetX);
@@ -82,18 +85,45 @@ BOOL CLocatorDistance::OnInitDialog()
 	//((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->SetMaxValue(3);
 	//((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetMaxValue(4);
 
-	if (((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->GetIntValue() == 0)//定位是重心
+	const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+
+	if (!bLocked && !m_bSystemRunStatus)
 	{
-		((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetEnabled(FALSE);
+		m_BL_LocatorDistance.SetEnabled(TRUE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetX)))->SetEnabled(TRUE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetY)))->SetEnabled(TRUE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetAngle)))->SetEnabled(TRUE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetArea)))->SetEnabled(TRUE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->SetEnabled(TRUE);
+		((CBL_Radio *)(GetDlgItem(IDC_BL_LongSide)))->SetEnabled(TRUE);
+		((CBL_Radio *)(GetDlgItem(IDC_BL_ShortSide)))->SetEnabled(TRUE);
+		m_BtBaseOk.SetEnabled(TRUE);
+
+		if (((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->GetIntValue() == 0)//定位是重心
+		{
+			((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetEnabled(FALSE);
+		}
+		else
+		{
+			((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetEnabled(TRUE);
+		}
 	}
 	else
 	{
-		//((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetMinValue(((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->GetIntValue() + 1);
-		((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetEnabled(TRUE);
+		m_BL_LocatorDistance.SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetX)))->SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetY)))->SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetAngle)))->SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocOffsetArea)))->SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtStart)))->SetEnabled(FALSE);
+		((CBL_Edit *)(GetDlgItem(IDC_BL_LocPtEnd)))->SetEnabled(FALSE);
+		((CBL_Radio *)(GetDlgItem(IDC_BL_LongSide)))->SetEnabled(FALSE);
+		((CBL_Radio *)(GetDlgItem(IDC_BL_ShortSide)))->SetEnabled(FALSE);
+		m_BtBaseOk.SetEnabled(FALSE);
 	}
 
 	UpdateBL();
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }

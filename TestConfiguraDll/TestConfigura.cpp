@@ -168,6 +168,7 @@ CTestConfigura::CTestConfigura(CWnd* pParent /*=NULL*/)
 	, m_dAngleLimit_L(-1)
 	, m_dAreaSumLimit_H(-1)
 	, m_dAreaSumLimit_L(-1)
+	, m_bSystemRunStatus(FALSE)
 {
 	m_ptMarkLast.x = -1;
 	m_ptMarkLast.y = -1;
@@ -319,6 +320,7 @@ CTestConfigura::CTestConfigura(UINT nIDTemplate, CWnd * pParent/* = nullptr*/)
 	, m_dAngleLimit_L(-1)
 	, m_dAreaSumLimit_H(-1)
 	, m_dAreaSumLimit_L(-1)
+	, m_bSystemRunStatus(FALSE)
 {
 	m_ptMarkLast.x = -1;
 	m_ptMarkLast.y = -1;
@@ -529,6 +531,66 @@ BOOL CTestConfigura::OnInitDialog()
 	// 异常: OCX 属性页应返回 FALSE
 }
 
+void CTestConfigura::LockCtrls(int nLock)//相应锁定控件消息
+{
+	BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+
+	BOOL bEnable = FALSE;
+
+	m_BL_SetImageList.SetReadOnly(!bEnable);
+	m_BL_TestProgramList.SetReadOnly(!bEnable);
+	m_BtBaseOk.SetEnabled(bEnable);
+	m_BL_ImageCurCol.SetEnabled(bEnable);
+	m_BL_ColMaxShow.SetEnabled(bEnable);
+	m_BL_ColMinShow.SetEnabled(bEnable);
+
+	((CBL_Button *)(GetDlgItem(IDC_BL_SetImgParamSame)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageSrc)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_SaveTestImage)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_SetParamSame)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMarkCancel)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+
+	if (!bLocked && !m_bSystemRunStatus && !m_ImgShow.empty())
+	{
+		bEnable = TRUE;
+
+		m_BL_SetImageList.SetReadOnly(!bEnable);
+		((CBL_Button *)(GetDlgItem(IDC_BL_ImageSrc)))->SetEnabled(bEnable);
+		((CBL_Button *)(GetDlgItem(IDC_BL_SaveTestImage)))->SetEnabled(bEnable);
+		m_BtBaseOk.SetEnabled(bEnable);
+
+		switch (m_nTestConfigWndType)
+		{
+		case RC_TEST_POS:
+			m_BL_TestProgramList.SetReadOnly(!bEnable);
+			m_BL_ImageCurCol.SetEnabled(bEnable);
+			m_BL_ColMaxShow.SetEnabled(bEnable);
+			m_BL_ColMinShow.SetEnabled(bEnable);
+
+			((CBL_Button *)(GetDlgItem(IDC_BL_SetImgParamSame)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_SetParamSame)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMarkCancel)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+			break;
+		case RC_SPECIAL_POS:
+			m_BL_TestProgramList.SetReadOnly(!bEnable);
+
+			((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void CTestConfigura::ShowTestConfigWnd()
 {
  	if (m_bWndShow)
@@ -562,59 +624,128 @@ void CTestConfigura::ShowTestConfigWnd()
  
 	m_strTitle = GetTitle();
 
-	m_ImgShow.Clone(&m_ImgBkup);
+	BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
 
+	BOOL bEnable = FALSE;
+
+	m_BL_SetImageList.SetReadOnly(!bEnable);
+	m_BL_TestProgramList.SetReadOnly(!bEnable);
+	m_BtBaseOk.SetEnabled(bEnable);
+	m_BL_ImageCurCol.SetEnabled(bEnable);
+	m_BL_ColMaxShow.SetEnabled(bEnable);
+	m_BL_ColMinShow.SetEnabled(bEnable);
+
+	((CBL_Button *)(GetDlgItem(IDC_BL_SetImgParamSame)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageSrc)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_SaveTestImage)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_SetParamSame)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMarkCancel)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
+	((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+	
+	if (!bLocked && !m_bSystemRunStatus && !m_ImgShow.empty())
+	{
+		bEnable = TRUE;
+
+		m_BL_SetImageList.SetReadOnly(!bEnable);
+		((CBL_Button *)(GetDlgItem(IDC_BL_ImageSrc)))->SetEnabled(bEnable);
+		((CBL_Button *)(GetDlgItem(IDC_BL_SaveTestImage)))->SetEnabled(bEnable);
+		m_BtBaseOk.SetEnabled(bEnable);
+
+		switch (m_nTestConfigWndType)
+		{
+		case RC_TEST_POS:
+			m_BL_TestProgramList.SetReadOnly(!bEnable);
+			m_BL_ImageCurCol.SetEnabled(bEnable);
+			m_BL_ColMaxShow.SetEnabled(bEnable);
+			m_BL_ColMinShow.SetEnabled(bEnable);
+
+			((CBL_Button *)(GetDlgItem(IDC_BL_SetImgParamSame)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_SetParamSame)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMarkCancel)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+			break;
+		case RC_SPECIAL_POS:
+			m_BL_TestProgramList.SetReadOnly(!bEnable);
+
+			((CBL_Button *)(GetDlgItem(IDC_BL_CheckTestProgram)))->SetEnabled(bEnable);
+			((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
+			break;
+		default:
+			break;
+		}
+	}
+	
 	CString strTemp;
 	strTemp.Format(_T("%d * %d"), m_ImgShow.Width(), m_ImgShow.Height());
 	m_BL_ImageSize.SetValueText(strTemp);
 
-	m_nTestConfigWndType == RC_TEST_POS ? GetImageRes(_T("標準圖像處理")) : ImageProcess(&m_ImgShow, 1, m_BL_SetImageList.GetRows());
-
-	if (m_nTestConfigWndType == RC_TEST_POS)//在測試範圍內才顯示邊界內容
+	if (m_ImgShow.empty())
 	{
-		if ((m_nTestProject == TEST_HOR_POSITION) || (m_nTestProject == TEST_SIDE_POSITION))
-		{
-			vector<Point2i> vptTemp;
-			vptTemp.resize(4);
+		m_BoxShow.SetImage(&m_ImgShow);
+		m_BL_CurImagePt.SetCaption(_T("X = 0, Y = 0"));
+		m_BL_ImageColInfo.SetValueText(_T("0"));
+		return;
+	}
 
-			if (m_nTestTargetDir == TEST_TARGET_DIR_X)
+	m_ImgShow.Clone(&m_ImgBkup);
+
+	if (!bLocked && !m_bSystemRunStatus)//在非自動和解鎖狀態下才執行處理程序
+	{
+		m_nTestConfigWndType == RC_TEST_POS ? GetImageRes(_T("標準圖像處理")) : ImageProcess(&m_ImgShow, 1, m_BL_SetImageList.GetRows());
+
+		if (m_nTestConfigWndType == RC_TEST_POS)//在測試範圍內才顯示邊界內容
+		{
+			if ((m_nTestProject == TEST_HOR_POSITION) || (m_nTestProject == TEST_SIDE_POSITION))
 			{
-				vptTemp[0] = Point2i(0, (int)m_dOffsetLength_0);
-				vptTemp[1] = Point2i(m_ImgShow.Width(), (int)m_dOffsetLength_0);
+				vector<Point2i> vptTemp;
+				vptTemp.resize(4);
 
-				vptTemp[2] = Point2i(0, (int)m_dOffsetLength_1);
-				vptTemp[3] = Point2i(m_ImgShow.Width(), (int)m_dOffsetLength_1);
-			}
-			if (m_nTestTargetDir == TEST_TARGET_DIR_Y)
+				if (m_nTestTargetDir == TEST_TARGET_DIR_X)
+				{
+					vptTemp[0] = Point2i(0, (int)m_dOffsetLength_0);
+					vptTemp[1] = Point2i(m_ImgShow.Width(), (int)m_dOffsetLength_0);
+
+					vptTemp[2] = Point2i(0, (int)m_dOffsetLength_1);
+					vptTemp[3] = Point2i(m_ImgShow.Width(), (int)m_dOffsetLength_1);
+				}
+				if (m_nTestTargetDir == TEST_TARGET_DIR_Y)
+				{
+					vptTemp[0] = Point2i((int)m_dOffsetLength_0, 0);
+					vptTemp[1] = Point2i((int)m_dOffsetLength_0, m_ImgShow.Height());
+
+					vptTemp[2] = Point2i((int)m_dOffsetLength_1, 0);
+					vptTemp[3] = Point2i((int)m_dOffsetLength_1, m_ImgShow.Height());
+				}
+
+				if (m_ImgShow.channels() < 3)
+					Merge(&m_ImgShow, &m_ImgShow, &m_ImgShow, &m_ImgShow);
+
+				line(m_ImgShow, vptTemp[0], vptTemp[1], MAT_RGB(0,255,0), 1, 8);
+				line(m_ImgShow, vptTemp[2], vptTemp[3], MAT_RGB(0,255,0), 1, 8);
+
+				m_ptLimitLine_1 = vptTemp[0];
+				m_ptLimitLine_2 = vptTemp[1];
+				m_ptLimitLine_3 = vptTemp[2];
+				m_ptLimitLine_4 = vptTemp[3];
+			}  
+
+			if (((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->GetCaption() == _T("顏色標記"))
 			{
-				vptTemp[0] = Point2i((int)m_dOffsetLength_0, 0);
-				vptTemp[1] = Point2i((int)m_dOffsetLength_0, m_ImgShow.Height());
-
-				vptTemp[2] = Point2i((int)m_dOffsetLength_1, 0);
-				vptTemp[3] = Point2i((int)m_dOffsetLength_1, m_ImgShow.Height());
+				m_BL_ImageCurCol.ShowWindow(SW_HIDE);
 			}
-
-			if (m_ImgShow.channels() < 3)
-				Merge(&m_ImgShow, &m_ImgShow, &m_ImgShow, &m_ImgShow);
-
-			line(m_ImgShow, vptTemp[0], vptTemp[1], MAT_RGB(0,255,0), 1, 8);
-			line(m_ImgShow, vptTemp[2], vptTemp[3], MAT_RGB(0,255,0), 1, 8);
-
-			m_ptLimitLine_1 = vptTemp[0];
-			m_ptLimitLine_2 = vptTemp[1];
-			m_ptLimitLine_3 = vptTemp[2];
-			m_ptLimitLine_4 = vptTemp[3];
-		}  
-
-		if (((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->GetCaption() == _T("顏色標記"))
-		{
-			m_BL_ImageCurCol.ShowWindow(SW_HIDE);
-		}
-		else if (((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->GetCaption() == _T("標記完成"))
-		{
-			m_BL_ImageCurCol.ShowWindow(SW_SHOW);
+			else if (((CBL_Button *)(GetDlgItem(IDC_BL_ImageColMark)))->GetCaption() == _T("標記完成"))
+			{
+				m_BL_ImageCurCol.ShowWindow(SW_SHOW);
+			}
 		}
 	}
+	
  	m_BoxShow.SetImage(&m_ImgShow);
 }
 
@@ -5437,8 +5568,11 @@ void CTestConfigura::_UpdateParam(void)
 			vector<CString> vstrTem;
 			vstrTem.clear();
 			vstrTem = m_ValueCalculate.CutStringElse(strParamText, ',');
-			m_ptStandard_A.x = _ttoi(vstrTem[0]);
-			m_ptStandard_A.y = _ttoi(vstrTem[1]);
+			if (vstrTem.size() >= 2)
+			{
+				m_ptStandard_A.x = _ttoi(vstrTem[0]);
+				m_ptStandard_A.y = _ttoi(vstrTem[1]);
+			}
 			continue;
 		}
 		if ((strSetText == _T("設置基準坐標B")) && (m_nTestConfigWndType == RC_SPECIAL_POS))
@@ -5446,8 +5580,11 @@ void CTestConfigura::_UpdateParam(void)
 			vector<CString> vstrTem;
 			vstrTem.clear();
 			vstrTem = m_ValueCalculate.CutStringElse(strParamText, ',');
-			m_ptStandard_B.x = _ttoi(vstrTem[0]);
-			m_ptStandard_B.y = _ttoi(vstrTem[1]);
+			if (vstrTem.size() >= 2)
+			{
+				m_ptStandard_B.x = _ttoi(vstrTem[0]);
+				m_ptStandard_B.y = _ttoi(vstrTem[1]);
+			}
 			continue;
 		}
 
@@ -6933,7 +7070,7 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 	BOOL bRes = FALSE;
 	m_ImgShow.Clone(&m_ImgBkup);
 
-	if (m_ImgShow.empty())
+	if (m_ImgShow.empty() || m_BL_SetImageList.GetReadOnly())
 	{
 		return;
 	}
@@ -7611,6 +7748,10 @@ void CTestConfigura::LBtDbClickBlTestprogramlist(long nRow, long nCol, short* pn
 	// TODO: 在此处添加消息处理程序代码
 	if (nCol == 0)
 	{
+		if (m_ImgShow.empty() || m_BL_SetImageList.GetReadOnly() || m_ImgBkup.empty())
+		{
+			return;
+		}
 		if (nFlags & MK_CONTROL)
 		{
 			CSmartImage ImgTem;
@@ -9303,6 +9444,11 @@ afx_msg LRESULT CTestConfigura::OnGmsgImgPointMove(WPARAM wParam, LPARAM lParam)
 	strTemp.Format(_T("X = %d, Y = %d"), nPt_x, nPt_y);
 	m_BL_CurImagePt.SetCaption(strTemp);
 
+	if (m_ImgShow.empty())
+	{
+		return 0;
+	}
+	
 	if (wParam)//彩色圖像
 	{
 		vector<CSmartImage> mChannels;
