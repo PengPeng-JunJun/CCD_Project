@@ -157,6 +157,41 @@ public:
 	int m_nTestFinishSet;    //測試設置數量
 	int m_nTestFinishCounter;//測試完成數量
 
+	typedef struct _RECT_FOCUS_INFO
+	{
+		BOOL bMainFocus;
+		BOOL bSlaveFocus;
+		BOOL bSpecialFocus;
+		BOOL bTestFocus;
+		set<int> snTestFocusNb;
+
+		void _Clear()
+		{
+			bMainFocus = FALSE;
+			bSlaveFocus = FALSE;
+			bSpecialFocus = FALSE;
+			bTestFocus = FALSE;
+			snTestFocusNb.clear();
+		}
+
+		BOOL _IsTestScopeInFocus(int nTestScopeNb)
+		{
+			BOOL bFocus = FALSE;
+
+			for (set<int>::iterator it = snTestFocusNb.begin(); it != snTestFocusNb.end(); it++)
+			{
+				if (nTestScopeNb == *it)
+				{
+					bFocus = TRUE;
+					break;
+				}
+			}
+			return bFocus;
+		}
+	}RECT_FOCUS_INFO;//矩形焦點結構體
+
+	RECT_FOCUS_INFO m_RectFocusInfo;
+
 public:
 
 	CRect m_rcSearchScope;

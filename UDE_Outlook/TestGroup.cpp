@@ -295,7 +295,7 @@ void CTestGroup::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		if (m_rcAdd.PtInRect(point))
 		{
-			if (!m_bTesting)
+			if (!m_bTesting && !m_bLock)
 			{
 				if (m_rcGroup.size() < MAX_GROUP)
 				{

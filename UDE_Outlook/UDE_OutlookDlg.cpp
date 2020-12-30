@@ -163,8 +163,8 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_nTagStyle(0)
 	,m_bAutoAdd_MainList(FALSE)
 	, m_bAutoAdd_SlaveList(FALSE)
-	, m_bMouseMove(FALSE)
-	, m_bChangePos(FALSE)
+	, m_bViewTopShow(FALSE)
+	, m_bInChangePos(FALSE)
 	, m_nChangePosCounter(10)
 	, m_nTestScopeChangeCounter(65535)
 	, m_nMovePos(0)
@@ -1409,17 +1409,58 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		case 5:
 			if (IDCANCEL == MsgBox.ShowMsg(_T("確認清除選中標記區域"),_T("確認"), MB_OKCANCEL | MB_ICONQUESTION))
 				return;
+			if (ViewTopCur->m_RectFocusInfo.bMainFocus)
+				ViewTopCur->m_rcMainPos.SetRectEmpty();
+			if (ViewTopCur->m_RectFocusInfo.bSlaveFocus)
+				ViewTopCur->m_rcSlavePos.SetRectEmpty();
+			if (ViewTopCur->m_RectFocusInfo.bSpecialFocus)
+				ViewTopCur->m_rcSpecialScope.SetRectEmpty();
+			
+			if (ViewTopCur->m_RectFocusInfo.bTestFocus)
+			{
+				for (int i = (int)ViewTopCur->m_rcTestScope.size() - 1; i >= 0; i--)
+				{
+					if (ViewTopCur->m_RectFocusInfo._IsTestScopeInFocus(i))
+					{
+						for (int j = 0; j < (int)ViewTopCur->m_TestConfig.size(); j++)
+						{
+							const BOOL bSamePlane = (*ViewTopCur->m_TestConfig[j])->m_bTestTargetSamePlane;
+							if (!bSamePlane)
+							{
+								UpdateViewTopWndInfo(m_TestGroup.m_nCurGroup, m_TestGroup.m_nCurRow, TRUE);//刪除測試框，且測試框中與定位特征異面調用（只校正坐標）
+								break;
+							}
+						} 
+
+						ViewTopCur->m_rcTestScope.erase(ViewTopCur->m_rcTestScope.begin() + i);
+						delete ViewTopCur->m_TestConfig[i];
+						ViewTopCur->m_TestConfig.erase(ViewTopCur->m_TestConfig.begin() + i);
+						ViewTopCur->m_RectFocusInfo.snTestFocusNb.erase(i);
+					}
+				}
+
+				ViewTopCur->m_RectFocusInfo._Clear();
+			}
+			
+			ViewTopCur->Invalidate(FALSE);
 			break;
 		case 6:
 			if (IDCANCEL == MsgBox.ShowMsg(_T("確認清除所有標記區域"),_T("確認"), MB_OKCANCEL | MB_ICONQUESTION))
 				return;
-			
+		
 			ViewTopCur->m_rcSearchScope.SetRectEmpty();
 			ViewTopCur->m_rcMainPos.SetRectEmpty();
 			ViewTopCur->m_rcSlavePos.SetRectEmpty();
 			ViewTopCur->m_rcSpecialScope.SetRectEmpty();
 			ViewTopCur->m_rcTestScope.clear();
+
+			for (int i = (int)ViewTopCur->m_rcTestScope.size() - 1; i >= 0; i--)
+			{
+				UpdateViewTopWndInfo(m_TestGroup.m_nCurGroup, m_TestGroup.m_nCurRow, TRUE);//刪除測試框，且測試框中與定位特征異面調用（只校正坐標）
+				delete ViewTopCur->m_TestConfig[i];
+			}
 			ViewTopCur->m_TestConfig.clear();
+			ViewTopCur->m_RectFocusInfo._Clear();
 			ViewTopCur->Invalidate(FALSE);
 			break;
 		case 7:
@@ -2004,6 +2045,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 	{
 		for (size_t nCounter1 = 0; nCounter1 < m_TopWnd[nCounter0].size(); nCounter1++)
 		{
+			m_TopWnd[nCounter0][nCounter1]->m_RectFocusInfo._Clear();
 			m_TopWnd[nCounter0][nCounter1]->m_bShowChangePos = FALSE;
 			m_TopWnd[nCounter0][nCounter1]->Invalidate(FALSE);
 			m_TopWnd[nCounter0][nCounter1]->m_bSystemRunStatus = m_bSystemRunStatus;
@@ -2826,13 +2868,13 @@ void CUDE_OutlookDlg::OnLButtonDown(UINT nFlags, CPoint point)
 			{
 				if (m_bMousePos[i])
 				{
-					m_bChangePos = TRUE;
+					m_bInChangePos = TRUE;
 					break;
 				}
 			}
 			const int nCurGroup = m_TestGroup.m_nCurGroup;
 			const int nCurRow   = m_TestGroup.m_nCurRow;
-			if (m_bChangePos)
+			if (m_bInChangePos)
 			{
 				for (size_t i = 0; i < m_TopWnd[nCurGroup][nCurRow]->m_rcSearchScopeChange.size(); i++)
 				{
@@ -2855,6 +2897,10 @@ void CUDE_OutlookDlg::OnLButtonDown(UINT nFlags, CPoint point)
 							m_rcChange = m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope[i];
 							m_nTestScopeChangeCounter = i;
 							m_nTagStyle = TEST_SCPOE;	
+							m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+							m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bTestFocus = TRUE;
+							m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.snTestFocusNb.insert(i);
+							m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
 							return;
 						}
 					}
@@ -2867,6 +2913,9 @@ void CUDE_OutlookDlg::OnLButtonDown(UINT nFlags, CPoint point)
 						m_nChangePosCounter = i;
 						m_rcChange = m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos;
 						m_nTagStyle = MAIN_POS;	
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bMainFocus = TRUE;
+						m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
 						return;
 					}
 				}
@@ -2878,6 +2927,9 @@ void CUDE_OutlookDlg::OnLButtonDown(UINT nFlags, CPoint point)
 						m_nChangePosCounter = i;
 						m_rcChange = m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos;
 						m_nTagStyle = SLAVE_POS;	
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSlaveFocus = TRUE;
+						m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
 						return;
 					}
 				}
@@ -2889,50 +2941,143 @@ void CUDE_OutlookDlg::OnLButtonDown(UINT nFlags, CPoint point)
 						m_nChangePosCounter = i;
 						m_rcChange = m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope;
 						m_nTagStyle = SPECIAL_SCPOE;	
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSpecialFocus = TRUE;
+						m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
 						return;
 					}
 				}
 			}
-			if (m_bMouseMove)
+			if (m_bViewTopShow)
 			{
+				static BOOL bCtrlFirst = FALSE;
+				static int  nFocusCounter = 0;
+
 				m_nMovePos = 0;
+
+				const BOOL bClkInMain = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos);
+				const BOOL bClkInSlave = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos);
+				const BOOL bClkInSpecial = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope);
+				BOOL bClkInTest = FALSE;
+				int nTestScope = -1;
 				for (size_t i= 0; i < m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope.size(); i++)
 				{
 					if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope[i]))
 					{
-						m_bPosMove = TRUE;
-						m_nMovePos = m_nMovePos + 10;
-						m_nTestScopeChangeCounter = i;
-						m_ptPosMoveOld = point;
+						bClkInTest = TRUE;
+						nTestScope = (int)i;
+						break;
+					}
+				}
+				if (bClkInMain || bClkInSlave || bClkInSpecial || bClkInTest)
+				{
+					if (m_TopWnd[nCurGroup][nCurRow]->m_bShowChangePos)
+					{
+						if ((nFlags & MK_CONTROL) && !bCtrlFirst)
+						{
+							bCtrlFirst = TRUE;
+							if (!nFocusCounter)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+							}
+						}
+						if(!(nFlags & MK_CONTROL))
+						{
+							m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+							nFocusCounter = 0;
+						}
+						if (bClkInTest)
+						{
+							m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bTestFocus = TRUE;
+							if (!m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._IsTestScopeInFocus(nTestScope))
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.snTestFocusNb.insert(nTestScope);
+								nFocusCounter++;
+							}
+						}
+						const BOOL bTestFocus = m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bTestFocus;
+						if (bClkInMain)
+						{
+							if (nFlags & MK_CONTROL)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bMainFocus = TRUE;
+								nFocusCounter++;
+							}
+							else if(!bTestFocus)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bMainFocus = TRUE;
+								nFocusCounter++;
+							}
+						}
+						const BOOL bMainFocus = m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bMainFocus;
+						if (bClkInSlave)
+						{
+							if (nFlags & MK_CONTROL)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSlaveFocus = TRUE;
+								nFocusCounter++;
+							}
+							else if(!bTestFocus && !bMainFocus)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSlaveFocus = TRUE;
+								nFocusCounter++;
+							}
+						}
+						const BOOL bSlaveFocus = m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSlaveFocus;
+						if (bClkInSpecial)
+						{
+							if (nFlags & MK_CONTROL)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSpecialFocus = TRUE;
+								nFocusCounter++;
+							}
+							else if(!bTestFocus && !bMainFocus && !bSlaveFocus)
+							{
+								m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo.bSpecialFocus = TRUE;
+								nFocusCounter++;
+							}
+						}
+
+						m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
 					}
 				}
 
-				if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSearchScope))//如果在搜尋範圍內
+				if (!bClkInMain && !bClkInSlave && !bClkInSpecial && !bClkInTest)
 				{
-					m_bPosMove = TRUE;
-					m_nMovePos = m_nMovePos + 4;
-					m_ptPosMoveOld = point;
+					if(!(nFlags & MK_CONTROL) || ((nFlags & MK_CONTROL) && nFocusCounter == 0))
+					{
+						m_TopWnd[nCurGroup][nCurRow]->m_RectFocusInfo._Clear();
+						m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
+						bCtrlFirst = FALSE;
+						nFocusCounter = 0;
+					}
 					return;
 				}
-				if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos))//如果在主定位點內
+
+				if (nFocusCounter != 1)
+					return;
+
+				m_bPosMove = TRUE;
+				m_ptPosMoveOld = point;
+				if (bClkInTest)
 				{
-					m_bPosMove = TRUE;
-					m_nMovePos = m_nMovePos + 2;
-					m_ptPosMoveOld = point;
+					m_nMovePos = m_nMovePos + 10;
+					m_nTestScopeChangeCounter = nTestScope;
 					return;
 				}
-				if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos))//如果在從定位點內
+				if (bClkInMain)//如果在主定位點內
 				{
-					m_bPosMove = TRUE;
-					m_nMovePos = m_nMovePos + 1;
-					m_ptPosMoveOld = point;
+					m_nMovePos += 2;
 					return;
 				}
-				if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope))//如果在特殊标记区域内
+				if (bClkInSlave)//如果在從定位點內
 				{
-					m_bPosMove = TRUE;
-					m_nMovePos = m_nMovePos + 3;
-					m_ptPosMoveOld = point;
+					m_nMovePos += 1;
+					return;
+				}
+				if (bClkInSpecial)//如果在特殊标记区域内
+				{
+					m_nMovePos += 3;
 					return;
 				}
 			}
@@ -2967,6 +3112,7 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 				CRect rcPart(m_PtStart.x, m_PtStart.y, m_PtEnd.x, m_PtEnd.y);
 				ViewTopCur->m_bDrawing = TRUE;
+				ViewTopCur->m_RectFocusInfo._Clear();
 
 				switch (m_nTagStyle)
 				{
@@ -3001,7 +3147,7 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		else
 		{
-			if (m_bMouseMove && (!m_bChangePos) && (!m_bPosMove))//鼠標移動，未按下，鼠標在範圍修改框內，顯示拖動箭頭
+			if (m_bViewTopShow && (!m_bInChangePos) && (!m_bPosMove))//鼠標移動，未按下，鼠標在範圍修改框內，顯示拖動箭頭
 			{
 				ViewTopCur = m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow];
 				if (ViewTopCur->m_bShowChangePos)
@@ -3095,7 +3241,7 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 				}				
 			}
-			else if (m_bChangePos)//改变框選区域大小
+			else if (m_bInChangePos)//改变框選区域大小
 			{
 				switch (m_nChangePosCounter)
 				{
@@ -3301,27 +3447,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 	CAppBase::OnMouseMove(nFlags, point);
 }
 
-BOOL CUDE_OutlookDlg::MouseMoveTranslate(CPoint ptInfo, CRect rcInfo)
-{
-	CRect rcMainWnd;
-	GetClientRect(rcMainWnd);//獲取客服區矩形
-
-	CPoint Pt_Offset_x = m_rcTopWnd.left - rcMainWnd.left;
-	CPoint Pt_Offset_y = m_rcTopWnd.top - rcMainWnd.top;
-
-	CRect rcPart;
-	rcPart.SetRectEmpty();
-	rcPart.TopLeft().x = rcInfo.TopLeft().x + Pt_Offset_x.x;
-	rcPart.TopLeft().y = rcInfo.TopLeft().y + Pt_Offset_y.x;
-	rcPart.BottomRight().x = rcInfo.BottomRight().x + Pt_Offset_x.x;
-	rcPart.BottomRight().y = rcInfo.BottomRight().y + Pt_Offset_y.x;
-	if (rcPart.PtInRect(ptInfo))
-	{
-		return TRUE;
-	}
-	return FALSE;
-}
-
 
 void CUDE_OutlookDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
@@ -3398,7 +3523,7 @@ void CUDE_OutlookDlg::OnLButtonUp(UINT nFlags, CPoint point)
 				}
 			}
 		}
-		if (m_bChangePos)
+		if (m_bInChangePos)
 		{
 			CViewTop * ViewTopCur = m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow];
 			if (m_rcChange.IsRectEmpty())
@@ -3427,7 +3552,7 @@ void CUDE_OutlookDlg::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 			
 			ViewTopCur->Invalidate(FALSE);	
-			m_bChangePos = FALSE;
+			m_bInChangePos = FALSE;
 		}
 		if (m_bPosMove)
 		{
@@ -3458,11 +3583,14 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 	const BOOL bClkInSlave = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos);//如果在從定位點內雙擊
 	const BOOL bClkInSpecial = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope);//在特殊區域內雙擊
 	BOOL bClkInTest = FALSE;
+	int nTestScope = -1;
 	for (size_t i= 0; i < m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope.size(); i++)
 	{
 		if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope[i]))//在測試範圍內雙擊
 		{
 			bClkInTest = TRUE;
+			nTestScope = (int)i;
+			break;
 		}
 	}
 
@@ -3486,7 +3614,7 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 		const CString strTestProject = m_TestGroup.m_BL_TestProjectList.GetItemText(m_TestGroup.m_BL_TestProjectList.GetCurRow(), 2);
 
-		if (m_bMouseMove)
+		if (m_bViewTopShow)
 		{
 			//if (m_TopWnd[nCurGroup][nCurRow]->m_bShowChangePos)
 			if (!bClkInMain && !bClkInSlave && !bClkInSpecial && !bClkInTest)
@@ -3519,7 +3647,7 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 			}
 			else
 			{
-				MsgBox.ShowMsg(_T("系統自動運行中，參數無法查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
+				//MsgBox.ShowMsg(_T("系統自動運行中，參數無法查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
 				return;
 			}
 			rcAOI.TopLeft().x = 0;
@@ -3546,16 +3674,10 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 			}
 			if (bClkInTest)
 			{
-				for (size_t i= 0; i < m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope.size(); i++)
-				{
-					if (MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope[i]))//在測試範圍內雙擊
-					{
-						pTestConfig = m_TopWnd[nCurGroup][nCurRow]->m_TestConfig[i];
-						m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_TEST_POS, i, pTestConfig);
-						m_TopWnd[nCurGroup][nCurRow]->ShowTestConfig(i);
-						return;
-					}
-				}
+				pTestConfig = m_TopWnd[nCurGroup][nCurRow]->m_TestConfig[nTestScope];
+				m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_TEST_POS, nTestScope, pTestConfig);
+				m_TopWnd[nCurGroup][nCurRow]->ShowTestConfig(nTestScope);
+				return;
 			}
 			if (bClkInSpecial)
 			{
@@ -3585,10 +3707,31 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 }
 
 
+BOOL CUDE_OutlookDlg::MouseMoveTranslate(CPoint ptInfo, CRect rcInfo)
+{
+	CRect rcMainWnd;
+	GetClientRect(rcMainWnd);//獲取客服區矩形
+
+	CPoint Pt_Offset_x = m_rcTopWnd.left - rcMainWnd.left;
+	CPoint Pt_Offset_y = m_rcTopWnd.top - rcMainWnd.top;
+
+	CRect rcPart;
+	rcPart.SetRectEmpty();
+	rcPart.TopLeft().x = rcInfo.TopLeft().x + Pt_Offset_x.x;
+	rcPart.TopLeft().y = rcInfo.TopLeft().y + Pt_Offset_y.x;
+	rcPart.BottomRight().x = rcInfo.BottomRight().x + Pt_Offset_x.x;
+	rcPart.BottomRight().y = rcInfo.BottomRight().y + Pt_Offset_y.x;
+	if (rcPart.PtInRect(ptInfo))
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void CUDE_OutlookDlg::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值'
-	if (m_bMouseMove)
+	if (m_bViewTopShow)
 	{
 		if (nFlags & MK_CONTROL)
 		{
@@ -3610,44 +3753,15 @@ void CUDE_OutlookDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	if (!m_BL_AllTestRun.GetStatus())
 	{
-		if (m_bMouseMove)
+		if (m_bViewTopShow)
 		{
 			CViewTop * ViewTopCur = m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow];
-
-			if (nFlags & MK_CONTROL)//在按下CTRL的時候，如果鼠標在測試範圍內，右鍵雙擊，可以刪除該測試範圍
+			const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+			if (!bLocked)
 			{
-				if (ViewTopCur->m_bShowChangePos)
-				{
-					for (size_t i= 0; i < ViewTopCur->m_rcTestScope.size(); i++)
-					{
-						if (MouseMoveTranslate(point, ViewTopCur->m_rcTestScope[i]))
-						{
-							for (size_t j = 0; j < ViewTopCur->m_TestConfig.size(); j++)
-							{
-								const BOOL bSamePlane = (*ViewTopCur->m_TestConfig[j])->m_bTestTargetSamePlane;
-								if (!bSamePlane)
-								{
-									UpdateViewTopWndInfo(m_TestGroup.m_nCurGroup, m_TestGroup.m_nCurRow, TRUE);//刪除測試框，且測試框中與定位特征異面調用（只校正坐標）
-									break;
-								}
-							} 
-							
-							ViewTopCur->m_rcTestScope.erase(ViewTopCur->m_rcTestScope.begin() + i);
-							ViewTopCur->m_TestConfig.erase(ViewTopCur->m_TestConfig.begin() + i);
-							ViewTopCur->Invalidate(FALSE);
-							return;
-						}
-					}
-				}
-			}
-			else//是否顯示可以調整範圍的8個矩形
-			{
-				const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
-				if (!bLocked)
-				{
-					ViewTopCur->m_bShowChangePos = !ViewTopCur->m_bShowChangePos;
-					ViewTopCur->Invalidate(FALSE);
-				}
+				ViewTopCur->m_bShowChangePos = !ViewTopCur->m_bShowChangePos;
+				ViewTopCur->m_RectFocusInfo._Clear();
+				ViewTopCur->Invalidate(FALSE);
 			}
 		}
 	}
@@ -4285,7 +4399,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 			}
 		}
 		m_TopWnd[wParam][m_TestGroup.m_nCurRow]->ShowWindow(SW_SHOW);//显示当前透明对话框
-		m_bMouseMove = TRUE;
+		m_bViewTopShow = TRUE;
 
 		m_CurrentImage.release();
 
@@ -4342,7 +4456,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 				m_CurrentImage.release();
 				strOldCamInfo = m_TestGroup.m_strAllInfo[wParam][3][m_TestGroup.m_nCurRow];
 			}
-			m_bMouseMove = TRUE;
+			m_bViewTopShow = TRUE;
 
 // 			static BOOL bFont = FALSE;
 // 			static COleFont ft;
@@ -4364,7 +4478,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestProjectListChange(WPARAM wParam, LPARAM l
 	if (lParam == NO_ROWS_SELECT)//如果沒有光標指定行
 	{
 		m_CurrentImage.release();
-		m_bMouseMove = FALSE;
+		m_bViewTopShow = FALSE;
 		LockCtrls(-1);
 	}
 
@@ -4586,7 +4700,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 	}
 	if (lParam == GROUP_NO_ROWS)
 	{
-		m_bMouseMove = FALSE;
+		m_bViewTopShow = FALSE;
 		LockCtrls(-1);
 	}
 	if (lParam == GROUP_TEST_RUN)//開始群組測試
@@ -5651,7 +5765,7 @@ void CUDE_OutlookDlg::_UpdateInterface()
 			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->ShowWindow(SW_SHOW);
 			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bIsWindowShow = TRUE;
 			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->Invalidate(FALSE);
-			m_bMouseMove = TRUE;
+			m_bViewTopShow = TRUE;
 		}
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(FALSE);
 		break;
@@ -5662,7 +5776,7 @@ void CUDE_OutlookDlg::_UpdateInterface()
 
 		_IsShowParamPart(SW_SHOW);
 		_HideTopeWnd();
-		m_bMouseMove = FALSE;
+		m_bViewTopShow = FALSE;
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(TRUE);
 		break;
 	case SHOW_IMAGE_SCREEN:
@@ -5672,7 +5786,7 @@ void CUDE_OutlookDlg::_UpdateInterface()
 
 		_IsShowParamPart(SW_HIDE);
 		_HideTopeWnd();
-		m_bMouseMove = FALSE;
+		m_bViewTopShow = FALSE;
 		m_TestGroup.m_BL_TestProjectList.SetReadOnly(TRUE);
 		break;
 	default:

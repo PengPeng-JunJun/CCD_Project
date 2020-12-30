@@ -165,6 +165,7 @@ BOOL CViewTop::OnInitDialog()
 		m_TestResult->m_strNGImagePath = Img_NG_Path;
 	}
 	//m_LocatorDistance.CreateTopWnd(FALSE, FALSE);
+	m_RectFocusInfo._Clear();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -195,13 +196,21 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	pDC->SelectStockObject(NULL_BRUSH);
 
 	CPen pen_SearchScope(PS_SOLID, nPenSize, RGB(205,0,238));
+
 	CPen pen_rcMainPos(PS_SOLID, nPenSize, RGB(69,184,35));
+	CPen pen_rcMainPos_Focus(PS_DOT, nPenSize, RGB(69,184,35));
+
 	CPen pen_rcSlavePos(PS_SOLID, nPenSize, RGB(221,0,111));
+	CPen pen_rcSlavePos_Focus(PS_DOT, nPenSize, RGB(221,0,111));
+
 	CPen pen_rcTestScope(PS_SOLID, nPenSize, RGB(0,255,255));
+	CPen pen_rcTestScope_Focus(PS_DOT, nPenSize, RGB(0,255,255));
 
 	CPen pen_rcTestScope_Res_NG(PS_SOLID, nPenSize, RGB(255,0,0));//測試範圍NG
 
 	CPen pen_rcSpecialScpoe(PS_SOLID, nPenSize, RGB(255,255,255));
+	CPen pen_rcSpecialScpoe_Focus(PS_DOT, nPenSize, RGB(255,255,255));
+
 	CPen pen_rcTestScopeTem(PS_DOT, nPenSize, RGB(0,255,0));
 	CPen pen_Cross(PS_SOLID, nPenSize, RGB(0,238,0));
 	CPen pen_StanderLine(PS_SOLID, nPenSize, RGB(0,255,0));
@@ -601,7 +610,8 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		}
 	}
 
-	pDC->SelectObject(pen_rcMainPos);
+	m_RectFocusInfo.bMainFocus ? pDC->SelectObject(pen_rcMainPos_Focus) : pDC->SelectObject(pen_rcMainPos);
+	
 	pDC->Rectangle(m_rcMainPos);
 	if (!m_bDrawing)
 	{
@@ -627,7 +637,8 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		
 	}
 
-	pDC->SelectObject(pen_rcSlavePos);
+	m_RectFocusInfo.bSlaveFocus ? pDC->SelectObject(pen_rcSlavePos_Focus) : pDC->SelectObject(pen_rcSlavePos);
+	
 	pDC->Rectangle(m_rcSlavePos);
 	if (!m_bDrawing)
 	{
@@ -656,7 +667,8 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	m_rcTestScopeChange.clear();
 	for (size_t i = 0; i < m_rcTestScope.size(); i++)
 	{
-		pDC->SelectObject(pen_rcTestScope);
+		m_RectFocusInfo.bTestFocus && m_RectFocusInfo._IsTestScopeInFocus((int)i) ? pDC->SelectObject(pen_rcTestScope_Focus) : pDC->SelectObject(pen_rcTestScope);
+		
 		pDC->Rectangle(m_rcTestScope[i]);
 
 		if (!m_rcTestScope[i].IsRectEmpty())
@@ -685,8 +697,8 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		}
 	}
 
-	pDC->SelectObject(pen_rcSpecialScpoe);
-
+	m_RectFocusInfo.bSpecialFocus ? pDC->SelectObject(pen_rcSpecialScpoe_Focus) : pDC->SelectObject(pen_rcSpecialScpoe);
+	
 	if (!m_bDrawing)
 	{
 		if (m_bShowChangePos)

@@ -98,7 +98,7 @@ void CVerisonManage::_ShowInfo()
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	UpdateInfoTemp.strUpdateDate = _T("V1.9    修改時間：2020年12月29日");
-	UpdateInfoTemp.strUpdateInfo = _T("1.新增刪除測試項目和刪除測試群組功能;2.修改讀取檔案後，菜單欄刷新BUG;3.定位尺寸顯示界面移動至標記菜單欄;4.完善權限管理功能;5.非自動且解鎖，即可修改參數，無需激活範圍修改標記");
+	UpdateInfoTemp.strUpdateInfo = _T("1.新增刪除測試項目和刪除測試群組功能;2.修改讀取檔案後，菜單欄刷新BUG;3.定位尺寸顯示界面移動至標記菜單欄;4.完善權限管理功能;5.非自動且解鎖，即可修改參數，無需激活範圍修改標記;6.標記範圍選中後虛線顯示;7.添加刪除標記範圍功能");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	CValueCalculate ValueCalculate;

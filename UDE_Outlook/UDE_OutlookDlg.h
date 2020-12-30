@@ -206,10 +206,10 @@ public:
 	BOOL m_nDrawImage;
 	BOOL m_bIsDraw;//繪製新的矩形
 	BOOL m_bIsDrawStart;
-	BOOL m_bChangePos;//鼠標在範圍修改矩形內，允許修改矩形大小
+	BOOL m_bInChangePos;//鼠標在範圍修改矩形內，允許修改矩形大小
 	CPoint m_PtStart;
 	CPoint m_PtEnd;
-	BOOL m_bMouseMove;//在有viewtop畫面被選中時，即表格中有選中行，才能開始在界面上繪圖
+	BOOL m_bViewTopShow;//是否有viewtop畫面顯示，如無顯示，則無法繪製ROI
 	BOOL m_bMousePos[8];
 	CRect m_rcChange;//待修改的矩形
 	int m_nChangePosCounter;//待修改矩形的修改位置編號，左上，右上，左下，右下，上，下，左，右依次為0，1，2，3，4，5，6，7
