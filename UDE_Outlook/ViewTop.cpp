@@ -593,8 +593,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		{
 			if (!m_rcSearchScope.IsRectEmpty())
 			{
-				m_rcSearchScopeChange.clear();
-				ChangeRect(m_rcSearchScope, m_rcSearchScopeChange);
+				_CreateChangeRect(m_rcSearchScope, m_rcSearchScopeChange);
 				for (size_t i = 0; i < m_rcSearchScopeChange.size(); i++)
 				{
 					pDC->Rectangle(m_rcSearchScopeChange[i]);
@@ -619,8 +618,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		{
 			if (!m_rcMainPos.IsRectEmpty())
 			{
-				m_rcMainPosChange.clear();
-				ChangeRect(m_rcMainPos, m_rcMainPosChange);
+				_CreateChangeRect(m_rcMainPos, m_rcMainPosChange);
 				for (size_t i = 0; i < m_rcMainPosChange.size(); i++)
 				{
 					pDC->Rectangle(m_rcMainPosChange[i]);
@@ -646,8 +644,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		{
 			if (!m_rcSlavePos.IsRectEmpty())
 			{
-				m_rcSlavePosChange.clear();
-				ChangeRect(m_rcSlavePos, m_rcSlavePosChange);
+				_CreateChangeRect(m_rcSlavePos, m_rcSlavePosChange);
 				for (size_t i = 0; i < m_rcSlavePosChange.size(); i++)
 				{
 					pDC->Rectangle(m_rcSlavePosChange[i]);
@@ -678,8 +675,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				if (m_bShowChangePos)
 				{
 					vector<CRect> rcPart;
-					rcPart.clear();
-					ChangeRect(m_rcTestScope[i], rcPart);
+					_CreateChangeRect(m_rcTestScope[i], rcPart);
 					m_rcTestScopeChange.push_back(rcPart);
 					for (size_t j = 0; j < 8; j++)
 					{
@@ -705,8 +701,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		{
 			if (!m_rcSpecialScope.IsRectEmpty())
 			{
-				m_vrcSpecialScopeChange.clear();
-				ChangeRect(m_rcSpecialScope, m_vrcSpecialScopeChange);
+				_CreateChangeRect(m_rcSpecialScope, m_vrcSpecialScopeChange);
 				for (size_t i = 0; i < m_vrcSpecialScopeChange.size(); i++)
 				{
 					pDC->Rectangle(m_vrcSpecialScopeChange[i]);
@@ -1293,59 +1288,61 @@ void CViewTop::_DrawWithoutWndShow()
 	return;
 }
 
-void CViewTop::ChangeRect(CRect rcInfo, vector<CRect> & rcTarget)
+void CViewTop::_CreateChangeRect(CRect rcParent, vector<CRect> & rcChange)
 {
-	CRect rcPart(rcInfo.TopLeft().x - 4, rcInfo.TopLeft().y - 4, rcInfo.TopLeft().x + 4, rcInfo.TopLeft().y + 4);
-	rcTarget.push_back(rcPart);
+	rcChange.clear();
+
+	CRect rcPart(rcParent.TopLeft().x - 4, rcParent.TopLeft().y - 4, rcParent.TopLeft().x + 4, rcParent.TopLeft().y + 4);
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.TopLeft().x = rcInfo.BottomRight().x - 4;
-	rcPart.TopLeft().y = rcInfo.TopLeft().y - 4;
-	rcPart.BottomRight().x = rcInfo.BottomRight().x + 4;
-	rcPart.BottomRight().y = rcInfo.TopLeft().y + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.TopLeft().x = rcParent.BottomRight().x - 4;
+	rcPart.TopLeft().y = rcParent.TopLeft().y - 4;
+	rcPart.BottomRight().x = rcParent.BottomRight().x + 4;
+	rcPart.BottomRight().y = rcParent.TopLeft().y + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.TopLeft().x = rcInfo.TopLeft().x - 4;
-	rcPart.TopLeft().y = rcInfo.BottomRight().y - 4;
-	rcPart.BottomRight().x = rcInfo.TopLeft().x + 4;
-	rcPart.BottomRight().y = rcInfo.BottomRight().y + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.TopLeft().x = rcParent.TopLeft().x - 4;
+	rcPart.TopLeft().y = rcParent.BottomRight().y - 4;
+	rcPart.BottomRight().x = rcParent.TopLeft().x + 4;
+	rcPart.BottomRight().y = rcParent.BottomRight().y + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.TopLeft().x = rcInfo.BottomRight().x - 4;
-	rcPart.TopLeft().y = rcInfo.BottomRight().y - 4;
-	rcPart.BottomRight().x = rcInfo.BottomRight().x + 4;
-	rcPart.BottomRight().y = rcInfo.BottomRight().y + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.TopLeft().x = rcParent.BottomRight().x - 4;
+	rcPart.TopLeft().y = rcParent.BottomRight().y - 4;
+	rcPart.BottomRight().x = rcParent.BottomRight().x + 4;
+	rcPart.BottomRight().y = rcParent.BottomRight().y + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.left = rcInfo.CenterPoint().x - 4;
-	rcPart.right = rcInfo.CenterPoint().x + 4;
-	rcPart.top = rcInfo.top - 4;
-	rcPart.bottom = rcInfo.top + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.left = rcParent.CenterPoint().x - 4;
+	rcPart.right = rcParent.CenterPoint().x + 4;
+	rcPart.top = rcParent.top - 4;
+	rcPart.bottom = rcParent.top + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.left = rcInfo.CenterPoint().x - 4;
-	rcPart.right = rcInfo.CenterPoint().x + 4;
-	rcPart.top = rcInfo.bottom - 4;
-	rcPart.bottom = rcInfo.bottom + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.left = rcParent.CenterPoint().x - 4;
+	rcPart.right = rcParent.CenterPoint().x + 4;
+	rcPart.top = rcParent.bottom - 4;
+	rcPart.bottom = rcParent.bottom + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.top = rcInfo.CenterPoint().y - 4;
-	rcPart.bottom = rcInfo.CenterPoint().y + 4;
-	rcPart.left = rcInfo.left - 4;
-	rcPart.right = rcInfo.left + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.top = rcParent.CenterPoint().y - 4;
+	rcPart.bottom = rcParent.CenterPoint().y + 4;
+	rcPart.left = rcParent.left - 4;
+	rcPart.right = rcParent.left + 4;
+	rcChange.push_back(rcPart);
 
 	rcPart.SetRectEmpty();
-	rcPart.top = rcInfo.CenterPoint().y - 4;
-	rcPart.bottom = rcInfo.CenterPoint().y + 4;
-	rcPart.left = rcInfo.right - 4;
-	rcPart.right = rcInfo.right + 4;
-	rcTarget.push_back(rcPart);
+	rcPart.top = rcParent.CenterPoint().y - 4;
+	rcPart.bottom = rcParent.CenterPoint().y + 4;
+	rcPart.left = rcParent.right - 4;
+	rcPart.right = rcParent.right + 4;
+	rcChange.push_back(rcPart);
 }
 
 

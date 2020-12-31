@@ -3162,10 +3162,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 								return;
 							}
 						}
-						for (int i = 0; i < 8; i++)
-						{
-							m_bMousePos[i] = FALSE;
-						}
 					}
 
 					if (!ViewTopCur->m_rcMainPos.IsRectEmpty())
@@ -3178,10 +3174,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 								return;
 							}
 						}
-						for (int i = 0; i < 8; i++)
-						{
-							m_bMousePos[i] = FALSE;
-						}
 					}
 
 					if (!ViewTopCur->m_rcSlavePos.IsRectEmpty())
@@ -3193,10 +3185,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 								m_bMousePos[i] = TRUE;
 								return;
 							}
-						}
-						for (int i = 0; i < 8; i++)
-						{
-							m_bMousePos[i] = FALSE; 
 						}
 					} 
 
@@ -3215,10 +3203,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 										return;
 									}
 								}
-								for (int x = 0; x < 8; x++)
-								{
-									m_bMousePos[x] = FALSE;
-								}
 							}
 						}
 					}
@@ -3233,12 +3217,11 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 								return;
 							}
 						}
-						for (int i = 0; i < 8; i++)
-						{
-							m_bMousePos[i] = FALSE;
-						}
 					}
-
+					for (int i = 0; i < 8; i++)
+					{
+						m_bMousePos[i] = FALSE;
+					}
 				}				
 			}
 			else if (m_bInChangePos)//改变框選区域大小
@@ -3347,74 +3330,39 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 				if (ViewTopCur->m_bShowChangePos)//無修改大小的8個框，無法拖動任一矩形
 				{
 					BOOL bUpdateInfo = FALSE;//更新比例或對樣信息
+
+					CRect * prcTemp = nullptr;
+
 					if ((m_nMovePos > 0) && (m_nMovePos <= 7))
 					{
-						if (m_nMovePos == 1)
+						switch (m_nMovePos)
 						{
-							m_rcChange = ViewTopCur->m_rcSlavePos;
-							m_rcChange.TopLeft().x = point.x - m_ptPosMoveOld.x + m_rcChange.TopLeft().x;
-							m_rcChange.TopLeft().y = point.y - m_ptPosMoveOld.y + m_rcChange.TopLeft().y;
-							m_rcChange.BottomRight().x = point.x - m_ptPosMoveOld.x + m_rcChange.BottomRight().x;
-							m_rcChange.BottomRight().y = point.y - m_ptPosMoveOld.y + m_rcChange.BottomRight().y;
-							m_ptPosMoveOld = point;
-							ViewTopCur->m_rcSlavePos = m_rcChange;
+						case 1:
+							prcTemp = &ViewTopCur->m_rcSlavePos;
 							bUpdateInfo = TRUE;
-						}
-						if (m_nMovePos == 2)
-						{
-							m_rcChange = ViewTopCur->m_rcMainPos;
-							m_rcChange.TopLeft().x = point.x - m_ptPosMoveOld.x + m_rcChange.TopLeft().x;
-							m_rcChange.TopLeft().y = point.y - m_ptPosMoveOld.y + m_rcChange.TopLeft().y;
-							m_rcChange.BottomRight().x = point.x - m_ptPosMoveOld.x + m_rcChange.BottomRight().x;
-							m_rcChange.BottomRight().y = point.y - m_ptPosMoveOld.y + m_rcChange.BottomRight().y;
-							m_ptPosMoveOld = point;
-							ViewTopCur->m_rcMainPos = m_rcChange;
+							break;
+						case 2:
+							prcTemp = &ViewTopCur->m_rcMainPos;
 							bUpdateInfo = TRUE;
-						}
-						if (m_nMovePos == 3)
-						{
-							m_rcChange = ViewTopCur->m_rcSpecialScope;
-							m_rcChange.TopLeft().x = point.x - m_ptPosMoveOld.x + m_rcChange.TopLeft().x;
-							m_rcChange.TopLeft().y = point.y - m_ptPosMoveOld.y + m_rcChange.TopLeft().y;
-							m_rcChange.BottomRight().x = point.x - m_ptPosMoveOld.x + m_rcChange.BottomRight().x;
-							m_rcChange.BottomRight().y = point.y - m_ptPosMoveOld.y + m_rcChange.BottomRight().y;
-							ViewTopCur->m_rcSpecialScope = m_rcChange;
-							m_ptPosMoveOld = point;
+							break;
+						case 3:
+							prcTemp = &ViewTopCur->m_rcSpecialScope;
 							if (ViewTopCur->m_SpecialPos->m_nGetStandardMethod == GET_STANDARD_METHOD_CUSTOM_LINE)
 							{
 								bUpdateInfo = TRUE;
 								ViewTopCur->m_SpecialPos->m_bSpecialMarkFinish = FALSE;
 							}
-						}
-						if (m_nMovePos == 4)
-						{
-							m_rcChange = ViewTopCur->m_rcSearchScope;
-							m_rcChange.TopLeft().x = point.x - m_ptPosMoveOld.x + m_rcChange.TopLeft().x;
-							m_rcChange.TopLeft().y = point.y - m_ptPosMoveOld.y + m_rcChange.TopLeft().y;
-							m_rcChange.BottomRight().x = point.x - m_ptPosMoveOld.x + m_rcChange.BottomRight().x;
-							m_rcChange.BottomRight().y = point.y - m_ptPosMoveOld.y + m_rcChange.BottomRight().y;
-							m_ptPosMoveOld = point;
-							ViewTopCur->m_rcSearchScope = m_rcChange;
-						}
-						if (m_nMovePos == 5)
-						{
-						}
-						if (m_nMovePos == 6)
-						{
-						}
-						if (m_nMovePos == 7)
-						{
+							break;
+						case 4:
+							prcTemp = &ViewTopCur->m_rcSearchScope;
+							break;
+						default:
+							break;
 						}
 					}
 					if (m_nMovePos >= 10)
 					{
-						m_rcChange = ViewTopCur->m_rcTestScope[m_nTestScopeChangeCounter];
-						m_rcChange.TopLeft().x = point.x - m_ptPosMoveOld.x + m_rcChange.TopLeft().x;
-						m_rcChange.TopLeft().y = point.y - m_ptPosMoveOld.y + m_rcChange.TopLeft().y;
-						m_rcChange.BottomRight().x = point.x - m_ptPosMoveOld.x + m_rcChange.BottomRight().x;
-						m_rcChange.BottomRight().y = point.y - m_ptPosMoveOld.y + m_rcChange.BottomRight().y;
-						m_ptPosMoveOld = point;
-						ViewTopCur->m_rcTestScope[m_nTestScopeChangeCounter] = m_rcChange;
+						prcTemp = &ViewTopCur->m_rcTestScope[m_nTestScopeChangeCounter];
 						ViewTopCur->m_vrcTestScopeTem.clear();
 
 						BOOL bChange = FALSE;
@@ -3433,6 +3381,16 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 						}
 					}
 
+					if (prcTemp != nullptr)
+					{
+						prcTemp->TopLeft().x = point.x - m_ptPosMoveOld.x + prcTemp->TopLeft().x;
+						prcTemp->TopLeft().y = point.y - m_ptPosMoveOld.y + prcTemp->TopLeft().y;
+						prcTemp->BottomRight().x = point.x - m_ptPosMoveOld.x + prcTemp->BottomRight().x;
+						prcTemp->BottomRight().y = point.y - m_ptPosMoveOld.y + prcTemp->BottomRight().y;
+						m_ptPosMoveOld = point;
+						m_rcChange = *prcTemp;
+					}
+					
 					if (bUpdateInfo)
 					{
 						UpdateViewTopWndInfo(m_TestGroup.m_nCurGroup, m_TestGroup.m_nCurRow, TRUE);//框選區域位置改變調用（只校正坐標）
@@ -3733,16 +3691,9 @@ void CUDE_OutlookDlg::OnRButtonDown(UINT nFlags, CPoint point)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值'
 	if (m_bViewTopShow)
 	{
-		if (nFlags & MK_CONTROL)
-		{
-
-		}
-		else
-		{
-			m_bIsDraw = FALSE;
-			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bDrawing = FALSE;
-			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->Invalidate(FALSE);
-		}
+		m_bIsDraw = FALSE;
+		m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bDrawing = FALSE;
+		m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->Invalidate(FALSE);
 	}
 	
 	CAppBase::OnRButtonDown(nFlags, point);
@@ -3751,18 +3702,15 @@ void CUDE_OutlookDlg::OnRButtonDown(UINT nFlags, CPoint point)
 void CUDE_OutlookDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	if (!m_BL_AllTestRun.GetStatus())
+	if (!m_BL_AllTestRun.GetStatus() && m_bViewTopShow)
 	{
-		if (m_bViewTopShow)
+		CViewTop * ViewTopCur = m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow];
+		const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+		if (!bLocked)
 		{
-			CViewTop * ViewTopCur = m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow];
-			const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
-			if (!bLocked)
-			{
-				ViewTopCur->m_bShowChangePos = !ViewTopCur->m_bShowChangePos;
-				ViewTopCur->m_RectFocusInfo._Clear();
-				ViewTopCur->Invalidate(FALSE);
-			}
+			ViewTopCur->m_bShowChangePos = !ViewTopCur->m_bShowChangePos;
+			ViewTopCur->m_RectFocusInfo._Clear();
+			ViewTopCur->Invalidate(FALSE);
 		}
 	}
 	

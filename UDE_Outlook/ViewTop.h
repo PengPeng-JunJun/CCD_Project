@@ -247,7 +247,7 @@ public:
 
 	CBlender<CTestNameInfo> m_TestNameInfo;
 public:
-	void ChangeRect(CRect rcInfo, vector<CRect> & rcTarget);
+	void _CreateChangeRect(CRect rcParent, vector<CRect> & rcChange);//„“½¨˜ËÓ›¹ ‡úµÄ³ß´çÐÞ¸Ä¿ò£¨8‚€£©
 	virtual BOOL OnInitDialog();
 	virtual void Serialize(CArchive& ar);
 
