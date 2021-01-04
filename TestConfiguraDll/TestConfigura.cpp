@@ -11,7 +11,7 @@ int CTestConfigura::m_bLoadData = FALSE;
 // CTestConfigura 对话框
 
 CSemaphore g_SemDeepLearn;
-
+BOOL g_bSystemRunStatus = FALSE;
 // typedef struct student
 // {
 // 	int data;
@@ -168,7 +168,6 @@ CTestConfigura::CTestConfigura(CWnd* pParent /*=NULL*/)
 	, m_dAngleLimit_L(-1)
 	, m_dAreaSumLimit_H(-1)
 	, m_dAreaSumLimit_L(-1)
-	, m_bSystemRunStatus(FALSE)
 {
 	m_ptMarkLast.x = -1;
 	m_ptMarkLast.y = -1;
@@ -320,7 +319,6 @@ CTestConfigura::CTestConfigura(UINT nIDTemplate, CWnd * pParent/* = nullptr*/)
 	, m_dAngleLimit_L(-1)
 	, m_dAreaSumLimit_H(-1)
 	, m_dAreaSumLimit_L(-1)
-	, m_bSystemRunStatus(FALSE)
 {
 	m_ptMarkLast.x = -1;
 	m_ptMarkLast.y = -1;
@@ -554,7 +552,7 @@ void CTestConfigura::LockCtrls(int nLock)//相应锁定控件消息
 	((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
 	((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
 
-	if (!bLocked && !m_bSystemRunStatus && !m_ImgShow.empty())
+	if (!bLocked && !g_bSystemRunStatus && !m_ImgShow.empty())
 	{
 		bEnable = TRUE;
 
@@ -645,7 +643,7 @@ void CTestConfigura::ShowTestConfigWnd()
 	((CBL_Button *)(GetDlgItem(IDC_BL_ImageDst)))->SetEnabled(bEnable);
 	((CBL_Button *)(GetDlgItem(IDC_BL_ImagePtMark)))->SetEnabled(bEnable);
 	
-	if (!bLocked && !m_bSystemRunStatus && !m_ImgShow.empty())
+	if (!bLocked && !g_bSystemRunStatus && !m_ImgShow.empty())
 	{
 		bEnable = TRUE;
 
@@ -695,7 +693,7 @@ void CTestConfigura::ShowTestConfigWnd()
 
 	m_ImgShow.Clone(&m_ImgBkup);
 
-	if (!bLocked && !m_bSystemRunStatus)//在非自動和解鎖狀態下才執行處理程序
+	if (!bLocked && !g_bSystemRunStatus)//在非自動和解鎖狀態下才執行處理程序
 	{
 		m_nTestConfigWndType == RC_TEST_POS ? GetImageRes(_T("標準圖像處理")) : ImageProcess(&m_ImgShow, 1, m_BL_SetImageList.GetRows());
 
@@ -764,9 +762,6 @@ void CTestConfigura::GetImageRes(const CString strImageProcessMode, int nTestAga
 				if (m_vstrTestProgram[i].strTestProgramParam == _T(""))
 					break;
 				
-				CString strTime;
-				QueryPerformanceFrequency(&m_nFreq);
-				QueryPerformanceCounter(&m_nBeginTime); 
 				if (m_vstrTestProgram[i].strTestProgramParam.Find(',') >= 0)
 				{
 					vstrTemp.clear();
@@ -805,12 +800,6 @@ void CTestConfigura::GetImageRes(const CString strImageProcessMode, int nTestAga
 					ImageProcess(&m_ImgShow, _ttoi(m_vstrTestProgram[i].strTestProgramParam), 
 						_ttoi(m_vstrTestProgram[i].strTestProgramParam));
 				}
-				QueryPerformanceCounter(&m_nEndTime);
-				if (IsWindowVisible())
-				{
-					strTime.Format(m_strTitle + _T("   圖像處理時長: %.2f MS"), (((double)(m_nEndTime.QuadPart - m_nBeginTime.QuadPart) / (double)m_nFreq.QuadPart)) * 1000);
-					SetTitle(strTime);
-				}
 				break;
 			}
 		}
@@ -827,9 +816,6 @@ void CTestConfigura::GetImageRes(const CString strImageProcessMode, int nTestAga
 			const CString strImgProcessMode = m_vstrTestProgram[nTestAgainProcessRow].strTestProgramParam;
 			if (strImgProcessMode != _T(""))
 			{
-				CString strTime;
-				QueryPerformanceFrequency(&m_nFreq);
-				QueryPerformanceCounter(&m_nBeginTime); 
 				if (strImgProcessMode.Find(',') >= 0)
 				{
 					vstrTemp.clear();
@@ -851,12 +837,6 @@ void CTestConfigura::GetImageRes(const CString strImageProcessMode, int nTestAga
 				{
 					m_ImgShowRepeat[_ttoi(strTemp) - 1].Clone(&m_ImgBkup);
 					ImageProcess(&m_ImgShowRepeat[_ttoi(strTemp) - 1], _ttoi(strImgProcessMode), _ttoi(strImgProcessMode));
-				}
-				QueryPerformanceCounter(&m_nEndTime);
-				if (IsWindowVisible())
-				{
-					strTime.Format(m_strTitle + _T("   圖像處理時長: %.2f MS"), (((double)(m_nEndTime.QuadPart - m_nBeginTime.QuadPart) / (double)m_nFreq.QuadPart)) * 1000);
-					SetTitle(strTime);
 				}
 			}
 		}
@@ -1098,6 +1078,7 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 	{
 		strTime.Format(m_strTitle + _T("   圖像處理時長: %.2f MS"), (((double)(m_nEndTime.QuadPart - m_nBeginTime.QuadPart) / (double)m_nFreq.QuadPart)) * 1000);
 		SetTitle(strTime);
+		m_BoxShow.SetImage(pImgSrc);
 	}
 }
 

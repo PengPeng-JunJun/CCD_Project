@@ -197,8 +197,6 @@ public:
 	int m_nShowImageMode;//圖像顯示模式，0-單畫面顯示  1-多畫面顯示  2-全屏顯示
 	BOOL m_bStarTestBySpace;//使用空格鍵可以啟動當前群組測試，只適用於單個群組
 
-	BOOL m_bSystemRunStatus;//系統運行狀態，是在自動或是手動模式
-
 	BOOL m_bTestContinue;//持續檢測
 
 public:

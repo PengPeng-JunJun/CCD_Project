@@ -52,6 +52,7 @@
 using namespace std;
 
 // CTestConfigura 对话框
+extern BOOL _declspec(dllimport) g_bSystemRunStatus;//軟件運行狀態 TRUE-自動  FALSE-手動
 
 enum METHOD {ADD = 1, INSERT, ERASE};//操作圖像結果向量的方法
 
@@ -384,8 +385,6 @@ public:
 	int m_nTestConfiguraNo;//测试范围编号
 
 	int m_nTestTargetCounter;//測試目標數量
-
-	BOOL m_bSystemRunStatus;//系統運行狀態 TRUE-自動  FALSE-手動
 
 	BOOL m_bTestTargetSamePlane;//测试目标与定位目标是否共面,TRUE共面 FALSE异面
 

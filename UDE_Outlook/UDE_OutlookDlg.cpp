@@ -195,7 +195,6 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_nShowImageMode(SHOW_IMAGE_SINGLE)
 	, m_bStarTestBySpace(FALSE)
 	, m_bTestContinue(FALSE)
-	, m_bSystemRunStatus(FALSE)
 	, m_nCurFileStatus(NO_FILE)
 	, m_bRegister(FALSE)
 	, m_nCommuniType(-1)
@@ -751,31 +750,34 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		
 		for (int nCounter = 0; nCounter < 4; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("設置"), nCounter, !g_bSystemRunStatus);
 		}
 		for (int nCounter = 0; nCounter < 2; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("拍照方式"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("拍照方式"), nCounter, !g_bSystemRunStatus);
 		}
 		for (int nCounter = 0; nCounter < 2; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, !g_bSystemRunStatus);
 		}
 		for (int nCounter = 0; nCounter < 3; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, !g_bSystemRunStatus);
 		}
 		for (int nCounter = 0; nCounter < 5; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("通訊設置"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("通訊設置"), nCounter, !g_bSystemRunStatus);
 		}
 
 		for (int nCounter = 0; nCounter < 2; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("功能"), nCounter, TRUE);
+			m_Menu.EnableItemByPos(_T("功能"), nCounter, !g_bSystemRunStatus);
 		}
+		
+		m_Menu.EnableItemByName(_T("圖像"), _T("加載圖像..."), !g_bSystemRunStatus);
+		m_Menu.EnableItemByName(_T("圖像"), _T("製作模板圖像..."), !g_bSystemRunStatus);
 
-		if (!m_bSystemRunStatus && m_TestGroup.m_nCurGroup >= 0 && m_TestGroup.m_nCurRow >= 0 && m_nShowImageMode == SHOW_IMAGE_SINGLE)
+		if (!g_bSystemRunStatus && m_TestGroup.m_nCurGroup >= 0 && m_TestGroup.m_nCurRow >= 0 && m_nShowImageMode == SHOW_IMAGE_SINGLE)
 		{
 			for (int nCounter = 0; nCounter < 4; nCounter++)
 			{
@@ -1318,7 +1320,7 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 				{
 					for (int i = 0; i < CHANNEL_SUM; i++)
 					{
-						const BOOL bChannelStatus = m_TopWnd[nCurGroup][nCurRow]->m_TestLightInfo->m_bChannelStatus[i];
+						const BOOL bChannelStatus = m_TopWnd[nCurGroup][nCurRow]->m_TestLightInfo->m_bChannelStatus[i]; 
 						const int nLightVaule = m_TopWnd[nCurGroup][nCurRow]->m_TestLightInfo->m_nChannelValue[i];
 
 						if (bChannelStatus)
@@ -2004,7 +2006,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 	int nErr = 0;
 	if(!CheckViewTopWndInfo(nGroup, nProject, nErr))//檢測失敗
 	{
-		m_bSystemRunStatus = FALSE;
+		g_bSystemRunStatus = FALSE;
 
 		CString strErrorInfo;
 		if (nErr == RUN_CHECK_PROPOR_ERROR)
@@ -2027,7 +2029,6 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 					m_TopWnd[nCounter0][nCounter1]->Invalidate(FALSE);
 					m_TopWnd[nCounter0][nCounter1]->m_bShowChangePos = FALSE;
 				}
-				m_TopWnd[nCounter0][nCounter1]->m_bSystemRunStatus = m_bSystemRunStatus;
 			}
 		}
 		return;
@@ -2040,7 +2041,7 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 	m_BL_TestRunStatus.SetCaption(_T("測試運行中"));
 	m_BL_TestRunStatus.SetForeColor(RGB(0, 255, 255));
 
-	m_bSystemRunStatus = TRUE;
+	g_bSystemRunStatus = TRUE;
 	for (size_t nCounter0 = 0; nCounter0 < m_TopWnd.size(); nCounter0++)
 	{
 		for (size_t nCounter1 = 0; nCounter1 < m_TopWnd[nCounter0].size(); nCounter1++)
@@ -2048,7 +2049,6 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 			m_TopWnd[nCounter0][nCounter1]->m_RectFocusInfo._Clear();
 			m_TopWnd[nCounter0][nCounter1]->m_bShowChangePos = FALSE;
 			m_TopWnd[nCounter0][nCounter1]->Invalidate(FALSE);
-			m_TopWnd[nCounter0][nCounter1]->m_bSystemRunStatus = m_bSystemRunStatus;
 		}
 	}
 	m_bFinishTest = TRUE;
@@ -2791,8 +2791,8 @@ void CUDE_OutlookDlg::OpenprojectWithFilePath(CString strPath)
 
 void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 {
-	m_bSystemRunStatus = bStatus;
-
+	g_bSystemRunStatus = bStatus;
+	
 	if (bStatus)//開始運行
 	{
 		_TestRunCheck(FALSE);
@@ -2806,13 +2806,6 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 	}
 	else//停止運行
 	{
-		for (size_t nCounter0 = 0; nCounter0 < m_TopWnd.size(); nCounter0++)
-		{
-			for (size_t nCounter1 = 0; nCounter1 < m_TopWnd[nCounter0].size(); nCounter1++)
-			{
-				m_TopWnd[nCounter0][nCounter1]->m_bSystemRunStatus = m_bSystemRunStatus;
-			}
-		}
 		KillTimer(2);
 		KillTimer(0);
 		KillTimer(30);
@@ -2840,6 +2833,10 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 		CTestResultChart:: m_bSaveData = FALSE;
 		LockCtrls(-1);
 	}
+
+	const BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+	_LockAllUis(bLocked);
+
 	// TODO: 在此处添加消息处理程序代码
 }
 
@@ -3536,7 +3533,6 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 		return;
 	}
 
-	m_TopWnd[nCurGroup][nCurRow]->m_LocatorDistance->m_bSystemRunStatus = m_bSystemRunStatus;//運行模式
 	const BOOL bClkInMain = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos);//如果在主定位點內雙擊
 	const BOOL bClkInSlave = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos);//如果在從定位點內雙擊
 	const BOOL bClkInSpecial = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope);//在特殊區域內雙擊
@@ -3587,7 +3583,7 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 			CRect rcAOI;//獲取相機傳感器的尺寸
 
 			BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
-			if (!bLocked && !m_bSystemRunStatus)
+			if (!bLocked && !g_bSystemRunStatus)
 			{
 				if (m_CurrentImage.empty())//如果無當前圖像，則立即拍照作為當前圖像
 				{
@@ -3599,14 +3595,14 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 				#endif
 				}
 			}
-			else if(bLocked && !m_bSystemRunStatus)
+			else if(bLocked && !g_bSystemRunStatus)
 			{
 				MsgBox.ShowMsg(_T("系統鎖定中，參數僅供查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
 			}
 			else
 			{
 				//MsgBox.ShowMsg(_T("系統自動運行中，參數無法查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
-				return;
+				//return;
 			}
 			rcAOI.TopLeft().x = 0;
 			rcAOI.TopLeft().y = 0;
@@ -5217,7 +5213,6 @@ void CUDE_OutlookDlg::_TimerGroupTestRun()
 			m_TopWnd[m_nCurGroup][nCounter0]->m_pCamImage = &m_vAllCamImage[_ttoi(m_TestGroup.m_strAllInfo[m_nCurGroup][3][nCounter0]) - 1];
 			//m_TopWnd[m_nCurGroup][nCounter0]->PostMessage(WM_TESTSTART);
 
-			m_TopWnd[m_nCurGroup][nCounter0]->m_bSystemRunStatus = m_bSystemRunStatus;
 			m_TopWnd[m_nCurGroup][nCounter0]->TestRun();
 			m_TopWnd[m_nCurGroup][nCounter0]->m_nTestLEDFinish = 0;
 

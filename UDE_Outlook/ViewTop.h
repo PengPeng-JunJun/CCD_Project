@@ -152,8 +152,6 @@ public:
 	BOOL m_bDrawFinish;//無窗口顯示時繪製完成
 	CString m_strSavePath;
 
-	BOOL m_bSystemRunStatus;//系統運行狀態，是在自動或是手動模式
-
 	int m_nTestFinishSet;    //測試設置數量
 	int m_nTestFinishCounter;//測試完成數量
 

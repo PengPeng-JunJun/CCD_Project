@@ -52,7 +52,6 @@ CViewTop::CViewTop(CWnd* pParent /*=NULL*/)
 	, m_pdcViewTop(nullptr)
 	, m_bContinueThreadStatus(FALSE)
 	, m_strTestRes(_T(""))
-	, m_bSystemRunStatus(FALSE)
 	, m_strTestName(_T(""))
 	, m_nTestFinishSet(0)
 	, m_nTestFinishCounter(0)
@@ -3590,7 +3589,7 @@ void CViewTop::TestRun(BOOL bMultipleThread)
 {
 	if (!bMultipleThread)
 	{
-		if (m_bSystemRunStatus)
+		//if (m_bSystemRunStatus)
 		{
 			//m_TestResult->PostMessage(gMsgTestResultUpdate, 2);
 		}
@@ -3889,7 +3888,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 	{
 		m_strTestRes = _T("FINISH");
 		CheckResult();
-		if (m_bSystemRunStatus)
+		if (g_bSystemRunStatus)
 		{
 			m_TestResult->PostMessage(gMsgTestResultUpdate, 2);		
 
@@ -3920,7 +3919,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 		{
 			m_strTestRes = _T("OK");
 			m_nTestRes = 1;
-			if (m_bSystemRunStatus)
+			if (g_bSystemRunStatus)
 			{
 				m_TestResult->PostMessage(gMsgTestResultUpdate, 1);
 				if (m_TestResult->m_bSaveOKImage)
@@ -3936,7 +3935,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 		{
 			m_strTestRes = _T("NG");
 			m_nTestRes = 0;
-			if (m_bSystemRunStatus)
+			if (g_bSystemRunStatus)
 			{
 				m_TestResult->PostMessage(gMsgTestResultUpdate, 0);
 
@@ -5632,8 +5631,6 @@ void CViewTop::CreateTestConfig()
 
 void CViewTop::ShowTestConfig(int nConfig)
 {
-	(*m_TestConfig[nConfig])->m_bSystemRunStatus = m_bSystemRunStatus;
-
 	CString strTitle;
 	(*m_TestConfig[nConfig])->m_nTestConfiguraNo = nConfig;
 	(*m_TestConfig[nConfig])->m_bWndShow = !(*m_TestConfig[nConfig])->IsWindowVisible();
@@ -5669,7 +5666,6 @@ void CViewTop::ShowTestLoc(int nLocMode)
 		break;
 	}
 	
-	(*pPosTemp)->m_bSystemRunStatus = m_bSystemRunStatus;
 	(*pPosTemp)->SetTitle(strTitle);
 	(*pPosTemp)->m_bWndShow = !(*pPosTemp)->IsWindowVisible();
 	(*pPosTemp)->ShowTestConfigWnd();
