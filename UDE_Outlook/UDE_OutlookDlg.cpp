@@ -3173,6 +3173,7 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 						}
 					}
 
+
 					if (!ViewTopCur->m_rcSlavePos.IsRectEmpty())
 					{
 						for (size_t i = 0; i < ViewTopCur->m_rcSlavePosChange.size(); i++)
