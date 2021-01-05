@@ -7174,18 +7174,18 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 
 					findContours(ImgTemp, vContours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找所有輪廓，輪廓間沒有從屬關係
 
-					vector<Point3d> vptCircle;
+					vector<Circle_3f> vptCircle;
 
-
-					for (size_t i = 0; i < vContours.size(); i++)
+					for (size_t j = 0; j < vContours.size(); j++)
 					{
-						const Point3d ptLoc = GetLocation(vContours[i]);
+						const Circle_3f ptLoc = LeastSquaresCircle(vContours[j]);
 
-						if (ptLoc.z > 0)
-						{
+						//const Point3d ptLoc_d = GetLocation(vContours[j]);
+
+						if (ptLoc.r > 0)
 							vptCircle.push_back(ptLoc);
-						}
 					}
+
 
 					if (m_ImgShow.channels() < 3 && vptCircle.size() > 0)
 					{
@@ -7196,15 +7196,15 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 					m_CenterPoint.y = 0;
 					m_CenterPoint.z = 0;
 
-					for (size_t i = 0; i < vptCircle.size(); i++)
+					for (size_t i = 0; i < vptCircle.size(); i++)  
 					{
-						circle(m_ImgShow, Point2d(vptCircle[i].x, vptCircle[i].y), (int)vptCircle[i].z, MAT_RGB(255, 0, 0), 1);
+						circle(m_ImgShow, Point2d(vptCircle[i].x, vptCircle[i].y), (int)vptCircle[i].r, MAT_RGB(255, 0, 0), 1);
 
 						if (vptCircle.size() == 1)
 						{
 							m_CenterPoint.x = vptCircle[i].x;
 							m_CenterPoint.y = vptCircle[i].y;
-							m_CenterPoint.z = vptCircle[i].z;
+							m_CenterPoint.z = vptCircle[i].r;
 						}
 					}
  				}
