@@ -762,7 +762,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		}
 		for (int nCounter = 0; nCounter < 3; nCounter++)
 		{
-			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, !g_bSystemRunStatus);
+			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
 		}
 		for (int nCounter = 0; nCounter < 5; nCounter++)
 		{

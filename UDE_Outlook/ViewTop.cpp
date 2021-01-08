@@ -812,7 +812,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 									strText.Format(_T("範圍 %d 像素 = %d 像素比例差值 = %.3f%%\n"), i + 1, m_vnValidPixelCounter[i], m_vdColAreaPropor[i] * 100 - 100);
 									break;
 								case TEST_VALID_PIXEL_PIX:
-									strText.Format(_T("範圍 %d 像素 = %d\n"), i + 1, m_vdColAreaPropor[i]);
+									strText.Format(_T("範圍 %d 像素 = %.1f\n"), i + 1, m_vdColAreaPropor[i]);
 									break;
 								case TEST_VALID_PIXEL_AREA://測試方式為單位面積時，比例中的值是經過計算的面積值
 									strText.Format(_T("範圍 %d 面積 = %.2f mm2\n"), i + 1, m_vdColAreaPropor[i]);
