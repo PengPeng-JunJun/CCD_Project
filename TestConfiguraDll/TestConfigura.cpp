@@ -437,15 +437,18 @@ BOOL CTestConfigura::OnInitDialog()
  	for (int i = 0; i < 6; i++)
  	{
 		const CString strNewTem = m_vstrSetImage[i].strSetImageWay;
-		if (GetImageProcessMode(strNewTem) != IMAGE_KEEP)
+		if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP || GetImageProcessMode(strNewTem) == IMAGE_ROTATION)
  		{
- 			m_BL_SetImageList.SetItemReadOnly(i, 2, TRUE);
- 			m_BL_SetImageList.SetItemNumberOnly(i, 2, FALSE);
+			m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
+			if (GetImageProcessMode(strNewTem) != IMAGE_FLIP)
+			{
+				m_BL_SetImageList.SetItemNumberOnly(i, 2, TRUE);
+			}
  		}
  		else
  		{
- 			m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
- 			m_BL_SetImageList.SetItemNumberOnly(i, 2, TRUE);
+			m_BL_SetImageList.SetItemReadOnly(i, 2, TRUE);
+			m_BL_SetImageList.SetItemNumberOnly(i, 2, FALSE);
  		}
  		switch (GetImageProcessMode(m_vstrSetImage[i].strSetImageWay))
  		{
@@ -6390,16 +6393,22 @@ void CTestConfigura::Serialize(CArchive& ar)
 			m_BL_SetImageList.AppendRow(TRUE);
 			ar >> strAr;
 			m_BL_SetImageList.SetItemText(i, 1, strAr);
-			if (GetImageProcessMode(strAr) != IMAGE_KEEP)
+
+			if (GetImageProcessMode(strAr) == IMAGE_KEEP || GetImageProcessMode(strAr) == IMAGE_FLIP || GetImageProcessMode(strAr) == IMAGE_ROTATION)
+			{
+				m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
+
+				if (GetImageProcessMode(strAr) != IMAGE_FLIP)
+				{
+					m_BL_SetImageList.SetItemNumberOnly(i, 2, TRUE);
+				}
+			}
+			else
 			{
 				m_BL_SetImageList.SetItemReadOnly(i, 2, TRUE);
 				m_BL_SetImageList.SetItemNumberOnly(i, 2, FALSE);
 			}
-			else
-			{
-				m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
-				m_BL_SetImageList.SetItemNumberOnly(i, 2, TRUE);
-			}
+
 			ar >> strAr;
 			m_BL_SetImageList.SetItemText(i, 2, strAr);
 		}
@@ -7358,6 +7367,23 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 					}				
 				}
 				break;
+			case IMAGE_ROTATION:
+				ImgRotation(&m_ImgShow, &m_ImgShow, Point2d(m_ImgShow.HalfWidth(), m_ImgShow.HalfHeight()), _ttof(vPart[0]));
+				break;
+			case IMAGE_FLIP:
+				if(vPart[0] == _T("X"))
+				{
+					Flip(&m_ImgShow, &m_ImgShow, FLIP_X);
+				}
+				if(vPart[0] == _T("Y"))
+				{
+					Flip(&m_ImgShow, &m_ImgShow, FLIP_Y);
+				}
+				if(vPart[0] == _T("XY"))
+				{
+					Flip(&m_ImgShow, &m_ImgShow, FLIP_XY);
+				}
+				break;
  			default:
 				break;
  			}
@@ -7371,188 +7397,25 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 	}
 	if (nCol == 2)
 	{
-		m_ImgShow.Clone(&m_ImgBkup);
-		if (nFlags & MK_CONTROL)
-		{
-			CSmartImage ImgTem;
+		const CString strCur = m_BL_SetImageList.GetItemText(nRow, 1);
 
-			ImgTem.Clone(&m_ImgBkup);
-			BOOL bBreak = FALSE;
-			for (int i = 0; i < m_BL_SetImageList.GetRows(); i++)
-			{
-				if (m_vstrSetImage[i].strSetImageWay != _T(""))
-				{
-					vector<CString> vPart;
-					vPart = m_ValueCalculate.CutStringElse(m_vstrSetImage[i].strSetImageParam, ',');
-					switch (GetImageProcessMode(m_vstrSetImage[i].strSetImageWay))
-					{
-					case IMAGE_SMOOTH:
-						m_ImageSmooth->m_strImageSmoothMode = vPart[0];
-						m_ImageSmooth->m_strImageSmoothChannel = vPart[1];
-						m_ImageSmooth->m_strImageSmoothSigmaX = vPart[2];
-						m_ImageSmooth->m_strImageSmoothSigmaY = vPart[3];
-						m_ImageSmooth->m_strImageSmoothVar = vPart[4];
-						m_ImageSmooth->m_strImageSmoothSharpenParam = vPart[5];
-						m_ImageSmooth->m_strImageSmoothConcolX = vPart[6];
-						m_ImageSmooth->m_strImageSmoothConcolY = vPart[7];
-						m_ImageSmooth->m_ImageSmoothSrc.Clone(&ImgTem);
-						m_ImageSmooth->ImageProcess();
-						ImgTem = m_ImageSmooth->m_ImageSmoothDst;
-						break;
-					case IMAGE_GRAY:
-						m_ImageGray->m_strImageGrayMode = vPart[0];
-						m_ImageGray->m_strImageGrayChannel = vPart[1];
-						m_ImageGray->m_strImageGrayInverse = vPart[2];
-						m_ImageGray->m_strImageGrayLimitLow = vPart[3];
-						m_ImageGray->m_strImageGrayLimitLowValue = vPart[4];
-						m_ImageGray->m_strImageGrayLimitHigh = vPart[5];
-						m_ImageGray->m_strImageGrayLimitHighValue = vPart[6];
-						m_ImageGray->m_strImageGrayConvolX = vPart[7];
-						m_ImageGray->m_strImageGrayConvolY = vPart[8];
-						m_ImageGray->m_ImageGraySrc.Clone(&ImgTem);
-						m_ImageGray->ImageProcess();
-						ImgTem = m_ImageGray->m_ImageGrayDst;
-						bBreak = TRUE;
-						m_nImageFormat = IMG_GRAY;
-						break;
-					case IMAGE_BINARY:
-						break;
-					case IMAGE_MORPHOLOGY:
-						m_ImageMorphology->m_strImageMorphologyMode = vPart[0];
-						m_ImageMorphology->m_strImageMorphologyChannel = vPart[1];
-						m_ImageMorphology->m_strImageMorphologyIterCounter = vPart[2];
-						m_ImageMorphology->m_strImageMorphologyShape = vPart[3];
-						m_ImageMorphology->m_strImageMorphologyConvolX = vPart[4];
-						m_ImageMorphology->m_strImageMorphologyConvolY = vPart[5];
-						m_ImageMorphology->m_ImageMorphologySrc.Clone(&ImgTem);
-						m_ImageMorphology->ImageProcess();
-						ImgTem = m_ImageMorphology->m_ImageMorphologyDst;
-						break;
-					case IMAGE_GET_GRAY:
-						Convert2Gray(&ImgTem, &ImgTem);
-						m_nImageFormat = IMG_GRAY;
-						break;
-					case IMAGE_SHARPEN:
-						m_ImageSharpen->m_strImageSharpenMode = vPart[0];
-						m_ImageSharpen->m_strImageSharpenChannel = vPart[1];
-						m_ImageSharpen->m_strImageSharpenDir = vPart[2];
-						m_ImageSharpen->m_strImageSharpenThresMin = vPart[3];
-						m_ImageSharpen->m_strImageSharpenThresMax = vPart[4];
-						m_ImageSharpen->m_strImageSharpenConvol = vPart[5];
-						m_ImageSharpen->m_ImageSharpenSrc.Clone(&ImgTem);
-						m_ImageSharpen->ImageProcess();
-						ImgTem = m_ImageSharpen->m_ImageSharpenDst;
-						break;
-					case IMAGE_ENHANCEMENT:
-						m_ImageEnhancement->m_strImageEnhancementMode = vPart[0];
-						m_ImageEnhancement->m_strImageEnhancementChannel = vPart[1];
-						m_ImageEnhancement->m_strImageEnhancementLog_C = vPart[2];
-						m_ImageEnhancement->m_strImageEnhancementLog_R = vPart[3];
-						m_ImageEnhancement->m_strImageEnhancementIndex_C = vPart[4];
-						m_ImageEnhancement->m_strImageEnhancementIndex_R = vPart[5];
-						m_ImageEnhancement->m_strImageEnhancementGammaData = vPart[6];
-						m_ImageEnhancement->m_ImageEnhancementSrc.Clone(&ImgTem);
-						m_ImageEnhancement->ImageProcess();
-						ImgTem = m_ImageEnhancement->m_ImageEnhancementDst;
-						break;
-
-					default:
-						break;
-					}
-				}
-				if (bBreak)
-				{
-					break;
-				}
-			}
-			//ImgTem = ImgTem & ImgTemCom;
-			m_ImgShow.Clone(&ImgTem);
-			m_BoxShow.SetImage(&m_ImgShow);
-		}
-		else
+		switch (GetImageProcessMode(strCur))
 		{
-			if (m_BL_SetImageList.GetItemText(nRow, 1) != _T(""))
-			{
-				vector<CString> vPart;
-				vPart = m_ValueCalculate.CutStringElse(m_BL_SetImageList.GetItemText(nRow, 2), ',');
-				switch (GetImageProcessMode(m_BL_SetImageList.GetItemText(nRow, 1)))
-				{
-				case IMAGE_SMOOTH:
-					m_ImageSmooth->m_strImageSmoothMode = vPart[0];
-					m_ImageSmooth->m_strImageSmoothChannel = vPart[1];
-					m_ImageSmooth->m_strImageSmoothSigmaX = vPart[2];
-					m_ImageSmooth->m_strImageSmoothSigmaY = vPart[3];
-					m_ImageSmooth->m_strImageSmoothVar = vPart[4];
-					m_ImageSmooth->m_strImageSmoothSharpenParam = vPart[5];
-					m_ImageSmooth->m_strImageSmoothConcolX = vPart[6];
-					m_ImageSmooth->m_strImageSmoothConcolY = vPart[7];
-					m_ImageSmooth->m_ImageSmoothSrc.Clone(&m_ImgBkup);
-					m_ImageSmooth.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageSmooth->m_strPartAll);
-					break;
-				case IMAGE_GRAY:
-					m_ImageGray->m_strImageGrayMode = vPart[0];
-					m_ImageGray->m_strImageGrayChannel = vPart[1];
-					m_ImageGray->m_strImageGrayInverse = vPart[2];
-					m_ImageGray->m_strImageGrayLimitLow = vPart[3];
-					m_ImageGray->m_strImageGrayLimitLowValue = vPart[4];
-					m_ImageGray->m_strImageGrayLimitHigh = vPart[5];
-					m_ImageGray->m_strImageGrayLimitHighValue = vPart[6];
-					m_ImageGray->m_strImageGrayConvolX = vPart[7];
-					m_ImageGray->m_strImageGrayConvolY = vPart[8];
-					m_ImageGray->m_ImageGraySrc.Clone(&m_ImgBkup);
-					m_ImageGray.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageGray->m_strPartAll);
-					m_nImageFormat = IMG_GRAY;
-					break;
-				case IMAGE_BINARY:
-					m_ImageBinary->m_strImageBinaryMode = vPart[0];
-					m_ImageBinary->m_strImageBinaryChannel = vPart[1];
-					m_ImageBinary->m_strImageBinaryInverse = vPart[2];
-					m_ImageBinary->m_strImageBinaryLimit = vPart[3];
-					m_ImageBinary->m_ImageBinarySrc.Clone(&m_ImgBkup);
-					m_ImageBinary.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageBinary->m_strPartAll);
-					m_nImageFormat = IMG_GRAY;
-					break;
-				case IMAGE_MORPHOLOGY:
-					m_ImageMorphology->m_strImageMorphologyMode = vPart[0];
-					m_ImageMorphology->m_strImageMorphologyChannel = vPart[1];
-					m_ImageMorphology->m_strImageMorphologyIterCounter = vPart[2];
-					m_ImageMorphology->m_strImageMorphologyShape = vPart[3];
-					m_ImageMorphology->m_strImageMorphologyConvolX = vPart[4];
-					m_ImageMorphology->m_strImageMorphologyConvolY = vPart[5];
-					m_ImageMorphology->m_ImageMorphologySrc.Clone(&m_ImgBkup);
-					m_ImageMorphology.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageMorphology->m_strPartAll);
-					break;
-				case IMAGE_SHARPEN:
-					m_ImageSharpen->m_strImageSharpenMode = vPart[0];
-					m_ImageSharpen->m_strImageSharpenChannel = vPart[1];
-					m_ImageSharpen->m_strImageSharpenDir = vPart[2];
-					m_ImageSharpen->m_strImageSharpenThresMin = vPart[3];
-					m_ImageSharpen->m_strImageSharpenThresMax = vPart[4];
-					m_ImageSharpen->m_strImageSharpenConvol = vPart[5];
-					m_ImageSharpen->m_ImageSharpenSrc.Clone(&m_ImgBkup);
-					m_ImageSharpen.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageSharpen->m_strPartAll);
-					break;
-				case IMAGE_ENHANCEMENT:
-					m_ImageEnhancement->m_strImageEnhancementMode = vPart[0];
-					m_ImageEnhancement->m_strImageEnhancementChannel = vPart[1];
-					m_ImageEnhancement->m_strImageEnhancementLog_C = vPart[2];
-					m_ImageEnhancement->m_strImageEnhancementLog_R = vPart[3];
-					m_ImageEnhancement->m_strImageEnhancementIndex_C = vPart[4];
-					m_ImageEnhancement->m_strImageEnhancementIndex_R = vPart[5];
-					m_ImageEnhancement->m_strImageEnhancementGammaData = vPart[6];
-					m_ImageEnhancement->m_ImageEnhancementSrc.Clone(&m_ImgBkup);
-					m_ImageEnhancement.CreateTopWnd(TRUE, TRUE);
-					m_BL_SetImageList.SetItemText(nRow, 2, m_ImageEnhancement->m_strPartAll);
-					break;
-				default:
-					break;
-				}
-			}
+		case IMAGE_KEEP:
+			* pnParam = 2;
+			m_BL_SetImageList.SetDropDownData(_T("0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15"));
+			break;
+		case IMAGE_FLIP:
+			* pnParam = 2;
+			m_BL_SetImageList.SetDropDownData(_T("X;Y;XY"));
+			break;
+		case IMAGE_ROTATION:
+			* pnParam = 2;
+			m_BL_SetImageList.SetDropDownData(_T("90;180;270"));
+			break;
+		default:
+			m_BL_SetImageList.SetItemReadOnly(nRow, nCol, TRUE);
+			break;
 		}
 	}
 
@@ -7586,16 +7449,22 @@ void CTestConfigura::ItemChangedBlSetimagelist(long nRow, long nCol, LPCTSTR str
 	{
 		if (strOldTem != strNewTem)//×Ö·û´®¸Ä×ƒ
 		{
-			if (GetImageProcessMode(strNewTem) != IMAGE_KEEP)
+
+			if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP || GetImageProcessMode(strNewTem) == IMAGE_ROTATION)
+			{
+				m_BL_SetImageList.SetItemReadOnly(nRow, 2, FALSE);
+
+				if (GetImageProcessMode(strNewTem) != IMAGE_FLIP)
+				{
+					m_BL_SetImageList.SetItemNumberOnly(nRow, 2, TRUE);
+				}
+			}
+			else
 			{
 				m_BL_SetImageList.SetItemReadOnly(nRow, 2, TRUE);
 				m_BL_SetImageList.SetItemNumberOnly(nRow, 2, FALSE);
 			}
-			else
-			{
-				m_BL_SetImageList.SetItemReadOnly(nRow, 2, FALSE);
-				m_BL_SetImageList.SetItemNumberOnly(nRow, 2, TRUE);
-			}
+
 			switch (GetImageProcessMode(strNewTem))
 			{
 			case IMAGE_SOURCE://
@@ -7692,6 +7561,8 @@ int CTestConfigura::GetImageProcessMode(CString strInput)
 	nImgProcessMode = strInput == _T("Ý†ÀªÌî³ä") ? IMAGE_CONTOUR_FILL : nImgProcessMode;
 	nImgProcessMode = strInput == _T("ˆDÏñÍ¨µÀ·Öëx") ? IMAGE_CH_SPLIT : nImgProcessMode;
 	nImgProcessMode = strInput == _T("ˆDÏñºöÂÔ") ? IMAGE_IGNORE : nImgProcessMode;
+	nImgProcessMode = strInput == _T("ˆDÏñÐýÞD") ? IMAGE_ROTATION : nImgProcessMode;
+	nImgProcessMode = strInput == _T("ˆDÏñ·­ÞD") ? IMAGE_FLIP : nImgProcessMode;
 	
 	return nImgProcessMode;
 }

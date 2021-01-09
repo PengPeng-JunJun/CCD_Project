@@ -80,7 +80,7 @@ enum RC_TYPE{RC_MAIN_POS = 1, RC_SLAVE_POS, RC_TEST_POS, RC_SPECIAL_POS};
 #define TEST_DEEPLEARN              20//深度學習檢測
 #define TEST_IMG_SIMILARITY         21//圖像相似度
 
-#define IMAGE_PROCESS_MODE  _T("恢復源圖像;空域濾波;邊緣銳化;圖像增強;轉換為灰度圖像;灰度變換;二值化;圖像反轉;形態學操作;圖像保留;擬合園;轉換為HSV圖像;轉換為RGB圖像;彩色二值化;像素濾波;輪廓填充;圖像通道分離;圖像忽略")
+#define IMAGE_PROCESS_MODE  _T("恢復源圖像;空域濾波;邊緣銳化;圖像增強;轉換為灰度圖像;灰度變換;二值化;圖像反轉;形態學操作;圖像保留;擬合園;轉換為HSV圖像;轉換為RGB圖像;彩色二值化;像素濾波;輪廓填充;圖像通道分離;圖像忽略;圖像旋轉;圖像翻轉")
 
 #define TEST_VER_POSITION_TIMES 20
 enum IMG_PROCESS_METHOD
@@ -102,7 +102,9 @@ enum IMG_PROCESS_METHOD
 	IMAGE_FILTER_PIX,
 	IMAGE_CONTOUR_FILL,
 	IMAGE_CH_SPLIT,
-	IMAGE_IGNORE
+	IMAGE_IGNORE,
+	IMAGE_ROTATION,
+	IMAGE_FLIP
 };
 
 

@@ -399,6 +399,10 @@ void CImgBox::OnMouseMove(UINT nFlags, CPoint point)
 BOOL CImgBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	// 圖像放大zDelta > 0  圖像縮小zDelta < 0 ，滾輪向上大於0
+	//pt 鼠標在顯示器中坐標值
+
 	CRect rcShow;
 	GetWindowRect(rcShow);
 
@@ -426,7 +430,7 @@ BOOL CImgBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 			m_dMagnify += (zDelta > 0 ? -m_dStep : m_dStep);
 
-			const int nOfst1 = cvRound(m_rcDc.Width() * (1 - m_dMagnify) * 0.5);
+			const int nOfst1 = cvRound(m_rcDc.Width() * (1 - m_dMagnify) * 0.5);//cvRound 四捨五入
 			const int nOfst2 = cvRound(m_rcDc.Height() * (1 - m_dMagnify) * 0.5);
 
 			if (nOfst1 || nOfst2)

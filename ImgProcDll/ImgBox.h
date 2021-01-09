@@ -63,7 +63,7 @@ public:
 	AFX_INLINE BOOL IsImgEmpty(void);
 	AFX_INLINE CSmartImage * GetImage(void);
 protected:
-	CRect m_rcDc;			// 放大DC矩形
+	CRect m_rcDc;			// 放大DC矩形，正好裝滿矩形框，需要的圖像尺寸
 	CRect m_rcView;			// 放大后显示到显示区域的矩形
 	CRect m_rcScale;		// 调整显示比例后的矩形
 	CRect m_rcDcScale;		// 放大后的比例矩形
