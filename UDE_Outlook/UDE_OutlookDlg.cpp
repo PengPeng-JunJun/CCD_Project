@@ -3563,6 +3563,10 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 			}
 		}
 	}
+	else if(nFlags & MK_SHIFT)
+	{
+	
+	}
 	else
 	{
 		CBlender<CTestConfigura> * pTestConfig;//傳遞需要處理圖像的類的指針

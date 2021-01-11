@@ -406,7 +406,8 @@ BOOL CTestConfigura::OnInitDialog()
 	m_BL_SetImageList.AppendColumn(_T("·½·¨"),DT_CENTER,135,FALSE);
 	m_BL_SetImageList.AppendColumn(_T("…¢”µ"),DT_CENTER,90,FALSE);
 
- 	for (int i = 0; i < 6; i++)
+	const int nPresetRows = 6;
+ 	for (int i = 0; i < nPresetRows; i++)
  	{
  		m_BL_SetImageList.AppendRow(TRUE);
  		switch (i)
@@ -434,7 +435,7 @@ BOOL CTestConfigura::OnInitDialog()
  		}
  	}
 	_UpdateSetImage();
- 	for (int i = 0; i < 6; i++)
+ 	for (int i = 0; i < nPresetRows; i++)
  	{
 		const CString strNewTem = m_vstrSetImage[i].strSetImageWay;
 		if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP || GetImageProcessMode(strNewTem) == IMAGE_ROTATION)
@@ -499,6 +500,12 @@ BOOL CTestConfigura::OnInitDialog()
 			m_BL_SetImageList.SetItemText(i, 2, _T("0,360,0,360,0,100,0,100"));	
 			break;
 		case IMAGE_IGNORE:
+			break;
+		case IMAGE_ROTATION:
+			m_BL_SetImageList.SetItemText(i, 2, _T("0¡ã"));	
+			break;
+		case IMAGE_FLIP:
+			m_BL_SetImageList.SetItemText(i, 2, _T("X"));	
 			break;
  		default:
 			break;
@@ -1069,6 +1076,23 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 						}
 					}
 				}				
+			}
+			break;
+		case IMAGE_ROTATION:
+			ImgRotation(pImgSrc, pImgSrc, Point2d(pImgSrc->HalfWidth(), pImgSrc->HalfHeight()), _ttof(vTemp[0]));
+			break;
+		case IMAGE_FLIP:
+			if(vTemp[0] == _T("X"))
+			{
+				Flip(pImgSrc, pImgSrc, FLIP_X);
+			}
+			if(vTemp[0] == _T("Y"))
+			{
+				Flip(pImgSrc, pImgSrc, FLIP_Y);
+			}
+			if(vTemp[0] == _T("XY"))
+			{
+				Flip(pImgSrc, pImgSrc, FLIP_XY);
 			}
 			break;
 		default:
@@ -7411,7 +7435,7 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 			break;
 		case IMAGE_ROTATION:
 			* pnParam = 2;
-			m_BL_SetImageList.SetDropDownData(_T("90;180;270"));
+			m_BL_SetImageList.SetDropDownData(_T("0¡ã;90¡ã;180¡ã;270¡ã"));
 			break;
 		default:
 			m_BL_SetImageList.SetItemReadOnly(nRow, nCol, TRUE);
@@ -7515,6 +7539,12 @@ void CTestConfigura::ItemChangedBlSetimagelist(long nRow, long nCol, LPCTSTR str
 				break;
 			case IMAGE_IGNORE:
 				break;
+			case IMAGE_ROTATION:
+				m_BL_SetImageList.SetItemText(nRow, 2, _T("0¡ã"));	
+				break;
+			case IMAGE_FLIP:
+				m_BL_SetImageList.SetItemText(nRow, 2, _T("X"));	
+				break;
 			default:
 				break;
 			}
@@ -7562,7 +7592,7 @@ int CTestConfigura::GetImageProcessMode(CString strInput)
 	nImgProcessMode = strInput == _T("ˆDÏñÍ¨µÀ·Öëx") ? IMAGE_CH_SPLIT : nImgProcessMode;
 	nImgProcessMode = strInput == _T("ˆDÏñºöÂÔ") ? IMAGE_IGNORE : nImgProcessMode;
 	nImgProcessMode = strInput == _T("ˆDÏñÐýÞD") ? IMAGE_ROTATION : nImgProcessMode;
-	nImgProcessMode = strInput == _T("ˆDÏñ·­ÞD") ? IMAGE_FLIP : nImgProcessMode;
+	nImgProcessMode = strInput == _T("ˆDÏñ·­ÞD") ? IMAGE_FLIP : nImgProcessMode;                                                                                                                                                                        
 	
 	return nImgProcessMode;
 }
