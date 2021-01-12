@@ -22,10 +22,15 @@ public:
 	int GetLightMode(void);
 	void SetLightMode(int nMode);
 
+	int GetCNMode(void);
+
 	int GetDelyTime(void);
 
 	BOOL SetChannelStatus(int nChannel, BOOL bStatus);
 	BOOL SetChannelIntensity(int nChannel, int nIntensity);
 	BOOL GetChannelIntensity(int nChannel, int & nIntensity);
+
+	BOOL Connect();
+	BOOL DisConnect();
 };
 

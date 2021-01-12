@@ -6547,7 +6547,7 @@ void CTestConfigura::Serialize(CArchive& ar)
 				if (m_ptStandard_A.x > 0 && m_ptStandard_A.y > 0 && m_ptStandard_B.x > 0 && m_ptStandard_B.y > 0)
 				{
 					m_bSpecialMarkFinish = TRUE;
-					m_pTestConfigura->PostMessage(gMsgSpecialMarkFinish);
+					m_pOwner->PostMessage(gMsgSpecialMarkFinish);
 				}
 				if (m_nGetStandardMethod >= GET_STANDARD_METHOD_CONTOUR_TOP)
 				{
@@ -6586,7 +6586,7 @@ void CTestConfigura::OnCancel()
 
 	if (m_nTestConfigWndType == RC_SPECIAL_POS)
 	{
-		m_pTestConfigura->PostMessage(gMsgSpecialMarkFinish);
+		m_pOwner->PostMessage(gMsgSpecialMarkFinish);
 	}
 	m_BL_SetImageList.DeleteRows(0, m_BL_SetImageList.GetRows() - 1, TRUE, TRUE);
 	for (size_t i = 0 ; i < m_vstrSetImageBkup.size(); i++)
@@ -6599,9 +6599,9 @@ void CTestConfigura::OnCancel()
 	m_vstrSetImage.clear();
 	m_vstrSetImage = m_vstrSetImageBkup;
 
-	if (m_pTestConfigura != nullptr)
+	if (m_pOwner != nullptr)
 	{
-		m_pTestConfigura->PostMessage(gMsgShowTestResult, FALSE);
+		m_pOwner->PostMessage(gMsgShowTestResult, FALSE);
 	}
 	CTpLayerWnd::OnCancel();
 }
@@ -6712,7 +6712,7 @@ void CTestConfigura::OnOK()
 
 	_UpdateSetImage();
 
-	m_pTestConfigura->PostMessage(gMsgShowTestResult, m_bParamChange);
+	m_pOwner->PostMessage(gMsgShowTestResult, m_bParamChange);
 	CTpLayerWnd::OnOK();
 }
 
@@ -7601,7 +7601,7 @@ int CTestConfigura::GetImageProcessMode(CString strInput)
 void CTestConfigura::LBtClickedBlSetparamsame(long nFlags)
 {
 	// TODO: 在此处添加消息处理程序代码
-	m_pTestConfigura->PostMessage(gMsgTestConfiguraSetParamSame, m_nTestConfiguraNo);
+	m_pOwner->PostMessage(gMsgTestConfiguraSetParamSame, m_nTestConfiguraNo);
 }
 
 
@@ -7620,7 +7620,7 @@ void CTestConfigura::LBtClickedBlSetimgparamsame(long nFlags)
 		m_tagParamCopyInfo.nSelectType_SP = Paramcopy->m_nSelectType_SP;
 		m_tagParamCopyInfo.strParamCopyData_SP = Paramcopy->m_strParamCopyData_SP;
 
-		m_pTestConfigura->PostMessage(gMsgTestConfiguraSetImgParamSame, m_nTestConfiguraNo);
+		m_pOwner->PostMessage(gMsgTestConfiguraSetImgParamSame, m_nTestConfiguraNo);
 	}
 }
 
@@ -8650,7 +8650,7 @@ BOOL CTestConfigura::CheckTestProgramList(int & nErrorRow, BOOL bUpdateParam)
 			return TRUE;
 		}
 		line(m_ImgShow, m_ptStandard_A, m_ptStandard_B, MAT_RGB(255,0,0), 1, 8);
-		m_pTestConfigura->PostMessage(gMsgSpecialMarkFinish);			
+		m_pOwner->PostMessage(gMsgSpecialMarkFinish);			
 	}
 	return TRUE;
 }

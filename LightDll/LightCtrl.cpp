@@ -59,6 +59,10 @@ void CLightCtrl::SetLightMode(int nMode)
 	m_Device->SetLightMode(nMode);
 }
 
+int CLightCtrl::GetCNMode(void)
+{
+	return m_Device->m_nCnMode;
+}
 
 int CLightCtrl::GetDelyTime(void)
 {
@@ -81,4 +85,16 @@ BOOL CLightCtrl::SetChannelIntensity(int nChannel, int nIntensity)
 BOOL CLightCtrl::GetChannelIntensity(int nChannel, int & nIntensity)
 {
 	return m_Device->GetChannelIntensity(nChannel, nIntensity);
+}
+
+
+BOOL CLightCtrl::Connect()
+{
+	return m_Device->Connect();
+}
+
+
+BOOL CLightCtrl::DisConnect()
+{
+	return m_Device->DisConnect();
 }

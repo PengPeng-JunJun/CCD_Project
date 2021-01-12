@@ -125,15 +125,12 @@ BOOL CViewTop::OnInitDialog()
 
 	m_MainPos.CreateBlendWnd(IDD_TESTCONFIGURA, this);
 	m_MainPos.CreateTopWnd(FALSE, FALSE);
-	m_MainPos->m_pTestConfigura = this;
 
 	m_SlavePos.CreateBlendWnd(IDD_TESTCONFIGURA, this);
 	m_SlavePos.CreateTopWnd(FALSE, FALSE);
-	m_SlavePos->m_pTestConfigura = this;
 
 	m_SpecialPos.CreateBlendWnd(IDD_TESTCONFIGURA, this);
 	m_SpecialPos.CreateTopWnd(FALSE, FALSE);
-	m_SpecialPos->m_pTestConfigura = this;
 
 	m_TestLightInfo.CreateBlendWnd(IDD_TESTLIGHTINFO, this);
 	m_TestLightInfo.CreateTopWnd(FALSE, FALSE);
@@ -5625,7 +5622,6 @@ void CViewTop::CreateTestConfig()
 
 	pTestConfig->CreateTopWnd(FALSE, FALSE);
 	
-	(*m_TestConfig[m_TestConfig.size() - 1])->m_pTestConfigura = this;
 }
 
 

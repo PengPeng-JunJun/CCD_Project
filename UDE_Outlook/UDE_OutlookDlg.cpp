@@ -5076,7 +5076,33 @@ void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 						{
 							if (bChannelStatus[i])
 							{
-								m_LightCtrl.SetChannelIntensity(i + 1, nLightVaule[i]);
+								if (!m_LightCtrl.SetChannelIntensity(i + 1, nLightVaule[i]))
+								{
+									CMsgBox MsgBox(this);
+									BOOL bConnectRes = FALSE;
+									int nReConnectTimes = 0;
+									const int nPresteReConnectTimes = 80;
+
+									m_LightCtrl.DisConnect();
+									DelayMs(150);
+									m_LightCtrl.DisConnect();
+									while (!bConnectRes)
+									{
+										bConnectRes = m_LightCtrl.Connect();
+										DelayMs(150);
+										nReConnectTimes++;
+										if (nReConnectTimes >= nPresteReConnectTimes)
+										{
+											MsgBox.ShowMsg(_T("控制光源異常，可能原因是：\n1、光源電源未打開\n2、COM口或IP地址填寫錯誤"),_T("ERROR"), MB_OK | MB_ICONSTOP);
+											return;
+										}
+									}
+									if (!m_LightCtrl.SetChannelIntensity(i + 1, nLightVaule[i]))
+									{
+										MsgBox.ShowMsg(_T("控制光源異常，可能原因是：\n1、光源電源未打開\n2、COM口或IP地址填寫錯誤"),_T("ERROR"), MB_OK | MB_ICONSTOP);
+										return;
+									}
+								}
 								m_LightCtrl.SetChannelStatus(i + 1, TRUE);
 							}
 						}

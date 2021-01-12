@@ -241,7 +241,6 @@ public:
 public:
 	CCRC    m_CRC;
 	CFindCtrlFile m_FindCtrlFile;
-	CCamStc m_CamStc[MAX_CAM];
 
 	int m_nCurCam;//正在傳送圖像到主對話框的相機
 	CSmartImage m_CurrentImage;
@@ -251,6 +250,7 @@ public:
 	CSmartImage m_NewImage;
 
 public:
+	CCamStc m_CamStc[MAX_CAM];
 	CUSBCamStc m_USBCamStc[MAX_CAM];
 
 public:

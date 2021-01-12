@@ -318,8 +318,6 @@ public:
 
 	CSVMTrainModel m_SVM;
 
-	CWnd *m_pTestConfigura;//窗口指針
-
 	BOOL m_bParamChange;//參數被修改
 
 	int m_nVersion_H;//版本號高位

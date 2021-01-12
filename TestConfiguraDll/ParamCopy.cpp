@@ -216,7 +216,7 @@ void CParamCopy::OnOK()
 		m_nSelectType = PARAM_COPY_PART;
 		m_strParamCopyData = strInfo;
 	}
-	if (!((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyPart)))->GetSelect() && ((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyAll)))->GetSelect())//全局考本
+	if (!((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyPart)))->GetSelect() && ((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyAll)))->GetSelect())//全局拷貝
 	{
 		m_nSelectType = PARAM_COPY_ALL;
 	}
@@ -323,11 +323,14 @@ void CParamCopy::OnOK()
 		m_nSelectType_SP = PARAM_COPY_PART;
 		m_strParamCopyData_SP = strInfo;
 	}
-	if (!((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyPart_SP)))->GetSelect() && ((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyAll_SP)))->GetSelect())//全局考本
+	if (!((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyPart_SP)))->GetSelect() && ((CBL_Radio *)(GetDlgItem(IDC_BL_ParamCopyAll_SP)))->GetSelect())//全局拷貝
 	{
 		m_nSelectType_SP = PARAM_COPY_ALL;
 	}
 
+	if (IDCANCEL == MsgBox.ShowMsg(_T("拷貝後無法復原，\n確認拷貝圖像處理腳本？"), _T("提示"), MB_ICONINFORMATION | MB_OKCANCEL))
+		return;
+	
 	CTpLayerWnd::OnOK();
 }
 

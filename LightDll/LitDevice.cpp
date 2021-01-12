@@ -215,8 +215,6 @@ void CLitDevice::Serialize(CArchive& ar)
 				{
 					//SetChannelStatus(i + 1, FALSE);
 				}
-
-				
 			}
 		}
 
@@ -430,6 +428,7 @@ BOOL CLitDevice::DisConnect(void)
 			}
 
 			m_bConnected = (OPT_SUCCEED != nResult);
+
 		}
 		break;
 
