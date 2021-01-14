@@ -102,7 +102,7 @@ void CVerisonManage::_ShowInfo()
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	UpdateInfoTemp.strUpdateDate = _T("V1.9    修改時間：2021年01月12日");
-	UpdateInfoTemp.strUpdateInfo = _T("1.新增光源掉線後重連;2.圖像處理新增圖像旋轉和圖像翻轉功能");
+	UpdateInfoTemp.strUpdateInfo = _T("1.新增光源掉線後重連功能;2.新增圖像旋轉和圖像翻轉功能;3.添加擬合圓方法選擇");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	CValueCalculate ValueCalculate;

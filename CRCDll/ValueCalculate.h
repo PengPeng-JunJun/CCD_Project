@@ -113,5 +113,7 @@ public:
 	//===================校验模式比对==================//
 	int CheckModeCMP(CString strMode);//校验运算
 
+	vector<int> FindCharInString(CString strInfo, char chInfo);//在字符串中查找字符，返回字符所在位置，組成向量
+
 };
 

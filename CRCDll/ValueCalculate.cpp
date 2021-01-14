@@ -344,6 +344,20 @@ void CValueCalculate::LoadConfigurationParam(CString strChecckMode, CString & st
 
 }
 
+vector<int> CValueCalculate::FindCharInString(CString strInfo, char chInfo)
+{
+	vector<int> vnInfo;
+	vnInfo.clear();
+	for (int i = 0; i < strInfo.GetLength(); i++)
+	{
+		if (strInfo[i] == chInfo)
+		{
+			vnInfo.push_back(i);
+		}
+	}
+	return vnInfo;
+}
+
 int CValueCalculate::CheckModeCMP(CString strMode)//Ð£ÑéÔËËã
 {
 	int nReturn = 32767;

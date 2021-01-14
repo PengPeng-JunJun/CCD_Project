@@ -438,7 +438,8 @@ BOOL CTestConfigura::OnInitDialog()
  	for (int i = 0; i < nPresetRows; i++)
  	{
 		const CString strNewTem = m_vstrSetImage[i].strSetImageWay;
-		if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP || GetImageProcessMode(strNewTem) == IMAGE_ROTATION)
+		if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP 
+			|| GetImageProcessMode(strNewTem) == IMAGE_ROTATION || GetImageProcessMode(strNewTem) == IMAGE_CIRCLE)
  		{
 			m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
 			if (GetImageProcessMode(strNewTem) != IMAGE_FLIP)
@@ -483,6 +484,7 @@ BOOL CTestConfigura::OnInitDialog()
  			m_BL_SetImageList.SetItemText(i, 2, _T("15"));	
  			break;
  		case IMAGE_CIRCLE:
+			m_BL_SetImageList.SetItemText(i, 2, _T("輪廓擬合法"));
  			break;
 		case IMAGE_SHARPEN://參數順序:銳化類型-通道選擇-求導方向-閾值上限-閾值下限-內核尺寸
 			m_BL_SetImageList.SetItemText(i, 2, _T("1,0,2,55,200,3"));	
@@ -932,38 +934,69 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 				cvContours vContours;
 				vector<Vec4i> hierarchy;
 				CSmartImage ImgTemp;
-				vector<Circle_3f> vptCircle;
+				vector<Circle_3f> vCircle;
+				vector<Point3d> vptCircle;
 
+				if (pImgSrc->channels() != 1)
+					continue;
 				ImgTemp.Clone(pImgSrc);
 
 				findContours(ImgTemp, vContours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找所有輪廓，輪廓間沒有從屬關係
 
 				for (size_t j = 0; j < vContours.size(); j++)
 				{
-					const Circle_3f ptLoc = LeastSquaresCircle(vContours[j]);
-
-					//const Point3d ptLoc_d = GetLocation(vContours[j]);
-
-					if (ptLoc.r > 0)
-						vptCircle.push_back(ptLoc);
+					if (vTemp[0] == _T("輪廓擬合法"))
+					{
+						const Point3d ptLoc_d = GetLocation(vContours[j]);
+						if (ptLoc_d.z > 0)
+							vptCircle.push_back(ptLoc_d);
+					}
+					else if (vTemp[0] == _T("最小二乘法"))
+					{
+						const Circle_3f ptLoc = LeastSquaresCircle(vContours[j]);
+						if (ptLoc.r > 0)
+							vCircle.push_back(ptLoc);
+					}
+					else
+					{
+					}
 				}
 
-				if (pImgSrc->channels() < 3 && vptCircle.size() > 0)
+				if (vCircle.size() || vptCircle.size())
 					Merge(pImgSrc, pImgSrc, pImgSrc, pImgSrc);
 					
 				m_CenterPoint.x = 0;
 				m_CenterPoint.y = 0;
 				m_CenterPoint.z = 0;
 
-				for (size_t j = 0; j < vptCircle.size(); j++)
+				if (vTemp[0] == _T("輪廓擬合法"))
 				{
-					circle(*pImgSrc, Point2d(vptCircle[j].x, vptCircle[j].y), (int)vptCircle[j].r, MAT_RGB(255, 0, 0), 1);
-					if (vptCircle.size() == 1)
+					for (size_t j = 0; j < vptCircle.size(); j++)
 					{
-						m_CenterPoint.x = vptCircle[j].x;
-						m_CenterPoint.y = vptCircle[j].y;
-						m_CenterPoint.z = vptCircle[j].r;
+						circle(*pImgSrc, Point2d(vptCircle[j].x, vptCircle[j].y), (int)vptCircle[j].z, MAT_RGB(255, 0, 0), 1);
+						if (vptCircle.size() == 1)
+						{
+							m_CenterPoint.x = vptCircle[j].x;
+							m_CenterPoint.y = vptCircle[j].y;
+							m_CenterPoint.z = vptCircle[j].z;
+						}
 					}
+				}
+				else if (vTemp[0] == _T("最小二乘法"))
+				{
+					for (size_t j = 0; j < vCircle.size(); j++)
+					{
+						circle(*pImgSrc, Point2d(vCircle[j].x, vCircle[j].y), (int)vCircle[j].r, MAT_RGB(255, 0, 0), 1);
+						if (vCircle.size() == 1)
+						{
+							m_CenterPoint.x = vCircle[j].x;
+							m_CenterPoint.y = vCircle[j].y;
+							m_CenterPoint.z = vCircle[j].r;
+						}
+					}
+				}
+				else
+				{
 				}
 			}
 			break;
@@ -6418,7 +6451,8 @@ void CTestConfigura::Serialize(CArchive& ar)
 			ar >> strAr;
 			m_BL_SetImageList.SetItemText(i, 1, strAr);
 
-			if (GetImageProcessMode(strAr) == IMAGE_KEEP || GetImageProcessMode(strAr) == IMAGE_FLIP || GetImageProcessMode(strAr) == IMAGE_ROTATION)
+			if (GetImageProcessMode(strAr) == IMAGE_KEEP || GetImageProcessMode(strAr) == IMAGE_FLIP 
+				|| GetImageProcessMode(strAr) == IMAGE_ROTATION || GetImageProcessMode(strAr) == IMAGE_CIRCLE)
 			{
 				m_BL_SetImageList.SetItemReadOnly(i, 2, FALSE);
 
@@ -6435,6 +6469,14 @@ void CTestConfigura::Serialize(CArchive& ar)
 
 			ar >> strAr;
 			m_BL_SetImageList.SetItemText(i, 2, strAr);
+
+			if (GetImageProcessMode(strAr) == IMAGE_CIRCLE)
+			{
+				if (strAr.IsEmpty())
+				{
+					m_BL_SetImageList.SetItemText(i, 2, _T("最小二乘法")); 
+				}
+			}
 		}
 
 		_UpdateSetImage();
@@ -7199,6 +7241,8 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
  				break;
  			case IMAGE_CIRCLE:
  				{
+					if (m_ImgShow.channels() != 1)
+						break;
 					cvContours vContours;
 
 					vector<Vec4i> hierarchy;
@@ -7207,38 +7251,64 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 
 					findContours(ImgTemp, vContours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找所有輪廓，輪廓間沒有從屬關係
 
-					vector<Circle_3f> vptCircle;
+					vector<Circle_3f> vCircle;
+					vector<Point3d> vptCircle;
 
-					for (size_t j = 0; j < vContours.size(); j++)
+					for (size_t i = 0; i < vContours.size(); i++)
 					{
-						const Circle_3f ptLoc = LeastSquaresCircle(vContours[j]);
-
-						//const Point3d ptLoc_d = GetLocation(vContours[j]);
-
-						if (ptLoc.r > 0)
-							vptCircle.push_back(ptLoc);
+						if (vPart[0] == _T("輪廓擬合法"))
+						{
+							const Point3d ptLoc_d = GetLocation(vContours[i]);
+							if (ptLoc_d.z > 0)
+								vptCircle.push_back(ptLoc_d);
+						}
+						else if (vPart[0] == _T("最小二乘法"))
+						{
+							const Circle_3f ptLoc = LeastSquaresCircle(vContours[i]);
+							if (ptLoc.r > 0)
+								vCircle.push_back(ptLoc);
+						}
+						else
+						{
+						}
 					}
 
 
-					if (m_ImgShow.channels() < 3 && vptCircle.size() > 0)
-					{
+					if (vCircle.size() || vptCircle.size())
 						Merge(&m_ImgShow, &m_ImgShow, &m_ImgShow, &m_ImgShow);
-					}
 
 					m_CenterPoint.x = 0;
 					m_CenterPoint.y = 0;
 					m_CenterPoint.z = 0;
 
-					for (size_t i = 0; i < vptCircle.size(); i++)  
+					if (vPart[0] == _T("輪廓擬合法"))
 					{
-						circle(m_ImgShow, Point2d(vptCircle[i].x, vptCircle[i].y), (int)vptCircle[i].r, MAT_RGB(255, 0, 0), 1);
-
-						if (vptCircle.size() == 1)
+						for (size_t i = 0; i < vptCircle.size(); i++)
 						{
-							m_CenterPoint.x = vptCircle[i].x;
-							m_CenterPoint.y = vptCircle[i].y;
-							m_CenterPoint.z = vptCircle[i].r;
+							circle(m_ImgShow, Point2d(vptCircle[i].x, vptCircle[i].y), (int)vptCircle[i].z, MAT_RGB(255, 0, 0), 1);
+							if (vptCircle.size() == 1)
+							{
+								m_CenterPoint.x = vptCircle[i].x;
+								m_CenterPoint.y = vptCircle[i].y;
+								m_CenterPoint.z = vptCircle[i].z;
+							}
 						}
+					}
+					else if (vPart[0] == _T("最小二乘法"))
+					{
+						for (size_t i = 0; i < vCircle.size(); i++)
+						{
+							circle(m_ImgShow, Point2d(vCircle[i].x, vCircle[i].y), (int)vCircle[i].r, MAT_RGB(255, 0, 0), 1);
+							if (vCircle.size() == 1)
+							{
+								m_CenterPoint.x = vCircle[i].x;
+								m_CenterPoint.y = vCircle[i].y;
+								m_CenterPoint.z = vCircle[i].r;
+							}
+						}
+					}
+					else
+					{
 					}
  				}
  				break;
@@ -7437,6 +7507,10 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 			* pnParam = 2;
 			m_BL_SetImageList.SetDropDownData(_T("0°;90°;180°;270°"));
 			break;
+		case IMAGE_CIRCLE:
+			* pnParam = 2;
+			m_BL_SetImageList.SetDropDownData(_T("輪廓擬合法;最小二乘法"));
+			break;
 		default:
 			m_BL_SetImageList.SetItemReadOnly(nRow, nCol, TRUE);
 			break;
@@ -7445,6 +7519,7 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 
 	_UpdateSetImage();
 }
+
 
 void CTestConfigura::RowsChangedBlSetimagelist(long nOldRows, long nNewRows, BOOL bAppend)//行數量發生改變
 {
@@ -7474,7 +7549,8 @@ void CTestConfigura::ItemChangedBlSetimagelist(long nRow, long nCol, LPCTSTR str
 		if (strOldTem != strNewTem)//字符串改變
 		{
 
-			if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP || GetImageProcessMode(strNewTem) == IMAGE_ROTATION)
+			if (GetImageProcessMode(strNewTem) == IMAGE_KEEP || GetImageProcessMode(strNewTem) == IMAGE_FLIP 
+				|| GetImageProcessMode(strNewTem) == IMAGE_ROTATION || GetImageProcessMode(strNewTem) == IMAGE_CIRCLE)
 			{
 				m_BL_SetImageList.SetItemReadOnly(nRow, 2, FALSE);
 
@@ -7521,6 +7597,7 @@ void CTestConfigura::ItemChangedBlSetimagelist(long nRow, long nCol, LPCTSTR str
 				m_BL_SetImageList.SetItemText(nRow, 2, _T("15"));	
 				break;
 			case IMAGE_CIRCLE:
+				m_BL_SetImageList.SetItemText(nRow, 2, _T("輪廓擬合法"));
 				break;
 			case IMAGE_SHARPEN:
 				m_BL_SetImageList.SetItemText(nRow, 2, _T("1,0,2,55,200,3"));	
