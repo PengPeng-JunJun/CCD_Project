@@ -9553,9 +9553,3 @@ UINT CTestConfigura::_ConfigTestRunThreadKernal(void)
 
 }
 
-
-
-
-
-
-

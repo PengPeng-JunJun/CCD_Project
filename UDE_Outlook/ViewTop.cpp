@@ -137,7 +137,6 @@ BOOL CViewTop::OnInitDialog()
 	m_TestLightInfo->SetTitle(_T("測試項目光源參數"));
 
 	m_TestNameInfo.CreateBlendWnd(IDD_TESTNAMEINFO, this);
-	//m_TestNameInfo.CreateTopWnd(FALSE, FALSE);
 	m_TestNameInfo->SetTitle(_T("測試項目命名"));
 
 	m_LocatorDistance.CreateBlendWnd(IDD_LOCATORDISTANCE, this);
@@ -160,7 +159,6 @@ BOOL CViewTop::OnInitDialog()
 		Img_NG_Path = g_strExePath + Img_NG_Path;
 		m_TestResult->m_strNGImagePath = Img_NG_Path;
 	}
-	//m_LocatorDistance.CreateTopWnd(FALSE, FALSE);
 	m_RectFocusInfo._Clear();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE

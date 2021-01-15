@@ -285,6 +285,7 @@ ON_MESSAGE(WM_DRAWIMAGE_USB, &CUDE_OutlookDlg::OnDrawimageUsb)
 ON_MESSAGE(WM_GROUPTEST_RUN, &CUDE_OutlookDlg::OnGrouptestRun)
 ON_MESSAGE(WM_TESTFINISH, &CUDE_OutlookDlg::OnTestfinish)
 ON_REGISTERED_MESSAGE(gMsgAppBaseUnlockUi, &CUDE_OutlookDlg::OnGmsgappbaseunlockui)
+ON_REGISTERED_MESSAGE(gMsgImgROIUpdate, &CUDE_OutlookDlg::OnGmsgImgROIUpdate)
 END_MESSAGE_MAP()
 
 
@@ -1732,7 +1733,7 @@ void CUDE_OutlookDlg::SetMainMenu()
 {
 	CString strHistoryPath;
 	strHistoryPath.Empty();
-	m_Menu.SetBtCaptions(_T("文件;設置;功能;視圖;圖像;標記;檢測;註冊"));
+	m_Menu.SetBtCaptions(_T("文件;設置;功能;視圖;圖像;標記;檢測;幫助"));
 
 	m_Menu.AddPopByPosPosPos(0, 0, 0, 0, _T("文件"), _T("新建...@Ctrl+N;打開...@Ctrl+O;保存...@Ctrl+S;另存為...@Ctrl+Shift+S;最近開啟檔案...;保存檔案信息...@Ctrl+Alt+S;打開檔案信息...@Ctrl+Shift+O;自動加載檔案...;自動檢測運行...;退出...@Ctrl+Q"));
 
@@ -3529,10 +3530,8 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 	const int nCurGroup = m_TestGroup.m_nCurGroup;
 	const int nCurRow   = m_TestGroup.m_nCurRow;
 
-	if (nCurGroup < 0 || nCurRow < 0 || nCurGroup > 9)
-	{
+	if (!m_bViewTopShow)
 		return;
-	}
 
 	const BOOL bClkInMain = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos);//如果在主定位點內雙擊
 	const BOOL bClkInSlave = MouseMoveTranslate(point, m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos);//如果在從定位點內雙擊
@@ -3565,7 +3564,54 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 	}
 	else if(nFlags & MK_SHIFT)
 	{
-	
+		CBlender<CImgROIPos> ImgROIPos;//圖像熱區
+		ImgROIPos.CreateBlendWnd(IDD_IMGROIPOS, this);
+
+		CBlender<CTestConfigura> * pTestConfig = nullptr;//傳遞需要處理圖像的類的指針
+
+		if (!bClkInMain && !bClkInSlave && !bClkInSpecial && !bClkInTest)
+			return;
+
+		CString strTitle;
+		CRect *prcTemp = nullptr;
+		if (bClkInMain)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_MainPos;
+			prcTemp = &m_TopWnd[nCurGroup][nCurRow]->m_rcMainPos;
+			strTitle.Format(_T("主定位範圍坐標"));
+		}
+		if (bClkInSlave)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SlavePos;
+			prcTemp = &m_TopWnd[nCurGroup][nCurRow]->m_rcSlavePos;
+			strTitle.Format(_T("從定位範圍坐標"));
+		}
+		if (bClkInSpecial)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SpecialPos;
+			prcTemp = &m_TopWnd[nCurGroup][nCurRow]->m_rcSpecialScope;
+			strTitle.Format(_T("基準線範圍坐標"));
+		}	
+		if (bClkInTest)
+		{
+			pTestConfig = m_TopWnd[nCurGroup][nCurRow]->m_TestConfig[nTestScope];
+			prcTemp = &m_TopWnd[nCurGroup][nCurRow]->m_rcTestScope[nTestScope];
+			strTitle.Format(_T("測試範圍%d坐標"), nTestScope + 1);
+		}
+
+		ImgROIPos->m_nWidthMax = m_rcTopWnd.Width() - 5;
+		ImgROIPos->m_nHeightMax = m_rcTopWnd.Height() - 5;
+
+		ImgROIPos->m_prcCur = prcTemp;
+			
+		ImgROIPos->m_bSystemRunStatus = (*pTestConfig)->IsWindowVisible() ? TRUE : g_bSystemRunStatus;
+		ImgROIPos->SetTitle(strTitle);
+		ImgROIPos.CreateTopWnd(TRUE, TRUE);
+
+		if (!g_bSystemRunStatus)
+		{
+			m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
+		}
 	}
 	else
 	{
@@ -3573,98 +3619,104 @@ void CUDE_OutlookDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 		const CString strTestProject = m_TestGroup.m_BL_TestProjectList.GetItemText(m_TestGroup.m_BL_TestProjectList.GetCurRow(), 2);
 
-		if (m_bViewTopShow)
+		//if (m_TopWnd[nCurGroup][nCurRow]->m_bShowChangePos)
+		if (!bClkInMain && !bClkInSlave && !bClkInSpecial && !bClkInTest)
+			return;
+
+		if (strTestProject == _T(""))
 		{
-			//if (m_TopWnd[nCurGroup][nCurRow]->m_bShowChangePos)
-			if (!bClkInMain && !bClkInSlave && !bClkInSpecial && !bClkInTest)
-				return;
-	
-			if (strTestProject == _T(""))
-			{
-				MsgBox.ShowMsg(_T("未選擇測試項目"), _T("顯示失敗"), MB_OK | MB_ICONSTOP);
-				return;
-			}
-						
-			CRect rcAOI;//獲取相機傳感器的尺寸
-
-			BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
-			if (!bLocked && !g_bSystemRunStatus)
-			{
-				if (m_CurrentImage.empty())//如果無當前圖像，則立即拍照作為當前圖像
-				{
-					MsgBox.ShowMsg(_T("未找到圖像，請拍照或加載圖像！"),_T("錯誤"), MB_OK | MB_ICONERROR);
-				#ifdef _DEBUG
-				#else
-					return;
-			
-				#endif
-				}
-			}
-			else if(bLocked && !g_bSystemRunStatus)
-			{
-				MsgBox.ShowMsg(_T("系統鎖定中，參數僅供查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
-			}
-			else
-			{
-				//MsgBox.ShowMsg(_T("系統自動運行中，參數無法查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
-				//return;
-			}
-			rcAOI.TopLeft().x = 0;
-			rcAOI.TopLeft().y = 0;
-			rcAOI.BottomRight().x = m_CurrentImage.Width();
-			rcAOI.BottomRight().y = m_CurrentImage.Height();
-				
-			//上述程序用於取得與相機傳感器等尺寸的照片，但是定位點于與測試範圍的圖像需要用其矩形進行切割
-			//同時可以標定加載出來的圖像
-			//下面程序是各個範圍根據自己尺寸對圖像進行切割
-
-			if (bClkInMain || bClkInSlave || bClkInSpecial || bClkInTest)
-			{
-				for (int nCounter = 0; nCounter < MAX_CAM; nCounter++)
-				{
-					m_CamStc[nCounter].m_bIfDraw = FALSE;
-					m_USBCamStc[nCounter].m_bIfDraw = FALSE;
-				}
-				if (!m_CurrentImage.empty())
-				{
-					m_nDrawImage = LOAD_IMAGE;
-					InvalidateRect(m_rcTopWnd, FALSE);
-				}
-			}
-			if (bClkInTest)
-			{
-				pTestConfig = m_TopWnd[nCurGroup][nCurRow]->m_TestConfig[nTestScope];
-				m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_TEST_POS, nTestScope, pTestConfig);
-				m_TopWnd[nCurGroup][nCurRow]->ShowTestConfig(nTestScope);
-				return;
-			}
-			if (bClkInSpecial)
-			{
-				pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SpecialPos;
-				m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_SPECIAL_POS, 0, pTestConfig);
-				m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_SPECIAL_POS);
-				return;
-			}	
-			if (bClkInSlave)
-			{
-				pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SlavePos;
-				m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_SLAVE_POS, 0, pTestConfig);
-				m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_SLAVE_POS);
-				return;
-			}
-			if (bClkInMain)
-			{
-				pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_MainPos;
-				m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_MAIN_POS, 0, pTestConfig);
-				m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_MAIN_POS);
-				return;
-			}							
+			MsgBox.ShowMsg(_T("未選擇測試項目"), _T("顯示失敗"), MB_OK | MB_ICONSTOP);
+			return;
 		}
+
+		CRect rcAOI;//獲取相機傳感器的尺寸
+
+		BOOL bLocked = _GetLockState(-1, PSD_LEVEL_TE);
+		if (!bLocked && !g_bSystemRunStatus)
+		{
+			if (m_CurrentImage.empty())//如果無當前圖像，則立即拍照作為當前圖像
+			{
+				MsgBox.ShowMsg(_T("未找到圖像，請拍照或加載圖像！"),_T("錯誤"), MB_OK | MB_ICONERROR);
+#ifdef _DEBUG
+#else
+				return;
+
+#endif
+			}
+		}
+		else if(bLocked && !g_bSystemRunStatus)
+		{
+			MsgBox.ShowMsg(_T("系統鎖定中，參數僅供查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
+		}
+		else
+		{
+			//MsgBox.ShowMsg(_T("系統自動運行中，參數無法查看！"),_T("提示"), MB_OK | MB_ICONINFORMATION);
+			//return;
+		}
+		rcAOI.TopLeft().x = 0;
+		rcAOI.TopLeft().y = 0;
+		rcAOI.BottomRight().x = m_CurrentImage.Width();
+		rcAOI.BottomRight().y = m_CurrentImage.Height();
+
+		//上述程序用於取得與相機傳感器等尺寸的照片，但是定位點于與測試範圍的圖像需要用其矩形進行切割
+		//同時可以標定加載出來的圖像
+		//下面程序是各個範圍根據自己尺寸對圖像進行切割
+
+		if (bClkInMain || bClkInSlave || bClkInSpecial || bClkInTest)
+		{
+			for (int nCounter = 0; nCounter < MAX_CAM; nCounter++)
+			{
+				m_CamStc[nCounter].m_bIfDraw = FALSE;
+				m_USBCamStc[nCounter].m_bIfDraw = FALSE;
+			}
+			if (!m_CurrentImage.empty())
+			{
+				m_nDrawImage = LOAD_IMAGE;
+				InvalidateRect(m_rcTopWnd, FALSE);
+			}
+		}
+		if (bClkInTest)
+		{
+			pTestConfig = m_TopWnd[nCurGroup][nCurRow]->m_TestConfig[nTestScope];
+			m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_TEST_POS, nTestScope, pTestConfig);
+			m_TopWnd[nCurGroup][nCurRow]->ShowTestConfig(nTestScope);
+			return;
+		}
+		if (bClkInSpecial)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SpecialPos;
+			m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_SPECIAL_POS, 0, pTestConfig);
+			m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_SPECIAL_POS);
+			return;
+		}	
+		if (bClkInSlave)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_SlavePos;
+			m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_SLAVE_POS, 0, pTestConfig);
+			m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_SLAVE_POS);
+			return;
+		}
+		if (bClkInMain)
+		{
+			pTestConfig = &m_TopWnd[nCurGroup][nCurRow]->m_MainPos;
+			m_TopWnd[nCurGroup][nCurRow]->GetSizeByAOI(m_rcTopWnd, rcAOI, &m_CurrentImage, RC_MAIN_POS, 0, pTestConfig);
+			m_TopWnd[nCurGroup][nCurRow]->ShowTestLoc(RC_MAIN_POS);
+			return;
+		}							
 	}
 	
 	CAppBase::OnLButtonDblClk(nFlags, point);
 }
 
+
+afx_msg LRESULT CUDE_OutlookDlg::OnGmsgImgROIUpdate(WPARAM wParam, LPARAM lParam)
+{
+	const int nCurGroup = m_TestGroup.m_nCurGroup;
+	const int nCurRow   = m_TestGroup.m_nCurRow;
+
+	m_TopWnd[nCurGroup][nCurRow]->Invalidate(FALSE);
+	return 0;
+}
 
 BOOL CUDE_OutlookDlg::MouseMoveTranslate(CPoint ptInfo, CRect rcInfo)
 {
@@ -5996,4 +6048,5 @@ BOOL CUDE_OutlookDlg::PreTranslateMessage(MSG* pMsg)
 	
 	return CAppBase::PreTranslateMessage(pMsg);
 }
+
 

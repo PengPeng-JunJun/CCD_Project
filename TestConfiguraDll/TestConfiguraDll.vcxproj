@@ -128,6 +128,7 @@
     <ClCompile Include="ImageMorphology.cpp" />
     <ClCompile Include="ImageSharpen.cpp" />
     <ClCompile Include="ImageSmooth.cpp" />
+    <ClCompile Include="ImgROIPos.cpp" />
     <ClCompile Include="ParamCopy.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -150,6 +151,7 @@
     <ClInclude Include="ImageMorphology.h" />
     <ClInclude Include="ImageSharpen.h" />
     <ClInclude Include="ImageSmooth.h" />
+    <ClInclude Include="ImgROIPos.h" />
     <ClInclude Include="ParamCopy.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

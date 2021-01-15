@@ -29,6 +29,7 @@
 #include "..\\SoftwareManageDll\\QualityManage.h"
 #include "..\\SoftwareManageDll\\VerisonManage.h"
 #include "..\\CodeLoggerDll\\Logger.h"
+#include "..\\TestConfiguraDll\ImgROIPos.h"
 
 #include <iostream> 
 #include <vector>
@@ -515,4 +516,6 @@ protected:
 	afx_msg LRESULT OnGmsgappbaseunlockui(WPARAM wParam, LPARAM lParam);
 
 public:
+protected:
+	afx_msg LRESULT OnGmsgImgROIUpdate(WPARAM wParam, LPARAM lParam);
 };

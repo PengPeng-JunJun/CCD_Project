@@ -797,7 +797,5 @@ protected:
 
 public:
 	void LBtClickedBlImageptmark(long nFlags);
-
-
 };
 
