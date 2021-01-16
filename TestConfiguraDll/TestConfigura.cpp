@@ -6467,10 +6467,11 @@ void CTestConfigura::Serialize(CArchive& ar)
 				m_BL_SetImageList.SetItemNumberOnly(i, 2, FALSE);
 			}
 
+			const BOOL bCirclr = GetImageProcessMode(strAr) == IMAGE_CIRCLE ? TRUE : FALSE;
 			ar >> strAr;
 			m_BL_SetImageList.SetItemText(i, 2, strAr);
 
-			if (GetImageProcessMode(strAr) == IMAGE_CIRCLE)
+			if (bCirclr)
 			{
 				if (strAr.IsEmpty())
 				{

@@ -106,7 +106,7 @@ void CVerisonManage::_ShowInfo()
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	UpdateInfoTemp.strUpdateDate = _T("V1.9    修改時間：2021年01月15日");
-	UpdateInfoTemp.strUpdateInfo = _T("1.係新增修改各測試範圍坐標和尺寸功能");
+	UpdateInfoTemp.strUpdateInfo = _T("1.新增修改各測試範圍坐標和尺寸功能");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	CValueCalculate ValueCalculate;
