@@ -199,6 +199,7 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_bRegister(FALSE)
 	, m_nCommuniType(-1)
 	, m_nTestGroupBkup(-1)
+	, m_strWndText(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_pControllerDlg.resize(247);
@@ -280,7 +281,6 @@ ON_MESSAGE(WM_GROUPCHANGE, &CUDE_OutlookDlg::OnGroupChange)
 ON_WM_RBUTTONDBLCLK()
 ON_WM_LBUTTONDBLCLK()
 ON_WM_COPYDATA()
-ON_MESSAGE(WM_PROJECTNAMECHANGE, &CUDE_OutlookDlg::OnProjectNamecChange)
 ON_MESSAGE(WM_DRAWIMAGE_USB, &CUDE_OutlookDlg::OnDrawimageUsb)
 ON_MESSAGE(WM_GROUPTEST_RUN, &CUDE_OutlookDlg::OnGrouptestRun)
 ON_MESSAGE(WM_TESTFINISH, &CUDE_OutlookDlg::OnTestfinish)
@@ -374,8 +374,6 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 
 	m_BL_TestRunStatus.SetCaption(_T("停止運行"));
 	m_BL_TestRunStatus.SetForeColor(RGB(155, 64, 64));
-
-	m_ProjectName->m_pProjectName = this;//初始化窗口指針
 
 	COleFont ft = m_Menu.GetFont();
 	CY sz = ft.GetSize();
@@ -693,7 +691,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	{
 		m_Menu.EnableItemByPos(_T("文件"), nCounter, FALSE);
 	}
-	for (int nCounter = 0; nCounter < 9; nCounter++)
+	for (int nCounter = 0; nCounter < 7; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, FALSE);
 	}
@@ -718,7 +716,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	
 	const BOOL bLocked = _GetLockState(nLock, PSD_LEVEL_TE);
 
-	for (int nCounter = 4; nCounter < 8; nCounter++)
+	for (int nCounter = 2; nCounter < 6; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
 	}
@@ -749,7 +747,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 			break;
 		}
 		
-		for (int nCounter = 0; nCounter < 4; nCounter++)
+		for (int nCounter = 0; nCounter < 2; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("設置"), nCounter, !g_bSystemRunStatus);
 		}
@@ -983,19 +981,16 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		switch (nItemPos)
 		{
 		case 0:
+			m_Port->ShowWindow(SW_SHOW);
+			m_Port->CenterWindow(this);
 			break;
 		case 1:
-			m_CRC.ShowParamWnd(SW_SHOW);
-			break;
-		case 2:
-			break;
-		case 3:
 			m_LightCtrl.ShowParamWnd(TRUE);
 			break;
-		case 7:
+		case 5:
 			
 			break;
-		case 8:
+		case 6:
 			//m_Menu.CheckItemByPos(_T("設置"), 8, !bChecked);
 			//m_bTestContinue = !bChecked;
 			break;
@@ -1719,11 +1714,18 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		}
 		if (strItemName == _T("進程間消息"))
 		{
-			m_ProjectName->m_BL_ProjectName.SetValueText(m_ProjectName->m_strProjectName);
-			m_ProjectName->ShowWindow(SW_SHOW);
-			m_ProjectName->CenterWindow(this);
 			m_Menu.CheckItemByPos(_T("通訊設置"), 0, TRUE);
 			m_nCommuniType = PROCESS;
+
+			CBlender<CProjectName> ProjectName; 
+			ProjectName.CreateBlendWnd(this);
+			ProjectName->m_strProjectName = m_strWndText;
+	
+			if (IDOK == ProjectName.CreateTopWnd(TRUE, TRUE))
+			{
+				m_strWndText = ProjectName->m_strProjectName;
+				SetWindowText(m_strWndText);
+			}
 		}
 	}
 }
@@ -1755,11 +1757,11 @@ void CUDE_OutlookDlg::SetMainMenu()
 		m_Menu.AddPopByPosPosPos(1, 0, 4, 0,_T("最近開啟檔案"), strHistoryPath);
 	}
 
-	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;CRC循環冗餘校驗...;添加設備...;光源設置...;拍照方式...;信號輸出模式...;顯示模式...;通訊設置...;連續檢測..."));
-	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
-	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
-	m_Menu.AddPopByPosPosPos(1, 1, 6, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
-	m_Menu.AddPopByPosPosPos(1, 1, 7, 0,_T("通訊設置"), _T("進程間消息;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
+	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;光源設置...;拍照方式...;信號輸出模式...;顯示模式...;通訊設置...;連續檢測..."));
+	m_Menu.AddPopByPosPosPos(1, 1, 2, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
+	m_Menu.AddPopByPosPosPos(1, 1, 3, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
+	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
+	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("通訊設置"), _T("進程間消息;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
 	
 	m_Menu.AddPopByPosPosPos(0, 2, 0, 0, _T("功能"), _T("樣本採集...;機器學習..."));
 	m_Menu.AddPopByPosPosPos(0, 3, 0, 0, _T("視圖"), _T("參數變更記錄...;IPQC點檢界面...;"));
@@ -1836,7 +1838,7 @@ void CUDE_OutlookDlg::SetMainMenu()
 		break;
 	}
 
-	m_Menu.CheckItemByPos(_T("設置"), 8, m_bTestContinue);
+	m_Menu.CheckItemByPos(_T("設置"), 6, m_bTestContinue);
 	
 }
 
@@ -2140,9 +2142,6 @@ void CUDE_OutlookDlg::CreateChildWindow()
 	m_LightCtrl.CreateBlendWnd(this);
 	m_LightCtrl.CreateTopWnd(FALSE, FALSE);
 
-	m_ProjectName.CreateBlendWnd(this);
-	m_ProjectName.CreateTopWnd(FALSE, FALSE);
-
 	m_pVerisonMange = new CBlender<CVerisonManage>;
 	m_pVerisonMange->CreateBlendWnd(this);
 	m_pVerisonMange->CreateTopWnd(FALSE, FALSE);
@@ -2162,6 +2161,9 @@ void CUDE_OutlookDlg::CreateChildWindow()
 	m_pQualityMange = new CBlender<CQualityManage>;
 	m_pQualityMange->CreateBlendWnd(this);
 	m_pQualityMange->CreateTopWnd(FALSE, FALSE);
+
+	m_Port.CreateBlendWnd(this);
+	m_Port.CreateTopWnd(FALSE, FALSE);
 }
 
 void CUDE_OutlookDlg::SearchConfigurationFile()
@@ -2170,7 +2172,7 @@ void CUDE_OutlookDlg::SearchConfigurationFile()
 	if (!m_CRC.SearchConfigurationFile())
 	{
 		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
-		m_Menu.EnableItemByName(_T("設置"), _T("CRC循環冗餘校驗"), FALSE);
+		//m_Menu.EnableItemByName(_T("設置"), _T("CRC循環冗餘校驗"), FALSE);
 	}
 }
 
@@ -2181,7 +2183,7 @@ void CUDE_OutlookDlg::SearchControllerFile()
 	if (!m_FindCtrlFile.SearchControllerFile())
 	{
 		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
-		m_Menu.EnableItemByName(_T("設置"), _T("添加設備"), FALSE);
+		//m_Menu.EnableItemByName(_T("設置"), _T("添加設備"), FALSE);
 	}
 }
 
@@ -2245,8 +2247,8 @@ void CUDE_OutlookDlg::_NewFile()
 		return;
 	}
 
-	m_ProjectName->m_strProjectName = m_CreateProjectDlg->m_strWindowName;//傳遞進程名稱
-	SetWindowText(m_CreateProjectDlg->m_strWindowName);
+	m_strWndText = m_CreateProjectDlg->m_strWindowName;//傳遞進程名稱
+	SetWindowText(m_strWndText);
 
 	m_BL_Line.ShowWindow(SW_SHOW);
 	m_BL_AllTestRun.ShowWindow(SW_SHOW);
@@ -2541,7 +2543,7 @@ void CUDE_OutlookDlg::_SaveFileInfo()
 
 	m_LightCtrl.Serialize(ar);
 
-	m_ProjectName->Serialize(ar);
+	ar << m_strWndText;
 
 	ar.Flush();
 	ar.Close();
@@ -2649,7 +2651,8 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	m_LightCtrl.m_Device->m_strSoftwareVersion = m_strSoftwareVersion;
 	m_LightCtrl.Serialize(ar);
 
-	m_ProjectName->Serialize(ar);
+	ar >> m_strWndText;
+	SetWindowText(m_strWndText);
 
 	m_BL_Line.ShowWindow(SW_SHOW);
 	m_BL_AllTestRun.ShowWindow(SW_SHOW);
@@ -4357,7 +4360,15 @@ void CUDE_OutlookDlg::Serialize(CArchive& ar)
 
 	//=======以上是光源控制器設置的串行化代碼======//
 
-	m_ProjectName->Serialize(ar);
+	if (ar.IsStoring())//將窗口名稱放到主線程的變量中，取消進程名稱窗口的串行化程序
+	{
+		ar << m_strWndText;
+	}
+	else
+	{
+		ar >> m_strWndText;
+		SetWindowText(m_strWndText);
+	}
 
 	//======以上是修改進程名稱串行化代碼=====//
 }
@@ -4791,13 +4802,6 @@ afx_msg LRESULT CUDE_OutlookDlg::OnGroupChange(WPARAM wParam, LPARAM lParam)
 }
 
 
-afx_msg LRESULT CUDE_OutlookDlg::OnProjectNamecChange(WPARAM wParam, LPARAM lParam)
-{
-	SetWindowText(m_ProjectName->m_strProjectName);
-	return 0;
-}
-
-
 afx_msg LRESULT CUDE_OutlookDlg::OnTestfinish(WPARAM wParam, LPARAM lParam)
 {
 	const int nTopWndGroup = wParam;
@@ -4925,7 +4929,7 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestfinish(WPARAM wParam, LPARAM lParam)
  
  			TestResInfo.nParam2 = nTopWndGroup;//測試的群組編號
  			USES_CONVERSION;
- 			memcpy(TestResInfo.szSrcWnd ,W2A(m_ProjectName->m_strProjectName) ,m_ProjectName->m_strProjectName.GetLength() + 1);
+ 			memcpy(TestResInfo.szSrcWnd ,W2A(m_strWndText) ,m_strWndText.GetLength() + 1);
  
  			COPYDATASTRUCT Cds;
  			Cds.dwData = TestResInfo.nID;
@@ -5273,7 +5277,7 @@ void CUDE_OutlookDlg::_TimerGroupTestRun()
 		TestResInfo.nParam1 = 9999;//拍照完成
 		TestResInfo.nParam2 = m_nCurGroup;
 		USES_CONVERSION;
-		memcpy(TestResInfo.szSrcWnd ,W2A(m_ProjectName->m_strProjectName) ,m_ProjectName->m_strProjectName.GetLength() + 1 );
+		memcpy(TestResInfo.szSrcWnd ,W2A(m_strWndText) ,m_strWndText.GetLength() + 1 );
 		COPYDATASTRUCT Cds;
 		Cds.dwData = TestResInfo.nID;
 		Cds.cbData = sizeof(TEST_INFO);

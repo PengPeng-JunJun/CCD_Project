@@ -30,6 +30,7 @@
 #include "..\\SoftwareManageDll\\VerisonManage.h"
 #include "..\\CodeLoggerDll\\Logger.h"
 #include "..\\TestConfiguraDll\ImgROIPos.h"
+#include "..\\NetworkDll\SerialPort.h"
 
 #include <iostream> 
 #include <vector>
@@ -58,6 +59,7 @@
 #pragma comment(lib, "..\\Debug\\ExcelDll.lib")
 #pragma comment(lib, "..\\Debug\\SoftwareManageDll.lib")
 #pragma comment(lib, "..\\Debug\\CodeLoggerDll.lib")
+#pragma comment(lib, "..\\Debug\\NetworkDll.lib")
 
 #define DEBUGSTYLE   0
 #else
@@ -70,23 +72,15 @@
 #pragma comment(lib, "..\\Release\\ExcelDll.lib")
 #pragma comment(lib, "..\\Release\\SoftwareManageDll.lib")
 #pragma comment(lib, "..\\Release\\CodeLoggerDll.lib")
+#pragma comment(lib, "..\\Release\\NetworkDll.lib")
 
 #define RELEASESTYLE   1
 #endif
 
 #define  MAXLEN  50
 
-#define  NO_IMAGE  0
-#define  SHOW_IMAGE  1//Ö÷¿òï@Ê¾±»ßx“ñÏà™CµÄŒ•rˆDÏñ
-#define  GET_IMAGE  2//Ö÷¿òï@Ê¾±»ßx“ñÏà™CÅÄÕÕµÄˆDÏñ
-#define  LOAD_IMAGE 3//Ö÷¿òï@Ê¾¼ÓİdµÄˆDÏñ
-
-#define  SEARCH_SCOPE 1
-#define  MAIN_POS 2
-#define  SLAVE_POS 3
-#define  TEST_SCPOE 4
-#define  SPECIAL_SCPOE 5//ÌØÊâ±ê¼Ç
-
+enum MAIN_VIEW_IMAGE_TYPE{NO_IMAGE, SHOW_IMAGE, GET_IMAGE, LOAD_IMAGE};//Ö÷ï@Ê¾¿òµÄˆDÏñîĞÍ£¬ ŸoˆDÏñ-ï@Ê¾Œ•rˆDÏñ-ï@Ê¾ÅÄÕÕˆDÏñ-ï@Ê¾¼ÓİdˆDÏñ
+enum LABEL_TYPE{SEARCH_SCOPE = 1, MAIN_POS, SLAVE_POS, TEST_SCPOE, SPECIAL_SCPOE};//˜ËÓ›îĞÍ
 enum CHANGE_POS{MOUSE_TOPLEFT, MOUSE_TOPRIGHT, MOUSE_BOTTOMLEFT, MOUSE_BOTTOMRIGHT, MOUSE_TOPMIDDLE, MOUSE_BOTTOMMIDDLE, MOUSE_LEFTMIDDLE, MOUSE_RIGHTMIDDLE};
 enum SHOW_WND_MODE{SHOW_IMAGE_SINGLE, SHOW_IMAGE_MULTIPLE, SHOW_IMAGE_SCREEN};//†Î®‹Ãæï@Ê¾,¶à®‹Ãæï@Ê¾,È«ÆÁï@Ê¾
 enum GET_IMG_MODE{GET_IMAGE_MODE_SYN, GET_IMAGE_MODE_ASY};//Í¬•rÅÄÕÕ,Öğ´ÎÅÄÕÕ
@@ -99,7 +93,6 @@ enum COMMUNI_TYPE{PROCESS, MODBUS, CUSTOM, IO_CARD,IO_NET};//ßM³ÌégÍ¨Ó£¬MODBUS…
 #define WM_GROUPTEST_RUN  WM_USER + 4000
 
 #define PROGRAM_LOCK_PASSWORD  _T("UDE88888888")
-
 
 #define SPACE_TEST_DELAY_TIME   60000//¿Õ¸ñ†¢„Ó î‘B±£³ÖÑÓ•r 
 
@@ -174,7 +167,6 @@ public:
 	CBlender<CControllerAddDlg> m_ControllerAddDlg;
 	CBlender<CRegisterDlg> m_Register;
 	CLightCtrl m_LightCtrl;//¹âÔ´¿ØÖÆÆ÷´°¿Ú
-	CBlender<CProjectName> m_ProjectName; 
 
 	CBlender<CSampleCollectionDlg> * m_pCollection;
 
@@ -191,6 +183,8 @@ public:
 	CBlender<CQualityManage> * m_pQualityMange;//Æ·Ù|¹ÜÀíîÖ¸á˜
 	CBlender<CVerisonManage> * m_pVerisonMange;//°æ±¾Ì–ï@Ê¾Ö¸á˜
 
+	CBlender<CSerialPort> m_Port;
+
 public:
 	BOOL m_bAutoSaveNGImg;//×Ô„Ó±£´æNGˆDÏñ
 	int m_nGetImageMode;//ÅÄÕÕ·½Ê½  0-Í¬²½ÅÄÕÕ£¬1-ÒÀ´ÎÅÄÕÕ
@@ -199,6 +193,8 @@ public:
 	BOOL m_bStarTestBySpace;//Ê¹ÓÃ¿Õ¸ñæI¿ÉÒÔ†¢„Ó®”Ç°Èº½MœyÔ‡£¬Ö»ßmÓÃì¶†Î‚€Èº½M
 
 	BOOL m_bTestContinue;//³ÖÀm™zœy
+
+	CString m_strWndText;//´°¿ÚÃû·Q£¨ßM³ÌÃû·Q£©
 
 public:
 	CWnd *m_pOutlookDlg;
@@ -357,7 +353,7 @@ public:
 protected:
 	afx_msg LRESULT OnTestProjectListChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGroupChange(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnProjectNamecChange(WPARAM wParam, LPARAM lParam);//ÊÕµ½ßM³ÌÃû×ƒ»¯ÏûÏ¢
+
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);

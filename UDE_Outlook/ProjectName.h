@@ -14,7 +14,6 @@
 #endif
 
 // CProjectName 对话框
-#define WM_PROJECTNAMECHANGE  WM_USER + 50
 
 class CProjectName : public CTpLayerWnd
 {
@@ -36,11 +35,9 @@ public:
 	CString m_strProjectName;
 
 	virtual BOOL OnInitDialog();
-	virtual void Serialize(CArchive& ar);
 public:
 	CBL_Edit m_BL_ProjectName;
 public:
-	CWnd *m_pProjectName;//窗口指針
 	virtual void OnOK();
 	virtual void OnCancel();
 };

@@ -47,25 +47,10 @@ BOOL CProjectName::OnInitDialog()
 	CTpLayerWnd::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-
+	m_BL_ProjectName.SetValueText(m_strProjectName);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
-
-
-void CProjectName::Serialize(CArchive& ar)
-{
-	if (ar.IsStoring())
-	{	// storing code
-		ar << m_strProjectName;
-	}
-	else
-	{	// loading code
-		ar >> m_strProjectName;
-		m_pProjectName->SendMessage(WM_PROJECTNAMECHANGE);
-	}
-}
-
 
 void CProjectName::OnOK()
 {
@@ -76,12 +61,11 @@ void CProjectName::OnOK()
 	if(hWnd != NULL)
 	{
 		CMsgBox MsgBox(this);
-		MsgBox.ShowMsg(_T("窗口名稱已存在，請確認。"), _T("窗口重命名"), MB_OK);
+		MsgBox.ShowMsg(_T("窗口名稱已存在，請確認！"), _T("窗口重複"), MB_OK);
 		return;
 	}
 	
 	m_strProjectName = strName;
-	m_pProjectName->SendMessage(WM_PROJECTNAMECHANGE);
 	CTpLayerWnd::OnOK();
 }
 
