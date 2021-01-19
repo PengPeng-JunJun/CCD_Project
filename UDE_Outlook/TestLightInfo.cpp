@@ -110,6 +110,10 @@ void CTestLightInfo::Serialize(CArchive& ar)
 	}
 	else
 	{	// loading code
+		vector<CString> vstrTem;
+		CValueCalculate ValueCalculate;
+		vstrTem = ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
+
 		int nAr = 0;
 		CString strAr;
 		BOOL bStatus = FALSE;
@@ -139,7 +143,7 @@ void CTestLightInfo::Serialize(CArchive& ar)
 			m_BL_LightStatus[1].SetSelect(TRUE);
 			m_BL_TriggerTime.SetEnabled(TRUE);
 		}
-		if (m_nVersion >= 9)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 9) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> m_nTriggerTime;
 		}

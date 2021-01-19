@@ -13,7 +13,6 @@
 #include "MsgInfoDlg.h"
 #include "CamStc.h"
 #include "USBCamStc.h"
-#include "ProjectName.h"
 #include "ViewDraw.h"
 #include "SampleCollectionDlg.h"
 
@@ -30,7 +29,8 @@
 #include "..\\SoftwareManageDll\\VerisonManage.h"
 #include "..\\CodeLoggerDll\\Logger.h"
 #include "..\\TestConfiguraDll\ImgROIPos.h"
-#include "..\\NetworkDll\SerialPort.h"
+#include "..\\CommunicationMgrDll\ProcessCommMgr.h"
+#include "..\\CommunicationMgrDll\ModbusCommMgr.h"
 
 #include <iostream> 
 #include <vector>
@@ -59,7 +59,7 @@
 #pragma comment(lib, "..\\Debug\\ExcelDll.lib")
 #pragma comment(lib, "..\\Debug\\SoftwareManageDll.lib")
 #pragma comment(lib, "..\\Debug\\CodeLoggerDll.lib")
-#pragma comment(lib, "..\\Debug\\NetworkDll.lib")
+#pragma comment(lib, "..\\Debug\\CommunicationMgrDll.lib")
 
 #define DEBUGSTYLE   0
 #else
@@ -72,7 +72,7 @@
 #pragma comment(lib, "..\\Release\\ExcelDll.lib")
 #pragma comment(lib, "..\\Release\\SoftwareManageDll.lib")
 #pragma comment(lib, "..\\Release\\CodeLoggerDll.lib")
-#pragma comment(lib, "..\\Release\\NetworkDll.lib")
+#pragma comment(lib, "..\\Release\\CommunicationMgrDll.lib")
 
 #define RELEASESTYLE   1
 #endif

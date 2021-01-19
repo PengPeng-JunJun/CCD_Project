@@ -186,7 +186,7 @@ void CLitDevice::Serialize(CArchive& ar)
 				ar >> m_nIntensity[i];
 				if (vstrTem.size() > 1)
 				{
-					if (_ttoi(vstrTem[1]) >= 9)
+					if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 9) || (_ttoi(vstrTem[0]) >= 2))
 					{
 						ar >> m_bChStatus[i];
 					}

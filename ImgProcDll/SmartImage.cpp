@@ -267,6 +267,34 @@ CString CSmartImage::Save(CString strPath) const
 	return strFileName;
 }
 
+BOOL CSmartImage::SaveWithExtName(CString strPath, CString strExtName) const
+{
+	CString strFileName;
+
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+
+	strFileName.Format(_T("\\%d%02d%02d%02d%02d%02d-%03d"),
+		st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+
+	strFileName.Append(_T("."));
+	strFileName.Append(strExtName);
+
+	BOOL bSucceed = FALSE;
+
+	if (!PathIsDirectory(strPath))
+	{
+		bSucceed = CreateDirectory(strPath, nullptr);
+	}
+
+	strPath.Append(strFileName);
+
+	USES_CONVERSION;
+	imwrite(W2A(strPath), *this);
+
+	return bSucceed;
+}
+
 
 BOOL CSmartImage::Save(CString strPath, const CString & strName) const
 {

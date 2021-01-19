@@ -320,11 +320,9 @@ public:
 
 	BOOL m_bParamChange;//參數被修改
 
-	int m_nVersion_H;//版本號高位
-
-	int m_nVersion_L;//版本號低位
-
 	int m_nImageFormat;//圖像格式 1-灰度 2-RGB 3-HSV
+
+	CString m_strSoftwareVersion;
 
 public:
 	typedef struct _tagTestProgramText

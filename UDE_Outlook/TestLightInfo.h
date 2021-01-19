@@ -1,12 +1,15 @@
 #pragma once
 #include "..\BlendWndDll\MsgBox.h"
+#include "..\CRCDll\\ValueCalculate.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "..\\Debug\\BlendWndDll.lib")
 #pragma comment(lib, "..\\Debug\\BlActiveXDll.lib")
+#pragma comment(lib, "..\\Debug\\CRCDll.lib")
 #else
 #pragma comment(lib, "..\\Release\\BlendWndDll.lib")
 #pragma comment(lib, "..\\Release\\BlActiveXDll.lib")
+#pragma comment(lib, "..\\Release\\CRCDll.lib")
 #endif
 
 
@@ -15,6 +18,7 @@
 #define LIGHT_CLOSE 1//光源閃爍
 // CTestLightInfo 对话框
 
+using namespace std;
 class CTestLightInfo : public CTpLayerWnd
 {
 	DECLARE_DYNAMIC(CTestLightInfo)
@@ -46,7 +50,7 @@ public:
 	int m_nLightStatus;//測試完成后，相應光源的狀態
 	int m_nTriggerTime;//觸發時長
 
-	int m_nVersion;//版本號
+	CString m_strSoftwareVersion;
 
 	DECLARE_EVENTSINK_MAP()
 	void StatusChangedBlChannel0(short nNewStatus);

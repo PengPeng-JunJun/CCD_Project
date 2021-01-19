@@ -121,8 +121,6 @@ CTestConfigura::CTestConfigura(CWnd* pParent /*=NULL*/)
 	, m_dRadiusOffsetL(0)
 	, m_dStandardAngleOffset(0)
 	, m_bColMark(FALSE)
-	, m_nVersion_H(0)
-	, m_nVersion_L(0)
 	, m_nCurPixelValidCounter(0)
 	, m_nImageFormat(0)
 	, m_nTestTargetDir(0)
@@ -274,8 +272,6 @@ CTestConfigura::CTestConfigura(UINT nIDTemplate, CWnd * pParent/* = nullptr*/)
 	, m_dRadiusOffsetL(0)
 	, m_dStandardAngleOffset(0)
 	, m_bColMark(FALSE)
-	, m_nVersion_H(0)
-	, m_nVersion_L(0)
 	, m_nCurPixelValidCounter(0)
 	, m_nImageFormat(0)
 	, m_nTestTargetDir(0)
@@ -6403,7 +6399,11 @@ void CTestConfigura::Serialize(CArchive& ar)
 		}
 		
 		ar >> m_nTestProject;
-		if (m_nVersion_L >= 8)
+
+		vector<CString> vstrTem;
+		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
+
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 8) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> m_nTestConfigWndType;
 		}
@@ -6527,7 +6527,7 @@ void CTestConfigura::Serialize(CArchive& ar)
 			ar >> m_vstrImageRes[i].strImageProgram;
 			ar >> m_vstrImageRes[i].strImageRes;
 		}
-		if (m_nVersion_L >= 6)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 6) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> nAr;
 
@@ -6539,7 +6539,7 @@ void CTestConfigura::Serialize(CArchive& ar)
 			}
 		}
 		
-		if (m_nVersion_L >= 10)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 10) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			size_t nSize = 0;
 			ar >> nSize;
@@ -6560,7 +6560,7 @@ void CTestConfigura::Serialize(CArchive& ar)
 				ar >> m_vptMarkOutside[i].y;
 			}
 		}
-		if (m_nVersion_L >= 13)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 13) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			size_t nSize = 0;
 			ar >> nSize;
@@ -6570,7 +6570,7 @@ void CTestConfigura::Serialize(CArchive& ar)
 				ar >> m_vImgTemplate[i];
 			}
 		}
-		if (m_nVersion_L >= 14)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 14) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			size_t nSize = 0;
 			ar >> nSize;

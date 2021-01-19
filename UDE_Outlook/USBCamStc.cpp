@@ -166,11 +166,11 @@ void CUSBCamStc::Serialize(CArchive& ar)
 		m_dUSBCamCurExposureValue = m_dUSBCamExposureValueBkup;
 
 
-		vector<CString> vstrTemp;
-		vstrTemp = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
-		if (vstrTemp.size() > 1)
+		vector<CString> vstrTem;
+		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
+		if (vstrTem.size() > 1)
 		{
-			if (_ttoi(vstrTemp[1]) >= 11)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 11) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_nUpdateSpeed;
 				ar >> m_nImageFrame;

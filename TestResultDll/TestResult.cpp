@@ -308,7 +308,7 @@ void CTestResult::Serialize(CArchive& ar)
 		vector<CString> vstrTem;
 		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
 
-		if (_ttoi(vstrTem[1]) >= 11)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 11) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> m_bSaveOKImage;
 			ar >> m_bSaveNGImage;

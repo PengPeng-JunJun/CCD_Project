@@ -824,7 +824,7 @@ void CTestGroup::Serialize(CArchive& ar)
 		}
 		m_BL_StartCode.SetValue(m_nStartCode[0]);
 
-		if (_ttoi(vstrTem[1]) >= 15)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 15) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			for (size_t i = 0; i < MAX_GROUP; i++)
 			{

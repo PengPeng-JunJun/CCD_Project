@@ -277,7 +277,7 @@ void CCamStc::Serialize(CArchive& ar)
 
 		if (vstrTem.size() > 1)
 		{
-			if (_ttoi(vstrTem[1]) >= 12)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 12) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				for (int i = 0; i < ST_WB_PARAMS; i++)
 				{

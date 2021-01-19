@@ -82,6 +82,8 @@ public:
 	BOOL Save(CString strPath, const CString & strName) const;
 	BOOL SaveWithPath(CString strPath);
 
+	BOOL SaveWithExtName(CString strPath, CString strExtName = _T("bmp")) const;//使用擴展名保存圖像，默認bmp格式
+
 	// 1. WINDOW_NORMAL		= 0x00000000	the user can resize the window (no constraint)  / also use to switch a fullscreen window to a normal size
 	// 2. WINDOW_AUTOSIZE	= 0x00000001	the user cannot resize the window, the size is constrainted by the image displayed
 	// 3. WINDOW_OPENGL		= 0x00001000	window with opengl support

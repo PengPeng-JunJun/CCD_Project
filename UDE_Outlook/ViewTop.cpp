@@ -168,6 +168,11 @@ BOOL CViewTop::OnInitDialog()
 // CViewTop 消息处理程序
 void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 {
+	if (m_rcTopWnd.IsRectEmpty())
+	{
+		return;
+	}
+	
 	CRect rcClient;
 	GetClientRect(rcClient);
 	
@@ -3891,7 +3896,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			{
 				if (PathIsDirectory(m_TestResult->m_strOKImagePath))
 				{
-					m_ImgSave.Save(m_TestResult->m_strOKImagePath);
+					m_ImgSave.SaveWithExtName(m_TestResult->m_strOKImagePath, _T("jpg"));
 				}
 			}
 
@@ -3900,8 +3905,8 @@ UINT CViewTop::_TestRunThreadKernal(void)
 				if (m_TestResult->m_bSaveNGImage)
 				{
 					if (PathIsDirectory(m_TestResult->m_strNGImagePath))
-					{
-						m_ImgSave.Save(m_TestResult->m_strNGImagePath);
+					{ 
+						m_ImgSave.SaveWithExtName(m_TestResult->m_strNGImagePath, _T("jpg"));
 					}
 				}
 				m_TestResult->PostMessage(gMsgTestResultType, 9999);
@@ -3921,7 +3926,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 				{
 					if (PathIsDirectory(m_TestResult->m_strOKImagePath))
 					{
-						m_ImgSave.Save(m_TestResult->m_strOKImagePath);
+						m_ImgSave.SaveWithExtName(m_TestResult->m_strOKImagePath, _T("jpg"));
 					}
 				}
 			}
@@ -3956,7 +3961,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 				{
 					if (PathIsDirectory(m_TestResult->m_strNGImagePath))
 					{
-						m_ImgSave.Save(m_TestResult->m_strNGImagePath);
+						m_ImgSave.SaveWithExtName(m_TestResult->m_strNGImagePath, _T("jpg"));
 					}
 				}
 			}
@@ -6215,7 +6220,7 @@ void CViewTop::Serialize(CArchive& ar)
 		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
 
 		CRect rcPart;
-		if (_ttoi(vstrTem[1]) >= 8)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 8) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> rcPart;
 			m_rcAOI = rcPart;
@@ -6231,7 +6236,7 @@ void CViewTop::Serialize(CArchive& ar)
 
 		m_rcSlavePos = rcPart;
 
-		if (_ttoi(vstrTem[1]) >= 8)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 8) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> rcPart;
 			m_rcSpecialScope = rcPart;
@@ -6249,21 +6254,19 @@ void CViewTop::Serialize(CArchive& ar)
 		m_MainPosLoc->Serialize(ar);
 		m_SlavePosLoc->Serialize(ar);
 
-		m_MainPos->m_nVersion_H = _ttoi(vstrTem[0]);
-		m_MainPos->m_nVersion_L = _ttoi(vstrTem[1]);
+		m_MainPos->m_strSoftwareVersion = m_strSoftwareVersion;
 		m_MainPos->Serialize(ar);
 
-		m_SlavePos->m_nVersion_H = _ttoi(vstrTem[0]);
-		m_SlavePos->m_nVersion_L = _ttoi(vstrTem[1]);
+		m_SlavePos->m_strSoftwareVersion = m_strSoftwareVersion;
 		m_SlavePos->Serialize(ar);
 
-		if (_ttoi(vstrTem[1]) >= 8)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 8) || (_ttoi(vstrTem[0]) >= 2))
 		{
-			m_SpecialPos->m_nVersion_H = _ttoi(vstrTem[0]);
-			m_SpecialPos->m_nVersion_L = _ttoi(vstrTem[1]);
+			m_SpecialPos->m_strSoftwareVersion = m_strSoftwareVersion;
 			m_SpecialPos->Serialize(ar);
 		}
-		m_TestLightInfo->m_nVersion = _ttoi(vstrTem[1]);
+
+		m_TestLightInfo->m_strSoftwareVersion = m_strSoftwareVersion;
 		m_TestLightInfo->Serialize(ar);
 
 		m_LocatorDistance->Serialize(ar);
@@ -6277,8 +6280,7 @@ void CViewTop::Serialize(CArchive& ar)
 
 		for (size_t i = 0; i < m_TestConfig.size(); i++)//加載測試配置參數
 		{
-			(*m_TestConfig[i])->m_nVersion_H = _ttoi(vstrTem[0]);
-			(*m_TestConfig[i])->m_nVersion_L = _ttoi(vstrTem[1]);
+			(*m_TestConfig[i])->m_strSoftwareVersion = m_strSoftwareVersion;
 			(*m_TestConfig[i])->Serialize(ar);
 		}
 		ar >> m_ptMainLocator.x;//主點位點的中心坐標
@@ -6304,19 +6306,19 @@ void CViewTop::Serialize(CArchive& ar)
 
 		if (vstrTem.size() > 1)
 		{
-			if (_ttoi(vstrTem[1]) >= 3)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 3) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_nLocatorResize;
 			}
-			if (_ttoi(vstrTem[1]) >= 4)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 4) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_fLine_K_Stander;
 			}
-			if (_ttoi(vstrTem[1]) >= 5)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 5) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_fLine_B_Stander;
 			}
-			if (_ttoi(vstrTem[1]) >= 16)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 16) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_strTestName;
 			}

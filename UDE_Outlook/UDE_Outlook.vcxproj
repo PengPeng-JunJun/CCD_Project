@@ -122,7 +122,6 @@
     <ClInclude Include="ControllerDlg.h" />
     <ClInclude Include="CreateProject.h" />
     <ClInclude Include="MsgInfoDlg.h" />
-    <ClInclude Include="ProjectName.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SampleCollectionDlg.h" />
     <ClInclude Include="stdafx.h" />
@@ -142,7 +141,6 @@
     <ClCompile Include="ControllerDlg.cpp" />
     <ClCompile Include="CreateProject.cpp" />
     <ClCompile Include="MsgInfoDlg.cpp" />
-    <ClCompile Include="ProjectName.cpp" />
     <ClCompile Include="SampleCollectionDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

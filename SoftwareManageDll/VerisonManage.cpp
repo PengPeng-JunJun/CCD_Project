@@ -109,6 +109,10 @@ void CVerisonManage::_ShowInfo()
 	UpdateInfoTemp.strUpdateInfo = _T("1.新增修改各測試範圍坐標和尺寸功能");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
+	UpdateInfoTemp.strUpdateDate = _T("V2.0.0  修改時間：2021年01月19日");
+	UpdateInfoTemp.strUpdateInfo = _T("1.版本號修改為3位有效;2.進程名稱窗口修改;3.測試圖像保存格式修改為jpg");
+	deUpdateInfo.push_front(UpdateInfoTemp);
+
 	CValueCalculate ValueCalculate;
 	for (size_t i = 0; i < deUpdateInfo.size(); i++)
 	{

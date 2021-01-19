@@ -1717,13 +1717,13 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 			m_Menu.CheckItemByPos(_T("通訊設置"), 0, TRUE);
 			m_nCommuniType = PROCESS;
 
-			CBlender<CProjectName> ProjectName; 
-			ProjectName.CreateBlendWnd(this);
-			ProjectName->m_strProjectName = m_strWndText;
-	
-			if (IDOK == ProjectName.CreateTopWnd(TRUE, TRUE))
+			CBlender<CProcessCommMgr> ProcessCommMgrTemp;
+			ProcessCommMgrTemp.CreateBlendWnd(this);
+			ProcessCommMgrTemp->m_strProcessName = m_strWndText;
+
+			if (IDOK == ProcessCommMgrTemp.CreateTopWnd(TRUE, TRUE))
 			{
-				m_strWndText = ProjectName->m_strProjectName;
+				m_strWndText = ProcessCommMgrTemp->m_strProcessName;
 				SetWindowText(m_strWndText);
 			}
 		}
@@ -2164,6 +2164,7 @@ void CUDE_OutlookDlg::CreateChildWindow()
 
 	m_Port.CreateBlendWnd(this);
 	m_Port.CreateTopWnd(FALSE, FALSE);
+
 }
 
 void CUDE_OutlookDlg::SearchConfigurationFile()
@@ -2681,7 +2682,8 @@ void CUDE_OutlookDlg::_SaveImage()
 	{
 		return;
 	}
-	CFileDialog dlgFile(FALSE,_T("*.bmp"),_T("無標題"),OFN_OVERWRITEPROMPT|OFN_HIDEREADONLY,_T("bmp Files(*.bmp)|*.bmp|All File(*.*)|*.*||"),this);
+	CFileDialog dlgFile(FALSE,_T("*.bmp;*.jpg"),_T("無標題"),OFN_OVERWRITEPROMPT|OFN_HIDEREADONLY,
+		_T("ImgFiles(*.bmp)|*.bmp|ImgFile(*.jpg)|*.jpg|All File(*.*)|*.*||"),this);
 	dlgFile.m_pOFN->lpstrTitle = _T("圖像保存");
 	CString strImageFilePath;
 	if (IDOK == dlgFile.DoModal())
@@ -2697,10 +2699,10 @@ void CUDE_OutlookDlg::_SaveImage()
 
 void CUDE_OutlookDlg::_LoadImage()
 {
-	CFileDialog dlgFile(TRUE, _T("*.bmp"), nullptr, OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY,
-		_T("AOI Files(*.bmp)|*.bmp|All Files(*.*)|*.*||"), this);
+	CFileDialog dlgFile(TRUE, _T("*.bmp;*.jpg"), nullptr, OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY,
+		_T("ImgFiles(*.bmp;*.jpg)|*.bmp;*.jpg|ImgFiles(*.bmp)|*.bmp|ImgFiles(*.jpg)|*.jpg|All Files(*.*)|*.*||"), this);
 
-	dlgFile.m_pOFN->lpstrTitle = _T("圖像打開");
+	dlgFile.m_pOFN->lpstrTitle = _T("圖像加載");
 
 	CString strPath;
 
@@ -4317,13 +4319,13 @@ void CUDE_OutlookDlg::Serialize(CArchive& ar)
 
 		vector<CString> vstrTem;
 		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
-		if (vstrTem.size() > 1)
+		if (vstrTem.size())
 		{
-			if (_ttoi(vstrTem[1]) >= 7)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 7) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_nGetImageMode;
 			}
-			if (_ttoi(vstrTem[1]) >= 17)
+			if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 17) || (_ttoi(vstrTem[0]) >= 2))
 			{
 				ar >> m_bImageTrigger;
 				ar >> m_bAutoRunCheck;
