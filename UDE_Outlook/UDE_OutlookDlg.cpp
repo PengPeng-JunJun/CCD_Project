@@ -2174,7 +2174,7 @@ void CUDE_OutlookDlg::SearchConfigurationFile()
 	{
 		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 		//m_Menu.EnableItemByName(_T("設置"), _T("CRC循環冗餘校驗"), FALSE);
-	}
+	} 
 }
 
 void CUDE_OutlookDlg::SearchControllerFile()
@@ -2285,7 +2285,6 @@ void CUDE_OutlookDlg::_NewFile()
 		}
 	}
 	m_CamMgr.DisconnectUnusedCam();
-
 
 	BOOL bValid_USB[] = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE};
 

@@ -39,6 +39,9 @@
     <ClCompile Include="ImgBox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="GslCircle.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ImgProcDll.def">
@@ -68,6 +71,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ImgBox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GslCircle.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

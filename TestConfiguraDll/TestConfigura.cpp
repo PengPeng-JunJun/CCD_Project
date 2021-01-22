@@ -930,8 +930,9 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 				cvContours vContours;
 				vector<Vec4i> hierarchy;
 				CSmartImage ImgTemp;
-				vector<Circle_3f> vCircle;
+				vector<Circle_3f> vCircle_3f;
 				vector<Point3d> vptCircle;
+				vector<Circle_3d> vCircle_3d;
 
 				if (pImgSrc->channels() != 1)
 					continue;
@@ -943,22 +944,30 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 				{
 					if (vTemp[0] == _T("輪廓擬合法"))
 					{
-						const Point3d ptLoc_d = GetLocation(vContours[j]);
-						if (ptLoc_d.z > 0)
-							vptCircle.push_back(ptLoc_d);
+						const Point3d ptCircle = GetLocation(vContours[j]);
+						if (ptCircle.z > 0)
+							vptCircle.push_back(ptCircle);
 					}
 					else if (vTemp[0] == _T("最小二乘法"))
 					{
-						const Circle_3f ptLoc = LeastSquaresCircle(vContours[j]);
-						if (ptLoc.r > 0)
-							vCircle.push_back(ptLoc);
+						const Circle_3f ptCircle = LeastSquaresCircle(vContours[j]);
+						if (ptCircle.r > 0)
+							vCircle_3f.push_back(ptCircle);
+					}
+					else if (vTemp[0] == _T("GSL"))
+					{
+						Circle_3d ptCircle;
+						CGslCircle gsl_circle;
+						if (gsl_circle.GetCircle(vContours[j], ptCircle))
+							vCircle_3d.push_back(ptCircle);
 					}
 					else
 					{
+
 					}
 				}
 
-				if (vCircle.size() || vptCircle.size())
+				if (vCircle_3f.size() || vptCircle.size() || vCircle_3d.size())
 					Merge(pImgSrc, pImgSrc, pImgSrc, pImgSrc);
 					
 				m_CenterPoint.x = 0;
@@ -980,14 +989,27 @@ void CTestConfigura::ImageProcess(CSmartImage * pImgSrc, int nProcessRowStart, i
 				}
 				else if (vTemp[0] == _T("最小二乘法"))
 				{
-					for (size_t j = 0; j < vCircle.size(); j++)
+					for (size_t j = 0; j < vCircle_3f.size(); j++)
 					{
-						circle(*pImgSrc, Point2d(vCircle[j].x, vCircle[j].y), (int)vCircle[j].r, MAT_RGB(255, 0, 0), 1);
-						if (vCircle.size() == 1)
+						circle(*pImgSrc, Point2d(vCircle_3f[j].x, vCircle_3f[j].y), (int)vCircle_3f[j].r, MAT_RGB(255, 0, 0), 1);
+						if (vCircle_3f.size() == 1)
 						{
-							m_CenterPoint.x = vCircle[j].x;
-							m_CenterPoint.y = vCircle[j].y;
-							m_CenterPoint.z = vCircle[j].r;
+							m_CenterPoint.x = vCircle_3f[j].x;
+							m_CenterPoint.y = vCircle_3f[j].y;
+							m_CenterPoint.z = vCircle_3f[j].r;
+						}
+					}
+				}
+				else if (vTemp[0] == _T("GSL"))
+				{
+					for (size_t j = 0; j < vCircle_3d.size(); j++)
+					{
+						circle(*pImgSrc, Point2d(vCircle_3d[j].x, vCircle_3d[j].y), (int)vCircle_3d[j].r, MAT_RGB(255, 0, 0), 1);
+						if (vCircle_3d.size() == 1)
+						{
+							m_CenterPoint.x = vCircle_3d[j].x;
+							m_CenterPoint.y = vCircle_3d[j].y;
+							m_CenterPoint.z = vCircle_3d[j].r;
 						}
 					}
 				}
@@ -7254,28 +7276,35 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 
 					vector<Circle_3f> vCircle;
 					vector<Point3d> vptCircle;
+					vector<Circle_3d> vCircle_3d;
 
 					for (size_t i = 0; i < vContours.size(); i++)
 					{
 						if (vPart[0] == _T("輪廓擬合法"))
 						{
-							const Point3d ptLoc_d = GetLocation(vContours[i]);
-							if (ptLoc_d.z > 0)
-								vptCircle.push_back(ptLoc_d);
+							const Point3d ptCircle = GetLocation(vContours[i]);
+							if (ptCircle.z > 0)
+								vptCircle.push_back(ptCircle);
 						}
 						else if (vPart[0] == _T("最小二乘法"))
 						{
-							const Circle_3f ptLoc = LeastSquaresCircle(vContours[i]);
-							if (ptLoc.r > 0)
-								vCircle.push_back(ptLoc);
+							const Circle_3f ptCircle = LeastSquaresCircle(vContours[i]);
+							if (ptCircle.r > 0)
+								vCircle.push_back(ptCircle);
+						}
+						else if (vPart[0] == _T("GSL"))
+						{
+							Circle_3d ptCircle;
+							CGslCircle gsl_circle;
+							if (gsl_circle.GetCircle(vContours[i], ptCircle))
+								vCircle_3d.push_back(ptCircle);
 						}
 						else
 						{
 						}
 					}
 
-
-					if (vCircle.size() || vptCircle.size())
+					if (vCircle.size() || vptCircle.size() || vCircle_3d.size())
 						Merge(&m_ImgShow, &m_ImgShow, &m_ImgShow, &m_ImgShow);
 
 					m_CenterPoint.x = 0;
@@ -7305,6 +7334,19 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 								m_CenterPoint.x = vCircle[i].x;
 								m_CenterPoint.y = vCircle[i].y;
 								m_CenterPoint.z = vCircle[i].r;
+							}
+						}
+					}
+					else if (vPart[0] == _T("GSL"))
+					{
+						for (size_t j = 0; j < vCircle_3d.size(); j++)
+						{
+							circle(m_ImgShow, Point2d(vCircle_3d[j].x, vCircle_3d[j].y), (int)vCircle_3d[j].r, MAT_RGB(255, 0, 0), 1);
+							if (vCircle_3d.size() == 1)
+							{
+								m_CenterPoint.x = vCircle_3d[j].x;
+								m_CenterPoint.y = vCircle_3d[j].y;
+								m_CenterPoint.z = vCircle_3d[j].r;
 							}
 						}
 					}
@@ -7510,7 +7552,7 @@ void CTestConfigura::LBtDbClickBlSetimagelist(long nRow, long nCol, short* pnPar
 			break;
 		case IMAGE_CIRCLE:
 			* pnParam = 2;
-			m_BL_SetImageList.SetDropDownData(_T("輪廓擬合法;最小二乘法"));
+			m_BL_SetImageList.SetDropDownData(_T("輪廓擬合法;最小二乘法;GSL"));
 			break;
 		default:
 			m_BL_SetImageList.SetItemReadOnly(nRow, nCol, TRUE);

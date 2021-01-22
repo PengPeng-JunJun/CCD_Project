@@ -168,10 +168,6 @@ BOOL CViewTop::OnInitDialog()
 // CViewTop 消息处理程序
 void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 {
-	if (m_rcTopWnd.IsRectEmpty())
-	{
-		return;
-	}
 	
 	CRect rcClient;
 	GetClientRect(rcClient);

@@ -16,6 +16,7 @@
 #include "..\MachineLearningDll\MLTrain.h"
 #include "..\CodeSystemDll\QrParse.h"
 #include "..\DeepLearnDll\SequentialNet.h"
+#include "..\ImgProcDll\GslCircle.h"
 
 #include "ImageBinary.h"
 #include "ImageGray.h"
