@@ -214,6 +214,14 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	CBrush brush_CenterPoint(RGB(255,0,0));
 
 	CRect rcText;
+
+	const int nClient_L = rcClient.TopLeft().x;
+	const int nClient_T = rcClient.TopLeft().y;
+	const int nClient_R = rcClient.BottomRight().x;
+	const int nClient_B = rcClient.BottomRight().y;
+
+	CRect rcRes(nClient_L + 10, nClient_T + 10, nClient_L + 200, nClient_T + 200);//結果顯示矩形，在屏幕的左上角
+
 	static CFont fontGrade;
 	static CFont fontResult;
 	static CFont fontCharact;
@@ -435,7 +443,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		}
 	}
 
-
+	
 	if (m_nTestProject == TEST_POSITION)
 	{
 		for (size_t i = 0; i < m_TestConfig.size(); i++)
@@ -595,11 +603,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				}
 				strText = _T("搜尋範圍");
 				pDC->SetTextColor(RGB(205,0,238));
-				rcText.TopLeft().x = m_rcSearchScope.TopLeft().x + 5;
-				rcText.TopLeft().y = m_rcSearchScope.TopLeft().y - 17;
-				rcText.BottomRight().x = m_rcSearchScope.BottomRight().x + 10;
-				rcText.BottomRight().y = m_rcSearchScope.BottomRight().y - 5;
-				pDC->DrawText(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+
+				CRect rcSearchText(m_rcSearchScope.TopLeft().x + 5, m_rcSearchScope.TopLeft().y - 17, 
+								   m_rcSearchScope.BottomRight().x + 10, m_rcSearchScope.BottomRight().y - 5);
+				pDC->DrawText(strText, &rcSearchText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 		}
 	}
@@ -620,10 +627,9 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				}
 				strText = _T("主定位點");
 				pDC->SetTextColor(RGB(69,184,35));
-				rcText.TopLeft().x = m_rcMainPos.TopLeft().x + 5;
-				rcText.TopLeft().y = m_rcMainPos.TopLeft().y - 17;
-				rcText.BottomRight().x = m_rcMainPos.BottomRight().x + 10;
-				rcText.BottomRight().y = m_rcMainPos.BottomRight().y - 5;
+
+				CRect rcMainPosText(m_rcMainPos.TopLeft().x + 5, m_rcMainPos.TopLeft().y - 17, 
+									m_rcMainPos.BottomRight().x + 10, m_rcMainPos.BottomRight().y - 5);
 				pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 		}
@@ -646,11 +652,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				}
 				strText = _T("次定位點");
 				pDC->SetTextColor(RGB(221,0,111));
-				rcText.TopLeft().x = m_rcSlavePos.TopLeft().x + 5;
-				rcText.TopLeft().y = m_rcSlavePos.TopLeft().y - 17;
-				rcText.BottomRight().x = m_rcSlavePos.BottomRight().x + 10;
-				rcText.BottomRight().y = m_rcSlavePos.BottomRight().y - 5;
-				pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+
+				CRect rcSlavePosText(m_rcSlavePos.TopLeft().x + 5, m_rcSlavePos.TopLeft().y - 17, 
+									 m_rcSlavePos.BottomRight().x + 10, m_rcSlavePos.BottomRight().y - 5);
+				pDC->DrawTextW(strText, &rcSlavePosText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 		}
 		
@@ -678,11 +683,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 					}
 					strText.Format(_T("%d"), i + 1);
 					pDC->SetTextColor(RGB(0,255,255));
-					rcText.TopLeft().x = m_rcTestScope[i].TopLeft().x + 5;
-					rcText.TopLeft().y = m_rcTestScope[i].TopLeft().y - 17;
-					rcText.BottomRight().x = m_rcTestScope[i].BottomRight().x + 10;
-					rcText.BottomRight().y = m_rcTestScope[i].BottomRight().y - 5;
-					pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+
+					CRect rcTestPosText(m_rcTestScope[i].TopLeft().x + 5, m_rcTestScope[i].TopLeft().y - 17, 
+										m_rcTestScope[i].BottomRight().x + 10, m_rcTestScope[i].BottomRight().y - 5);
+					pDC->DrawTextW(strText, &rcTestPosText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 				}
 			}
 		}
@@ -703,11 +707,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				}
 				strText = _T("基準線標記");
 				pDC->SetTextColor(RGB(255,255,255));
-				rcText.TopLeft().x = m_rcSpecialScope.TopLeft().x + 5;
-				rcText.TopLeft().y = m_rcSpecialScope.TopLeft().y - 17;
-				rcText.BottomRight().x = m_rcSpecialScope.BottomRight().x + 10;
-				rcText.BottomRight().y = m_rcSpecialScope.BottomRight().y - 5;
-				pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+
+				CRect rcSpecialPosText(m_rcSpecialScope.TopLeft().x + 5, m_rcSpecialScope.TopLeft().y - 17, 
+									   m_rcSpecialScope.BottomRight().x + 10, m_rcSpecialScope.BottomRight().y - 5);
+				pDC->DrawTextW(strText, &rcSpecialPosText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 			pDC->Rectangle(m_rcSpecialScope);
 		}
@@ -741,40 +744,37 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	pDC->SelectObject(pen_rcTestScope);
 	pDC->Rectangle(m_rcTest);
 
-
-	strText.Format(_T("運行時長 %.1f ms"), m_dEndTime);
-	pDC->SetTextColor(RGB(255,0,0));
-	rcText.TopLeft().x = rcClient.TopLeft().x + 10;
-	rcText.TopLeft().y = rcClient.BottomRight().y - 20;
-	rcText.BottomRight().x = rcClient.TopLeft().x + 200;
-	rcText.BottomRight().y = rcClient.BottomRight().y - 5;
 	if (m_bIsWindowShow)
 	{
-		pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+		CString strRunTime;
+		strRunTime.Format(_T("運行時長 %.1f ms"), m_dEndTime);
+		pDC->SetTextColor(RGB(255,0,0));
+		CRect rcRunTimeText(nClient_L + 10, nClient_B - 20, nClient_L + 200, nClient_B - 5);
+		pDC->DrawTextW(strRunTime, &rcRunTimeText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 	}
 
-	if (m_nMarkMode == MARK_WITH_MATERIAL)
+	if (m_bIsWindowShow)
 	{
-		if (!m_bCheckFinish)
+		if (m_nMarkMode == MARK_WITH_MATERIAL)
 		{
-			strText.Format(_T("樣品角度 %.2f"), m_dLocatorAngle);
-			rcText.TopLeft().x = rcClient.BottomRight().x - 100;
-			rcText.TopLeft().y = rcClient.BottomRight().y - 20;
+			if (!m_bCheckFinish)
+			{
+				strText.Format(_T("樣品角度 %.2f"), m_dLocatorAngle);
+				rcText.TopLeft().x = rcClient.BottomRight().x - 100;
+				rcText.TopLeft().y = rcClient.BottomRight().y - 20;
+				rcText.BottomRight().x = rcClient.BottomRight().x - 10;
+				rcText.BottomRight().y = rcClient.BottomRight().y - 5;
+			}
+		}
+		if (m_bCheckFinish)
+		{
+			strText.Format(_T("Area %.2f, α-Offset %.2f °, X-Offset %.2f mm, Y-Offset %.2f mm\nK = %.2f  B = %.2f  ptStart X = %.2f ptStart Y = %.2f ptEnd X = %.2f ptEnd Y = %.2f"), m_dAreaProporation, m_dSubOffsetAngle, m_dSubOffsetX, m_dSubOffsetY, m_fLine_K, m_fLine_B, m_ptStart.x, m_ptStart.y, m_ptEnd.x, m_ptEnd.y);
+			rcText.TopLeft().x = rcClient.BottomRight().x - 550;
+			rcText.TopLeft().y = rcClient.BottomRight().y - 35;
 			rcText.BottomRight().x = rcClient.BottomRight().x - 10;
 			rcText.BottomRight().y = rcClient.BottomRight().y - 5;
 		}
-	}
-	if (m_bCheckFinish)
-	{
-		strText.Format(_T("Area %.2f, α-Offset %.2f °, X-Offset %.2f mm, Y-Offset %.2f mm\nK = %.2f  B = %.2f  ptStart X = %.2f ptStart Y = %.2f ptEnd X = %.2f ptEnd Y = %.2f"), m_dAreaProporation, m_dSubOffsetAngle, m_dSubOffsetX, m_dSubOffsetY, m_fLine_K, m_fLine_B, m_ptStart.x, m_ptStart.y, m_ptEnd.x, m_ptEnd.y);
-		rcText.TopLeft().x = rcClient.BottomRight().x - 550;
-		rcText.TopLeft().y = rcClient.BottomRight().y - 35;
-		rcText.BottomRight().x = rcClient.BottomRight().x - 10;
-		rcText.BottomRight().y = rcClient.BottomRight().y - 5;
-	}
-	pDC->SetTextColor(RGB(255,255,255));
-	if (m_bIsWindowShow)
-	{
+		pDC->SetTextColor(RGB(255,255,255));
 		pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 	}
 	
@@ -911,7 +911,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 						strText.Format(_T("整體結果 %d\n"), m_nTestRes);
 						strPart = strPart + strText;
 					}
-				}
+				}   
 				break;
 			case TEST_COL_PROPOR_PIECE:
 				if (m_vdColAreaPropor.size() == m_vdColProporPiece.size())
@@ -1168,9 +1168,6 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				pDC->SelectObject(fontCharact);
 				for (size_t i = 0; i < m_vstrCharacter.size(); i++)
 				{
-					/*string str = "hello world";
-					CString cstr(str.c_str());*/
-
 					const int nFirRow = (*m_TestConfig[i])->m_nCharactersFirRow;
 					const int nSecRow = (*m_TestConfig[i])->m_nCharactersSecRow;
 
@@ -1247,13 +1244,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		if (m_nTestProject != TEST_CHARACTER)
 		{
 			pDC->SetTextColor(RGB(255,0,0));
-			rcText.TopLeft().x = rcClient.TopLeft().x + 10;
-			rcText.TopLeft().y = rcClient.TopLeft().y + 10;
-			rcText.BottomRight().x = rcClient.BottomRight().x + 200;
-			rcText.BottomRight().y = rcClient.BottomRight().y + 200;
+
 			if (m_bIsWindowShow)
 			{
-				pDC->DrawTextW(strPart, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+				pDC->DrawTextW(strPart, &rcRes, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 		}
 	}
@@ -5295,7 +5289,7 @@ BOOL CViewTop::CheckResult()
 					{
 						bTestRes = FALSE;
 						m_vnTestRes.push_back(FALSE);
-						m_vdAngle_Flatness.push_back(-360);
+						m_vdAngle_Flatness.push_back(400);
 						continue;
 					}
 	

@@ -987,9 +987,6 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		case 1:
 			m_LightCtrl.ShowParamWnd(TRUE);
 			break;
-		case 5:
-			
-			break;
 		case 6:
 			//m_Menu.CheckItemByPos(_T("設置"), 8, !bChecked);
 			//m_bTestContinue = !bChecked;
@@ -1712,7 +1709,7 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		{
 			m_Menu.CheckItemByPos(_T("通訊設置"), i, FALSE);
 		}
-		if (strItemName == _T("進程間消息"))
+		if (strItemName == _T("進程間通訊"))
 		{
 			m_Menu.CheckItemByPos(_T("通訊設置"), 0, TRUE);
 			m_nCommuniType = PROCESS;
@@ -1726,6 +1723,12 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 				m_strWndText = ProcessCommMgrTemp->m_strProcessName;
 				SetWindowText(m_strWndText);
 			}
+		}
+		if (strItemName == _T("Modebus協議"))
+		{
+			m_Menu.CheckItemByPos(_T("Modebus協議"), 0, TRUE);
+			m_nCommuniType = MODBUS;
+
 		}
 	}
 }
@@ -1761,7 +1764,7 @@ void CUDE_OutlookDlg::SetMainMenu()
 	m_Menu.AddPopByPosPosPos(1, 1, 2, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
 	m_Menu.AddPopByPosPosPos(1, 1, 3, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
 	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
-	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("通訊設置"), _T("進程間消息;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
+	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("通訊設置"), _T("進程間通訊;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
 	
 	m_Menu.AddPopByPosPosPos(0, 2, 0, 0, _T("功能"), _T("樣本採集...;機器學習..."));
 	m_Menu.AddPopByPosPosPos(0, 3, 0, 0, _T("視圖"), _T("參數變更記錄...;IPQC點檢界面...;"));
@@ -3177,7 +3180,6 @@ void CUDE_OutlookDlg::OnMouseMove(UINT nFlags, CPoint point)
 							}
 						}
 					}
-
 
 					if (!ViewTopCur->m_rcSlavePos.IsRectEmpty())
 					{
