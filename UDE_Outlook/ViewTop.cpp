@@ -213,8 +213,6 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 
 	CBrush brush_CenterPoint(RGB(255,0,0));
 
-	CRect rcText;
-
 	const int nClient_L = rcClient.TopLeft().x;
 	const int nClient_T = rcClient.TopLeft().y;
 	const int nClient_R = rcClient.BottomRight().x;
@@ -630,7 +628,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 
 				CRect rcMainPosText(m_rcMainPos.TopLeft().x + 5, m_rcMainPos.TopLeft().y - 17, 
 									m_rcMainPos.BottomRight().x + 10, m_rcMainPos.BottomRight().y - 5);
-				pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+				pDC->DrawTextW(strText, &rcMainPosText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 			}
 		}
 		
@@ -755,27 +753,25 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 
 	if (m_bIsWindowShow)
 	{
-		if (m_nMarkMode == MARK_WITH_MATERIAL)
+		CRect rcInfo;
+		if (m_nMarkMode == MARK_WITH_MATERIAL && !m_bCheckFinish) 
 		{
-			if (!m_bCheckFinish)
-			{
-				strText.Format(_T("樣品角度 %.2f"), m_dLocatorAngle);
-				rcText.TopLeft().x = rcClient.BottomRight().x - 100;
-				rcText.TopLeft().y = rcClient.BottomRight().y - 20;
-				rcText.BottomRight().x = rcClient.BottomRight().x - 10;
-				rcText.BottomRight().y = rcClient.BottomRight().y - 5;
-			}
+			strText.Format(_T("樣品角度 %.2f"), m_dLocatorAngle);
+			rcInfo.TopLeft().x = nClient_R - 100;
+			rcInfo.TopLeft().y = nClient_B - 20;
+			rcInfo.BottomRight().x = nClient_R - 10;
+			rcInfo.BottomRight().y = nClient_B - 5;
 		}
 		if (m_bCheckFinish)
 		{
 			strText.Format(_T("Area %.2f, α-Offset %.2f °, X-Offset %.2f mm, Y-Offset %.2f mm\nK = %.2f  B = %.2f  ptStart X = %.2f ptStart Y = %.2f ptEnd X = %.2f ptEnd Y = %.2f"), m_dAreaProporation, m_dSubOffsetAngle, m_dSubOffsetX, m_dSubOffsetY, m_fLine_K, m_fLine_B, m_ptStart.x, m_ptStart.y, m_ptEnd.x, m_ptEnd.y);
-			rcText.TopLeft().x = rcClient.BottomRight().x - 550;
-			rcText.TopLeft().y = rcClient.BottomRight().y - 35;
-			rcText.BottomRight().x = rcClient.BottomRight().x - 10;
-			rcText.BottomRight().y = rcClient.BottomRight().y - 5;
+			rcInfo.TopLeft().x = nClient_R - 550;
+			rcInfo.TopLeft().y = nClient_B - 35;
+			rcInfo.BottomRight().x = nClient_R - 10;
+			rcInfo.BottomRight().y = nClient_B - 5;
 		}
 		pDC->SetTextColor(RGB(255,255,255));
-		pDC->DrawTextW(strText, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+		pDC->DrawTextW(strText, &rcInfo, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
 	}
 	
 	CString strPart = _T("");
@@ -1000,8 +996,8 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 			case TEST_LED_SCREEN:
 				for (size_t i = 0; i < m_vdColMean_H.size(); i++)
 				{
-						strText.Format(_T("範圍 %d, 結果 %d, H = %.5f, V = %.5f\n"), i + 1, m_vbLEDScreenRes[i], m_vdColMean_H[i], m_vdColMean_V[i]);
-						strPart = strPart + strText; 
+					strText.Format(_T("範圍 %d, 結果 %d, H = %.5f, V = %.5f\n"), i + 1, m_vbLEDScreenRes[i], m_vdColMean_H[i], m_vdColMean_V[i]);
+					strPart = strPart + strText; 
 				}
 				if (m_vdColMean_H.size() > 0)
 				{
@@ -1162,64 +1158,67 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 				}
 				break;
 			case TEST_CHARACTER:
-				m_rcTestScope_TestRes.clear();
-				m_rcTestScope_TestRes = m_rcTestScope;
-				pDC->SetTextColor(RGB(255,0,0));
-				pDC->SelectObject(fontCharact);
-				for (size_t i = 0; i < m_vstrCharacter.size(); i++)
 				{
-					const int nFirRow = (*m_TestConfig[i])->m_nCharactersFirRow;
-					const int nSecRow = (*m_TestConfig[i])->m_nCharactersSecRow;
+					m_rcTestScope_TestRes.clear();
+					m_rcTestScope_TestRes = m_rcTestScope;
+					pDC->SetTextColor(RGB(255,0,0));
+					pDC->SelectObject(fontCharact);
+					CRect rcCharacter;
 
-					if (m_vstrCharacter[i].GetLength() >= (nFirRow + nSecRow))
+					for (size_t i = 0; i < m_vstrCharacter.size(); i++)
 					{
-						string stdStr(CW2A(m_vstrCharacter[i].GetString()));
+						const int nFirRow = (*m_TestConfig[i])->m_nCharactersFirRow;
+						const int nSecRow = (*m_TestConfig[i])->m_nCharactersSecRow;
 
-						string stdStr_Fir = stdStr.substr(0, nFirRow);
-						string stdStr_Sec = stdStr.substr(nFirRow, nSecRow);
-
-						CString strFir(stdStr_Fir.c_str());
-						CString strSec(stdStr_Sec.c_str());
-
-						strPart = _T("字符：") + strFir + _T("\n") + _T("         ") + strSec;
-					}
-					
-					if (m_vnTestRes.size())
-					{
-						if (m_vnTestRes[i] == FALSE)
+						if (m_vstrCharacter[i].GetLength() >= (nFirRow + nSecRow))
 						{
-							pDC->SetTextColor(RGB(255,0,0));
-							pDC->SelectObject(pen_rcTestScope_Res_NG);
-							pDC->Rectangle(m_rcTestScope_TestRes[i]);				
-						}
-						else
-						{
-							pDC->SetTextColor(RGB(0,0,255));
-							pDC->SelectObject(pen_rcTestScope);
-						}
-					}
-					
-					rcText.TopLeft().x = m_rcTestScope_TestRes[i].TopLeft().x;
-					rcText.TopLeft().y = m_rcTestScope_TestRes[i].BottomRight().y + 10;
-					rcText.BottomRight().x = m_rcTestScope_TestRes[i].TopLeft().x + 500;
-					rcText.BottomRight().y = m_rcTestScope_TestRes[i].BottomRight().y + 100;
+							string stdStr(CW2A(m_vstrCharacter[i].GetString()));
 
-					if (m_bIsWindowShow)
-					{
-						pDC->DrawTextW(strPart, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+							string stdStr_Fir = stdStr.substr(0, nFirRow);
+							string stdStr_Sec = stdStr.substr(nFirRow, nSecRow);
+
+							CString strFir(stdStr_Fir.c_str());
+							CString strSec(stdStr_Sec.c_str());
+
+							strPart = _T("字符：") + strFir + _T("\n") + _T("         ") + strSec;
+						}
+
+						if (m_vnTestRes.size())
+						{
+							if (m_vnTestRes[i] == FALSE)
+							{
+								pDC->SetTextColor(RGB(255,0,0));
+								pDC->SelectObject(pen_rcTestScope_Res_NG);
+								pDC->Rectangle(m_rcTestScope_TestRes[i]);				
+							}
+							else
+							{
+								pDC->SetTextColor(RGB(0,0,255));
+								pDC->SelectObject(pen_rcTestScope);
+							}
+						}
+
+						rcCharacter.TopLeft().x = m_rcTestScope_TestRes[i].TopLeft().x;
+						rcCharacter.TopLeft().y = m_rcTestScope_TestRes[i].BottomRight().y + 10;
+						rcCharacter.BottomRight().x = m_rcTestScope_TestRes[i].TopLeft().x + 500;
+						rcCharacter.BottomRight().y = m_rcTestScope_TestRes[i].BottomRight().y + 100;
+
+						if (m_bIsWindowShow)
+						{
+							pDC->DrawTextW(strPart, &rcCharacter, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+						}
 					}
-				}
-				if (m_vstrCharacter.size() <= 0)
-				{
-					strPart.Empty();
-					
-					if (m_bIsWindowShow)
+					if (m_vstrCharacter.size() <= 0)
 					{
-						rcText.TopLeft().x = rcClient.TopLeft().x + 10;
-						rcText.TopLeft().y = rcClient.TopLeft().y + 10;
-						rcText.BottomRight().x = rcClient.BottomRight().x + 200;
-						rcText.BottomRight().y = rcClient.BottomRight().y + 200;
-						pDC->DrawTextW(strPart, &rcText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+						strPart.Empty();
+						if (m_bIsWindowShow)
+						{
+							rcCharacter.TopLeft().x     = nClient_L + 10;
+							rcCharacter.TopLeft().y     = nClient_T + 10;
+							rcCharacter.BottomRight().x = nClient_R + 200;
+							rcCharacter.BottomRight().y = nClient_B + 200;
+							pDC->DrawTextW(strPart, &rcCharacter, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+						}
 					}
 				}
 				break;
@@ -2408,7 +2407,7 @@ CHECK:
 				cvContours vOutlineTemp;
 				findContours(ImgTarget, vOutlineTemp, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);//提取輪廓
 
-				if (vOutlineTemp.size() == 0)
+				if (vOutlineTemp.size() <= 1 && m_SpecialPos->m_nGetStandardMethod != GET_STANDARD_METHOD_CUSTOM_LINE)
 				{
 					return FALSE;
 				}

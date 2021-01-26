@@ -510,7 +510,8 @@ public:
 
 	double m_dAngleLimit_H;//角度偏移上限
 	double m_dAngleLimit_L;//角度偏移下限
-	vector<Point2i> m_vptFlatLine;//如需測試與基準線角度，則用該變量保存擬合直線的點
+
+	vector<Point2i> m_vptFlatLine;//需要基準線配合測量，該變量保存擬合直線的點
 
 	int m_nCharacterRows;//字符行數
 
@@ -620,7 +621,7 @@ public:
 	BOOL GetColSurface(int & nValidPixelCounter, double & dColAreaPropor, double & dRepeatAreaPropor_1, double & dRepeatAreaPropor_2, double & dRepeatAreaPropor_3);//檢測表面顏色
 	double m_dColSurfaceResType;//用於區分焊點檢測不良項目，漏焊 or 連錫
 
-	BOOL GetFlatness(vector<vector<Point2i>> & vvnTestPosValue);//平整度檢測
+	BOOL GetFlatness(vector<vector<Point2i>> & vvnTestPosValue);//平整度檢測，vvnTestPosValue計算出的上下左右中，五個點的坐標
 
 	BOOL GetCharacter(CString & strCharacter, vector<int> & vnCharacterPixel);
 

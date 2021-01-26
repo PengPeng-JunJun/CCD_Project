@@ -3926,9 +3926,8 @@ BOOL CTestConfigura::GetColSurface(int & nValidPixelCounter, double & dColAreaPr
 
 BOOL CTestConfigura::GetFlatness(vector<vector<Point2i>> & vvptTestPosValue)
 {
-	vvptTestPosValue.clear();
-
 	CMsgBox MsgBox(this);
+	vvptTestPosValue.clear();
 
 	m_vptFlatLine.clear();
 
@@ -6026,14 +6025,8 @@ vector<Point2i> CTestConfigura::_GetContoursLimitPos(vector<Point2i> nvContoursS
 
 void CTestConfigura::_ContoursPosSort(cvContours & vContours, int nContoursDir) const
 {
-	if (nContoursDir == TEST_TARGET_DIR_X)
-	{
-		std::sort(vContours.begin(), vContours.end(), ContoursSortFun_PosX);
-	}
-	else
-	{
-		std::sort(vContours.begin(), vContours.end(), ContoursSortFun_PosY);
-	}
+	nContoursDir == TEST_TARGET_DIR_X ? sort(vContours.begin(), vContours.end(), ContoursSortFun_PosX) : 
+										sort(vContours.begin(), vContours.end(), ContoursSortFun_PosY);
 }
 
 
