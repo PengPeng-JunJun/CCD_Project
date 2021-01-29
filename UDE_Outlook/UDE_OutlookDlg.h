@@ -151,6 +151,7 @@ protected:
 
 	int m_nCommuniType;//軟件通訊方式
 
+	int m_nShowResTextType;
 public:
 	void ItemClickMenuAppMain(LPCTSTR strMenu, LPCTSTR strItem, short nItemPos, BOOL bChecked, long nFlags);
 	void StatusChangedSwAppLock(BOOL bStatus);

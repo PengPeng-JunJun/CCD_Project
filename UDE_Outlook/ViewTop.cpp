@@ -8,6 +8,8 @@
 
 // CViewTop 对话框
 
+int CViewTop::m_nShowResTextType = NG_ONLY;
+
 IMPLEMENT_DYNAMIC(CViewTop, CFigureBase)
 
 CViewTop::CViewTop(CWnd* pParent /*=NULL*/)
@@ -55,7 +57,6 @@ CViewTop::CViewTop(CWnd* pParent /*=NULL*/)
 	, m_strTestName(_T(""))
 	, m_nTestFinishSet(0)
 	, m_nTestFinishCounter(0)
-	
 {
 	m_vdColSortArea.clear();
 	m_vdColSort_H.clear();
@@ -218,7 +219,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	const int nClient_R = rcClient.BottomRight().x;
 	const int nClient_B = rcClient.BottomRight().y;
 
-	CRect rcRes(nClient_L + 10, nClient_T + 10, nClient_L + 200, nClient_T + 200);//結果顯示矩形，在屏幕的左上角
+	CRect rcRes(nClient_L + 10, nClient_T + 10, nClient_L + 800, nClient_T + 800);//結果顯示矩形，在屏幕的左上角
 
 	static CFont fontGrade;
 	static CFont fontResult;
@@ -745,7 +746,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	if (m_bIsWindowShow)
 	{
 		CString strRunTime;
-		strRunTime.Format(_T("運行時長 %.1f ms"), m_dEndTime);
+		strRunTime.Format(_T("運行時長 %.1f ms"), m_dEndTime); 
 		pDC->SetTextColor(RGB(255,0,0));
 		CRect rcRunTimeText(nClient_L + 10, nClient_B - 20, nClient_L + 200, nClient_B - 5);
 		pDC->DrawTextW(strRunTime, &rcRunTimeText, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
@@ -777,6 +778,10 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 	CString strPart = _T("");
 	pDC->SelectObject(fontResult);
 
+	BOOL bResTextColor = FALSE;//TRUE  結果字符顏色不同
+	vector<CString> vstrResText;//結果提提用顏色區別，結果字符向量
+	vector<COLORREF> vcolResCol;//結果提提用顏色區別，結果顏色向量
+	
 	if (m_nTestProject > 0)
 	{
 		if (m_bFindMark)
@@ -793,32 +798,39 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 					{
 						if (m_vnTestRes.size() > 0)
 						{
-							if (m_vnTestRes[i] == FALSE)
+							bResTextColor = TRUE;
+
+							switch ((*m_TestConfig[i])->m_nTestMethod)
 							{
+							case TEST_VALID_PIXEL_PROPOR:
+								strText.Format(_T("範圍 %d 像素 = %d 像素比例差值 = %.3f%%"), i + 1, m_vnValidPixelCounter[i], m_vdColAreaPropor[i] * 100 - 100);
+								break;
+							case TEST_VALID_PIXEL_PIX:
+								strText.Format(_T("範圍 %d 像素 = %.1f"), i + 1, m_vdColAreaPropor[i]);
+								break;
+							case TEST_VALID_PIXEL_AREA://測試方式為單位面積時，比例中的值是經過計算的面積值
+								strText.Format(_T("範圍 %d 面積 = %.2f mm2"), i + 1, m_vdColAreaPropor[i]);
+								break;
+							case TEST_VALID_PIXEL_LENGTH:
+								strText.Format(_T("範圍 %d 長度Max = %.2f mm"), i + 1, m_vdColAreaPropor[i]);
+								break;
+							case TEST_VALID_PIXEL_WIDTH:
+								strText.Format(_T("範圍 %d 寬度Max = %.2f mm"), i + 1, m_vdColAreaPropor[i]);
+								break;
+							default:
+								break;
+							}
+							vstrResText.push_back(strText);
+
+							if (m_vnTestRes[i])
+							{
+								vcolResCol.push_back(RGB(0, 255, 255));
+							}
+							else
+							{
+								vcolResCol.push_back(RGB(255, 0, 0));
 								pDC->SelectObject(pen_rcTestScope_Res_NG);
 								pDC->Rectangle(m_rcTestScope_TestRes[i]);
-
-								switch ((*m_TestConfig[i])->m_nTestMethod)
-								{
-								case TEST_VALID_PIXEL_PROPOR:
-									strText.Format(_T("範圍 %d 像素 = %d 像素比例差值 = %.3f%%\n"), i + 1, m_vnValidPixelCounter[i], m_vdColAreaPropor[i] * 100 - 100);
-									break;
-								case TEST_VALID_PIXEL_PIX:
-									strText.Format(_T("範圍 %d 像素 = %.1f\n"), i + 1, m_vdColAreaPropor[i]);
-									break;
-								case TEST_VALID_PIXEL_AREA://測試方式為單位面積時，比例中的值是經過計算的面積值
-									strText.Format(_T("範圍 %d 面積 = %.2f mm2\n"), i + 1, m_vdColAreaPropor[i]);
-									break;
-								case TEST_VALID_PIXEL_LENGTH:
-									strText.Format(_T("範圍 %d 長度Max = %.2f mm\n"), i + 1, m_vdColAreaPropor[i]);
-									break;
-								case TEST_VALID_PIXEL_WIDTH:
-									strText.Format(_T("範圍 %d 寬度Max = %.2f mm\n"), i + 1, m_vdColAreaPropor[i]);
-									break;
-								default:
-									break;
-								}
-								strPart = strPart + strText;
 							}
 						}
 					}
@@ -1020,25 +1032,33 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 						{
 							if (m_vnTestRes.size() > 0)
 							{
-								if (m_vnTestRes[i] == FALSE)
+								bResTextColor = TRUE;
+
+								strPart.Empty();
+								strText.Format(_T("範圍%d 有效比例 = %.2f%%, 漏焊比例 = %.2f%%"), i + 1, (m_vdColAreaPropor[i] * 100), m_vdRepeatAreaPropor_1[i] * 100);
+								strPart.Append(strText);
+
+								if ((*m_TestConfig[i])->m_dRepeatAreaLimit_H2 > 0)
 								{
+									strText.Format(_T(", 孔洞比例 = %.2f%%"), m_vdRepeatAreaPropor_2[i] * 100);
+									strPart.Append(strText);
+								}
+								if ((*m_TestConfig[i])->m_dRepeatAreaLimit_H3 > 0)
+								{
+									strText.Format(_T(", PIN尖比例 = %.2f%%"), m_vdRepeatAreaPropor_3[i] * 100);
+									strPart.Append(strText);
+								}
+								vstrResText.push_back(strPart);
+
+								if (m_vnTestRes[i])
+								{
+									vcolResCol.push_back(RGB(0, 255, 255));
+								}
+								else
+								{
+									vcolResCol.push_back(RGB(255, 0, 0));
 									pDC->SelectObject(pen_rcTestScope_Res_NG);
 									pDC->Rectangle(m_rcTestScope_TestRes[i]);
-									
-									strText.Format(_T("範圍%d 有效比例 = %.2f%%, 漏焊比例 = %.2f%%"), i + 1, (m_vdColAreaPropor[i] * 100), m_vdRepeatAreaPropor_1[i] * 100);
-									strPart = strPart + strText;
-
-									if ((*m_TestConfig[i])->m_dRepeatAreaLimit_H2 > 0)
-									{
-										strText.Format(_T(", 孔洞比例 = %.2f%%"), m_vdRepeatAreaPropor_2[i] * 100);
-										strPart += strText;
-									}
-									if ((*m_TestConfig[i])->m_dRepeatAreaLimit_H3 > 0)
-									{
-										strText.Format(_T(", PIN尖比例 = %.2f%%"), m_vdRepeatAreaPropor_3[i] * 100);
-										strPart += strText;
-									}
-									strPart += _T("\n");
 								}
 							}
 						}
@@ -1061,13 +1081,14 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 						{
 							if (m_vdAngle_Flatness[i] != 400)
 							{
-								strText.Format(_T("範圍 %d 高度差 %5.3fmm，夾角角度 %.2f°\n"), i + 1, m_vdHighDiffMax[i], m_vdAngle_Flatness[i]);
+								strText.Format(_T("範圍 %d 高度差 %5.3fmm，夾角角度 %.2f°"), i + 1, m_vdHighDiffMax[i], m_vdAngle_Flatness[i]);
 							}
 							else
 							{
-								strText.Format(_T("範圍 %d 高度差 %5.3fmm\n"), i + 1, m_vdHighDiffMax[i]);
+								strText.Format(_T("範圍 %d 高度差 %5.3fmm"), i + 1, m_vdHighDiffMax[i]);
 							}
-							strPart = strPart + strText;
+							vstrResText.push_back(strText);
+
 							for (size_t j = 0; j < m_vvvptTestPosValue[i].size(); j++)
 							{
 								if ((*m_TestConfig[i])->m_nTestTargetDir == TEST_TARGET_DIR_X)
@@ -1085,14 +1106,18 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 								ptEnd.y  = (int)((double)ptEnd.y / fProportion + m_rcTestScope[i].TopLeft().y);
 								if (m_vnTestRes.size())
 								{
-									if (m_vnTestRes[i] == FALSE)
+									bResTextColor = TRUE;
+
+									if (m_vnTestRes[i])
 									{
-										pDC->SelectObject(pen_rcTestScope_Res_NG);
-										pDC->Rectangle(m_rcTestScope_TestRes[i]);				
+										pDC->SelectObject(pen_rcTestScope);
+										vcolResCol.push_back(RGB(0, 255, 255));
 									}
 									else
 									{
-										pDC->SelectObject(pen_rcTestScope);
+										vcolResCol.push_back(RGB(255, 0, 0));
+										pDC->SelectObject(pen_rcTestScope_Res_NG);
+										pDC->Rectangle(m_rcTestScope_TestRes[i]);	
 									}
 								}
 								
@@ -1106,19 +1131,35 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 					{
 						if(m_vdHighDiffMax.size())
 						{
-							strText.Format(_T("範圍 %d 最大高度差 %5.3fmm\n"), i + 1, m_vdHighDiffMax[i]);
-							strPart = strPart + strText;
-						}
+							strText.Format(_T("最大高度差 %5.3fmm"), m_vdHighDiffMax[i]);
+							vstrResText.push_back(strText);
+
+							if(m_vdHighDiffMax[i] > (*m_TestConfig[i])->m_dOffsetLengthLimitH)
+							{
+								vcolResCol.push_back(RGB(255, 0, 0));
+							}
+							else
+							{
+								vcolResCol.push_back(RGB(0, 255, 255));
+							}
+						}	
+						
 						if (m_vdLength_Flatness.size())
 						{
 							const double dLengthH = (*m_TestConfig[i])->m_dLengthLimitH;
 							const double dLengthL = (*m_TestConfig[i])->m_dLengthLimitL;
 							for (size_t k = 0; k < m_vdLength_Flatness.size(); k++)
 							{
+								strText.Format(_T("輪廓%d  尺寸%.3fmm"), k + 1, m_vdLength_Flatness[k]);
+								vstrResText.push_back(strText);
+
 								if ((m_vdLength_Flatness[k] > dLengthH) || (m_vdLength_Flatness[k] < dLengthL))
 								{
-									strText.Format(_T("範圍 %d 輪廓%d異常  尺寸%5.3fmm\n"), i + 1, k + 1, m_vdLength_Flatness[k]);
-									strPart = strPart + strText;
+									vcolResCol.push_back(RGB(255, 0, 0));
+								}
+								else
+								{
+									vcolResCol.push_back(RGB(0, 255, 255));
 								}
 							}
 						}
@@ -1126,34 +1167,37 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 						{
 							const double dDistanceH = (*m_TestConfig[i])->m_dDistanceLimit_H;
 							const double dDistanceL = (*m_TestConfig[i])->m_dDistanceLimit_L;
-
 							for (size_t k = 0; k < m_vdDistance_Flatness.size(); k++)
 							{
+								strText.Format(_T("間距%d 尺寸%.3fmm"), k + 1, m_vdDistance_Flatness[k]);
+								vstrResText.push_back(strText);
+
 								if ((m_vdDistance_Flatness[k] > dDistanceH) || (m_vdDistance_Flatness[k] < dDistanceL))
 								{
-									strText.Format(_T("範圍 %d 間距%d異常  尺寸%5.3fmm\n"), i + 1, k + 1, m_vdDistance_Flatness[k]);
-									strPart = strPart + strText;
-								}
-							}
-						}
-
-						for (size_t j = 0; j < 2; j++)
-						{
-							if (m_vnTestRes.size())
-							{
-								if (m_vnTestRes[i] == FALSE)
-								{
-									pDC->SelectObject(pen_rcTestScope_Res_NG);
-									pDC->Rectangle(m_rcTestScope_TestRes[i]);				
+									vcolResCol.push_back(RGB(255, 0, 0));
 								}
 								else
 								{
-									pDC->SelectObject(pen_rcTestScope);
+									vcolResCol.push_back(RGB(0, 255, 255));
 								}
 							}
+						}
+
+						if (m_vnTestRes.size())
+						{
+							bResTextColor = TRUE;
+							if (m_vnTestRes[i])
+							{
+								pDC->SelectObject(pen_rcTestScope);
+							}
+							else
+							{
+								pDC->SelectObject(pen_rcTestScope_Res_NG);
+								pDC->Rectangle(m_rcTestScope_TestRes[i]);
+							}
+						}
 							/*pDC->MoveTo(ptStar.x, ptStar.y);
 							pDC->LineTo(ptEnd.x, ptEnd.y);*/
-						}
 					}
 				}
 				break;
@@ -1193,7 +1237,7 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 							}
 							else
 							{
-								pDC->SetTextColor(RGB(0,0,255));
+								pDC->SetTextColor(RGB(0,255,255));
 								pDC->SelectObject(pen_rcTestScope);
 							}
 						}
@@ -1242,11 +1286,37 @@ void CViewTop::DrawFigure(CDC * pDC, CRect rcDraw)
 		}
 		if (m_nTestProject != TEST_CHARACTER)
 		{
-			pDC->SetTextColor(RGB(255,0,0));
-
 			if (m_bIsWindowShow)
 			{
-				pDC->DrawTextW(strPart, &rcRes, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+				if (bResTextColor && (vstrResText.size() == vcolResCol.size()))
+				{
+					const int nTextHight = 18;
+					int nRectCounter = 0;
+					for (size_t i = 0; i < vstrResText.size(); i++)
+					{
+						if (vcolResCol[i] == RGB(255, 0, 0) && m_nShowResTextType != OK_ONLY)
+						{
+							pDC->SetTextColor(vcolResCol[i]);
+							CRect rcResTemp(nClient_L + 10, nClient_T + 5 + nTextHight * nRectCounter, 
+								nClient_L + 800, nClient_T + 5 + nTextHight * (nRectCounter + 1));//結果顯示矩形，在屏幕的左上角
+							pDC->DrawTextW(vstrResText[i], &rcResTemp, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX); 
+							nRectCounter++;
+						}
+						if (vcolResCol[i] == RGB(0, 255, 255) && m_nShowResTextType != NG_ONLY)
+						{
+							pDC->SetTextColor(vcolResCol[i]);
+							CRect rcResTemp(nClient_L + 10, nClient_T + 5 + nTextHight * nRectCounter, 
+								nClient_L + 800, nClient_T + 5 + nTextHight * (nRectCounter + 1));//結果顯示矩形，在屏幕的左上角
+							pDC->DrawTextW(vstrResText[i], &rcResTemp, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX); 
+							nRectCounter++;
+						}						
+					}
+				}
+				else
+				{
+					pDC->SetTextColor(RGB(255,0,0));
+					pDC->DrawTextW(strPart, &rcRes, DT_EDITCONTROL|DT_LEFT|DT_NOPREFIX);
+				}
 			}
 		}
 	}

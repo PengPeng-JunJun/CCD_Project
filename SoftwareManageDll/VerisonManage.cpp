@@ -117,9 +117,13 @@ void CVerisonManage::_ShowInfo()
 	UpdateInfoTemp.strUpdateInfo = _T("1.新增擬合圓方法-GSL數學庫計算;2.修改平整度檢測結果顯示;3.修改平整度測試BUG");
 	deUpdateInfo.push_front(UpdateInfoTemp);
 
-	// 	UpdateInfoTemp.strUpdateDate = _T("V2.0.1  修改時間：2021年01月19日");
-	// 	UpdateInfoTemp.strUpdateInfo = _T("1.新增擬合圓方法-GSL數學庫計算;2.NG品與OK品測試結果字體顏色不同;3.修改平整度檢測結果顯示;4.修改平整度測試BUG");
-	// 	deUpdateInfo.push_front(UpdateInfoTemp);
+	UpdateInfoTemp.strUpdateDate = _T("V2.0.2  修改時間：2021年01月28日");
+	UpdateInfoTemp.strUpdateInfo = _T("1.NG品與OK品測試結果字體顏色不同;2.結果內容顯示可設置(默認值：僅顯示NG);3.菜單欄添加單項測試功能;4.修改刪除檢測框BUG;5.顯示模式改變無需密碼;6.修改加載檔案信息BUG");
+	deUpdateInfo.push_front(UpdateInfoTemp);
+
+// 	UpdateInfoTemp.strUpdateDate = _T("V2.0.2  修改時間：2021年01月27日");
+// 	UpdateInfoTemp.strUpdateInfo = _T("1.NG品與OK品測試結果字體顏色不同;2.修改刪除檢測框BUG");
+// 	deUpdateInfo.push_front(UpdateInfoTemp);
 
 	CValueCalculate ValueCalculate;
 	for (size_t i = 0; i < deUpdateInfo.size(); i++)

@@ -200,6 +200,7 @@ CUDE_OutlookDlg::CUDE_OutlookDlg(CWnd* pParent /*=NULL*/)
 	, m_nCommuniType(-1)
 	, m_nTestGroupBkup(-1)
 	, m_strWndText(_T(""))
+	, m_nShowResTextType(NG_ONLY)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_pControllerDlg.resize(247);
@@ -691,7 +692,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	{
 		m_Menu.EnableItemByPos(_T("文件"), nCounter, FALSE);
 	}
-	for (int nCounter = 0; nCounter < 7; nCounter++)
+	for (int nCounter = 0; nCounter < 8; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, FALSE);
 	}
@@ -707,7 +708,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	{
 		m_Menu.EnableItemByPos(_T("標記"), nCounter, FALSE);
 	}
-	for (int nCounter = 0; nCounter < 5; nCounter++)
+	for (int nCounter = 0; nCounter < 6; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("檢測"), nCounter, FALSE);
 	}
@@ -716,9 +717,18 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 	
 	const BOOL bLocked = _GetLockState(nLock, PSD_LEVEL_TE);
 
-	for (int nCounter = 2; nCounter < 6; nCounter++)
+	for (int nCounter = 2; nCounter < 7; nCounter++)
 	{
 		m_Menu.EnableItemByPos(_T("設置"), nCounter, TRUE);
+	}
+
+	for (int nCounter = 0; nCounter < 3; nCounter++)
+	{
+		m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
+	}
+	for (int nCounter = 0; nCounter < 3; nCounter++)
+	{
+		m_Menu.EnableItemByPos(_T("檢測結果顯示"), nCounter, TRUE);
 	}
 	for (int nCounter = 0; nCounter < 5; nCounter++)
 	{
@@ -759,10 +769,6 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		{
 			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, !g_bSystemRunStatus);
 		}
-		for (int nCounter = 0; nCounter < 3; nCounter++)
-		{
-			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, TRUE);
-		}
 		for (int nCounter = 0; nCounter < 5; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("通訊設置"), nCounter, !g_bSystemRunStatus);
@@ -778,7 +784,7 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 
 		if (!g_bSystemRunStatus && m_TestGroup.m_nCurGroup >= 0 && m_TestGroup.m_nCurRow >= 0 && m_nShowImageMode == SHOW_IMAGE_SINGLE)
 		{
-			for (int nCounter = 0; nCounter < 4; nCounter++)
+			for (int nCounter = 0; nCounter < 5; nCounter++)
 			{
 				m_Menu.EnableItemByPos(_T("檢測"), nCounter, TRUE);
 			}
@@ -808,10 +814,6 @@ void CUDE_OutlookDlg::LockCtrls(int nLock)
 		for (int nCounter = 0; nCounter < 2; nCounter++)
 		{
 			m_Menu.EnableItemByPos(_T("信號輸出模式"), nCounter, FALSE);
-		}
-		for (int nCounter = 0; nCounter < 3; nCounter++)
-		{
-			m_Menu.EnableItemByPos(_T("顯示模式"), nCounter, FALSE);
 		}
 		for (int nCounter = 0; nCounter < 5; nCounter++)
 		{
@@ -1404,6 +1406,8 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		case 5:
 			if (IDCANCEL == MsgBox.ShowMsg(_T("確認清除選中標記區域"),_T("確認"), MB_OKCANCEL | MB_ICONQUESTION))
 				return;
+
+			ClearTopWndText();
 			if (ViewTopCur->m_RectFocusInfo.bMainFocus)
 				ViewTopCur->m_rcMainPos.SetRectEmpty();
 			if (ViewTopCur->m_RectFocusInfo.bSlaveFocus)
@@ -1443,6 +1447,7 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 			if (IDCANCEL == MsgBox.ShowMsg(_T("確認清除所有標記區域"),_T("確認"), MB_OKCANCEL | MB_ICONQUESTION))
 				return;
 		
+			ClearTopWndText();
 			ViewTopCur->m_rcSearchScope.SetRectEmpty();
 			ViewTopCur->m_rcMainPos.SetRectEmpty();
 			ViewTopCur->m_rcSlavePos.SetRectEmpty();
@@ -1485,7 +1490,7 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 		if (nCurRow < 0)
 			return;
 
-		if (nItemPos <= 3)//對樣，坐標校正，A點校正，B點校正均需要圖像
+		if (nItemPos <= 4)//對樣，坐標校正，A點校正，B點校正，啟動測試均需要圖像
 		{
 			CString strErrInfo;
 			strErrInfo.Empty();
@@ -1605,6 +1610,28 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 			}
 			break;
 		case 4:
+			if (!m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bCheckFinish)
+			{
+				MsgBox.ShowMsg(_T("該測試項目未進行比例校正"),_T("ERROR"), MB_OK | MB_ICONWARNING);
+				return;
+			}
+			if (m_TestGroup.m_BL_TestProjectList.GetItemText(m_TestGroup.m_BL_TestProjectList.GetCurRow(), 2) == _T("形態對比"))
+			{
+				if (!m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_bCmpFinish)
+				{
+					MsgBox.ShowMsg(_T("該測試項目未對樣"),_T("ERROR"), MB_OK | MB_ICONWARNING);
+					return;
+				}
+			}
+
+			m_dStartTime = GetTickCount();// 取得开始时间
+			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->m_pCamImage = &m_CurrentImage;
+			m_TopWnd[m_TestGroup.m_nCurGroup][m_TestGroup.m_nCurRow]->PostMessage(WM_TESTSTART);
+			m_TestGroup.m_strAllInfo[m_TestGroup.m_nCurGroup][COL_MAX - 1][m_TestGroup.m_nCurRow].Empty();
+			m_TestGroup.m_BL_TestProjectList.SetItemText(m_TestGroup.m_nCurRow, COL_MAX - 1, _T(""));
+			m_CamStc[_ttoi(m_TestGroup.m_strAllInfo[m_TestGroup.m_nCurGroup][3][m_TestGroup.m_nCurRow]) - 1].m_nCamRes = 2;
+			break;
+		case 5:
 			if (!bChecked)
 			{
 				if (m_BL_AllTestRun.GetStatus())
@@ -1731,6 +1758,32 @@ void CUDE_OutlookDlg::_ClickMenuItem(LPCTSTR strMenu, LPCTSTR strItem, short nIt
 
 		}
 	}
+
+	if (strMenuName == _T("檢測結果顯示"))
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			m_Menu.CheckItemByPos(_T("檢測結果顯示"), i, FALSE);
+		}
+		if (strItemName == _T("僅顯示NG"))
+		{
+			m_nShowResTextType = NG_ONLY;
+			CViewTop::m_nShowResTextType = NG_ONLY;
+			m_Menu.CheckItemByPos(_T("檢測結果顯示"), 0, TRUE);
+		}
+		if (strItemName == _T("僅顯示OK"))
+		{
+			m_nShowResTextType = OK_ONLY;
+			CViewTop::m_nShowResTextType = OK_ONLY;
+			m_Menu.CheckItemByPos(_T("檢測結果顯示"), 1, TRUE);
+		}
+		if (strItemName == _T("同時顯示"))
+		{
+			m_nShowResTextType = OK_NG;
+			CViewTop::m_nShowResTextType = OK_NG;
+			m_Menu.CheckItemByPos(_T("檢測結果顯示"), 2, TRUE);
+		}
+	}
 }
 
 
@@ -1760,17 +1813,18 @@ void CUDE_OutlookDlg::SetMainMenu()
 		m_Menu.AddPopByPosPosPos(1, 0, 4, 0,_T("最近開啟檔案"), strHistoryPath);
 	}
 
-	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;光源設置...;拍照方式...;信號輸出模式...;顯示模式...;通訊設置...;連續檢測..."));
+	m_Menu.AddPopByPosPosPos(0, 1, 0, 0, _T("設置"), _T("串口設置...;光源設置...;拍照方式...;信號輸出模式...;通訊設置...;顯示模式...;檢測結果顯示...;連續檢測..."));
 	m_Menu.AddPopByPosPosPos(1, 1, 2, 0,_T("拍照方式"), _T("同時拍照;逐次拍照"));
 	m_Menu.AddPopByPosPosPos(1, 1, 3, 0,_T("信號輸出模式"), _T("標準模式;觸發模式"));
-	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
-	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("通訊設置"), _T("進程間通訊;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
-	
+	m_Menu.AddPopByPosPosPos(1, 1, 4, 0,_T("通訊設置"), _T("進程間通訊;Modebus協議;串口自定義協議;IO板卡;網絡分佈式IO"));
+	m_Menu.AddPopByPosPosPos(1, 1, 5, 0,_T("顯示模式"), _T("單畫面顯示;多畫面顯示;全屏顯示"));
+	m_Menu.AddPopByPosPosPos(1, 1, 6, 0,_T("檢測結果顯示"), _T("僅顯示NG;僅顯示OK;同時顯示"));
+
 	m_Menu.AddPopByPosPosPos(0, 2, 0, 0, _T("功能"), _T("樣本採集...;機器學習..."));
 	m_Menu.AddPopByPosPosPos(0, 3, 0, 0, _T("視圖"), _T("參數變更記錄...;IPQC點檢界面...;"));
 	m_Menu.AddPopByPosPosPos(0, 4, 0, 0, _T("圖像"), _T("圖像保存...;加載圖像...@Ctrl+D;製作模板圖像...;拍照...;顯示動態圖像..."));
 	m_Menu.AddPopByPosPosPos(0, 5, 0, 0, _T("標記"), _T("搜尋範圍...;主定位點...;次定位點...;檢測區域...;基準線標記...;清除選中標記...;清除所有標記...;顯示定位尺寸..."));
-	m_Menu.AddPopByPosPosPos(0, 6, 0, 0, _T("檢測"), _T("對樣...;坐標校正...;A點校正...;B點校正..;Space啟動檢測..."));
+	m_Menu.AddPopByPosPosPos(0, 6, 0, 0, _T("檢測"), _T("對樣...;坐標校正...;A點校正...;B點校正...;啟動檢測...;Space啟動檢測..."));
 	m_Menu.AddPopByPosPosPos(0, 7, 0, 0, _T("幫助"), _T("關於...;軟體註冊..."));
 
 	m_Menu.SetItemFont(_T("微软雅黑,15pt"));
@@ -1841,7 +1895,22 @@ void CUDE_OutlookDlg::SetMainMenu()
 		break;
 	}
 
-	m_Menu.CheckItemByPos(_T("設置"), 6, m_bTestContinue);
+	switch (m_nShowResTextType)
+	{
+	case NG_ONLY:
+		m_Menu.CheckItemByPos(_T("檢測結果顯示"), 0, TRUE);
+		break;
+	case OK_ONLY:
+		m_Menu.CheckItemByPos(_T("檢測結果顯示"), 1, TRUE);
+		break;
+	case OK_NG:
+		m_Menu.CheckItemByPos(_T("檢測結果顯示"), 2, TRUE);
+		break;
+	default:
+		break;
+	}
+
+	m_Menu.CheckItemByPos(_T("設置"), 7, m_bTestContinue);
 	
 }
 
@@ -2637,11 +2706,11 @@ void CUDE_OutlookDlg::_LoadFileInfo()
 	vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
 	if (vstrTem.size() > 1)
 	{
-		if (_ttoi(vstrTem[1]) >= 7)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 7) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> m_nGetImageMode;
 		}
-		if (_ttoi(vstrTem[1]) >= 18)
+		if ((_ttoi(vstrTem[0]) >= 1 && _ttoi(vstrTem[1]) >= 18) || (_ttoi(vstrTem[0]) >= 2))
 		{
 			ar >> m_bImageTrigger;
 			ar >> m_bAutoRunCheck;
@@ -2821,7 +2890,7 @@ void CUDE_OutlookDlg::StatusChangedBlAlltestrun(BOOL bStatus)
 		m_TestGroup._SetLockStatus();
 		m_BL_TestRunStatus.SetCaption(_T("停止運行"));
 		m_BL_TestRunStatus.SetForeColor(RGB(155, 64, 64));
-		m_Menu.CheckItemByPos(_T("檢測"), 4, FALSE);
+		m_Menu.CheckItemByPos(_T("檢測"), 5, FALSE);
 		m_bStarTestBySpace = FALSE;
 		m_bFinishTest = FALSE;
 
@@ -4086,7 +4155,7 @@ void CUDE_OutlookDlg::OnTimer(UINT_PTR nIDEvent)
 		break;
 	case 20:
 		KillTimer(20);
-		m_Menu.CheckItemByPos(_T("檢測"), 4, FALSE);
+		m_Menu.CheckItemByPos(_T("檢測"), 5, FALSE);
 		m_bStarTestBySpace = FALSE;
 		break;
 	case 30:

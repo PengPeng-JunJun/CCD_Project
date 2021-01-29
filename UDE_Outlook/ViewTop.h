@@ -106,6 +106,13 @@ using namespace std;
 #define USED_THREAD_COUNTER  8
 
 
+enum SHOW_RES_TEXT_TYPE
+{
+	NG_ONLY,
+	OK_ONLY,
+	OK_NG
+};
+
 class CViewTop : public CFigureBase// , public CAppBase
 {
 	
@@ -189,6 +196,8 @@ public:
 	}RECT_FOCUS_INFO;//矩形焦點結構體
 
 	RECT_FOCUS_INFO m_RectFocusInfo;
+
+	static int m_nShowResTextType;//顯示結果字體的類型，只顯示NG，顯示OK和NG
 
 public:
 
