@@ -3,12 +3,12 @@
 #include "math.h"
 #include <vector>
 
-#include "..\\FindFileDll\FindCtrlFile.h"
+#include "..\\FileOperateDll\\SearchFile.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "..\\Debug\\FindFileDll.lib")
+#pragma comment(lib, "..\\Debug\\FileOperateDll.lib")
 #else
-#pragma comment(lib, "..\\Release\\FindFileDll.lib")
+#pragma comment(lib, "..\\Release\\FileOperateDll.lib")
 #endif
 
 #define  Bin   2

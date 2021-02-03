@@ -6275,6 +6275,7 @@ void CViewTop::Serialize(CArchive& ar)
 	}
 	else
 	{	// loading code
+
 		vector<CString> vstrTem;
 		vstrTem = m_ValueCalculate.CutStringElse(m_strSoftwareVersion, '.');
 

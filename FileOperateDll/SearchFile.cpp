@@ -1,18 +1,19 @@
 #include "stdafx.h"
-#include "FindCtrlFile.h"
+#include "SearchFile.h"
 
 CString g_strExePath = _T("");
 
-CFindCtrlFile::CFindCtrlFile(void)
+CSearchFile::CSearchFile(void)
 {
 }
 
 
-CFindCtrlFile::~CFindCtrlFile(void)
+CSearchFile::~CSearchFile(void)
 {
 }
 
-BOOL CFindCtrlFile::SearchControllerFile()
+
+BOOL CSearchFile::SearchControllerFile()
 {
 	CString strFolderPath;
 
@@ -35,7 +36,7 @@ BOOL CFindCtrlFile::SearchControllerFile()
 }
 
 
-BOOL CFindCtrlFile::SearchReportFile()
+BOOL CSearchFile::SearchReportFile()
 {
 	CString strFolderPath;
 	strFolderPath = g_strExePath + _T("\\Report");
@@ -61,7 +62,7 @@ BOOL CFindCtrlFile::SearchReportFile()
 	return TRUE;
 }
 
-BOOL CFindCtrlFile::SearchTemplateFile()
+BOOL CSearchFile::SearchTemplateFile()
 {
 	CString strFolderPath;
 	strFolderPath = g_strExePath + _T("\\Template");
@@ -82,7 +83,7 @@ BOOL CFindCtrlFile::SearchTemplateFile()
 	return TRUE;
 }
 
-BOOL CFindCtrlFile::SearchImageFile()
+BOOL CSearchFile::SearchImageFile()
 {
 	CString strFolderPath;
 	strFolderPath = g_strExePath + _T("\\NG_Img");
@@ -114,7 +115,7 @@ BOOL CFindCtrlFile::SearchImageFile()
 }
 
 
-BOOL CFindCtrlFile::SearchFile(CString strPath, BOOL & bIfCreate)
+BOOL CSearchFile::SearchFile(CString strPath, BOOL & bIfCreate)
 {
 	CString strFolderPath;
 	strFolderPath = g_strExePath + strPath;
@@ -136,7 +137,7 @@ BOOL CFindCtrlFile::SearchFile(CString strPath, BOOL & bIfCreate)
 	return TRUE;
 }
 
-CString CFindCtrlFile:: GetExePath(void)  
+CString CSearchFile:: GetExePath(void)  
 {  
 	CString strExePath;  
 	GetModuleFileName(NULL, strExePath.GetBuffer(MAX_PATH), MAX_PATH);  
@@ -146,7 +147,7 @@ CString CFindCtrlFile:: GetExePath(void)
 	return strExePath;  
 }
 
-CString CFindCtrlFile::LoadSignalData(CString strFileName)
+CString CSearchFile::LoadSignalData(CString strFileName)
 {
 	CString strFilePath;
 	strFilePath = g_strExePath + _T("\\Controller\\") + strFileName + _T(".ini");
@@ -171,7 +172,7 @@ CString CFindCtrlFile::LoadSignalData(CString strFileName)
 	
 }
 
-BOOL CFindCtrlFile::CheckFile(CString strFilePath)//查找是否存在文件
+BOOL CSearchFile::CheckFile(CString strFilePath)//查找是否存在文件
 {
 	if (GetFileAttributes(strFilePath) != -1) //如果文件存在
 	{
@@ -190,7 +191,7 @@ BOOL CFindCtrlFile::CheckFile(CString strFilePath)//查找是否存在文件
     pair<string,string>类型的数组，map<文件名，文件路径>
 ************************************************************************/
 
-vector<pair<CString,CString>> CFindCtrlFile::FindFilesInDirecotry(CString fileName,CString directory, int & filecounter)
+vector<pair<CString,CString>> CSearchFile::FindFilesInDirecotry(CString fileName,CString directory, int & filecounter)
 {
 	vector<pair<CString,CString>> files;
 
@@ -227,7 +228,7 @@ vector<pair<CString,CString>> CFindCtrlFile::FindFilesInDirecotry(CString fileNa
     pair<string,string>类型的数组，map<文件名，文件路径>
 ************************************************************************/
 
-vector<pair<CString,CString>> CFindCtrlFile::FindFilesInDirecotryRecursion( CString fileName, CString directory, int recursionCount, int & filecounter, vector <CString> & vstrFileName)
+vector<pair<CString,CString>> CSearchFile::FindFilesInDirecotryRecursion( CString fileName, CString directory, int recursionCount, int & filecounter, vector <CString> & vstrFileName)
 {
 	vector<pair<CString,CString>> files;
 	
@@ -275,7 +276,7 @@ vector<pair<CString,CString>> CFindCtrlFile::FindFilesInDirecotryRecursion( CStr
 }
 
 // 删除文件（第二个参数bDelete表示是否删除至回收站,默认删除到回收站）  
-BOOL CFindCtrlFile::RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/)  
+BOOL CSearchFile::RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/)  
 {  
 	strPath += '\0';  
 	SHFILEOPSTRUCT  shDelFile;  
@@ -303,7 +304,7 @@ BOOL CFindCtrlFile::RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/)
 
 
 
-vector<CString> CFindCtrlFile::_FindFile(CString strFolderName, CString strFileType)
+vector<CString> CSearchFile::_FindFile(CString strFolderName, CString strFileType)
 {
 	vector<CString> vstrPath;
 	CString m_cstrFileList=_T("");

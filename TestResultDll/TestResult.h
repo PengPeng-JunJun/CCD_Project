@@ -69,8 +69,6 @@ public:
 	CBL_Edit m_BL_edOKImagePath;
 	CBL_Edit m_BL_edNGImagePath;
 
-public:
-	CFindCtrlFile m_FindFile;
 protected:
 	afx_msg LRESULT OnGmsgTestResultUpdate(WPARAM wParam, LPARAM lParam);
 public:

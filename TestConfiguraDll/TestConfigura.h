@@ -52,6 +52,7 @@
 #include <cstring>
 using namespace std;
 
+
 // CTestConfigura 对话框
 extern BOOL _declspec(dllimport) g_bSystemRunStatus;//軟件運行狀態 TRUE-自動  FALSE-手動
 

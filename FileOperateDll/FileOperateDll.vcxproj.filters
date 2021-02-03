@@ -18,7 +18,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FindFileDll.cpp">
+    <ClCompile Include="FileOperateDll.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -27,15 +27,15 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FindCtrlFile.cpp">
+    <ClCompile Include="SearchFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FindFileDll.def">
+    <None Include="FileOperateDll.def">
       <Filter>源文件</Filter>
     </None>
-    <None Include="res\FindFileDll.rc2">
+    <None Include="res\FileOperateDll.rc2">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
@@ -49,12 +49,12 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="FindCtrlFile.h">
+    <ClInclude Include="SearchFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="FindFileDll.rc">
+    <ResourceCompile Include="FileOperateDll.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>

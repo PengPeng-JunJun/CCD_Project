@@ -9,7 +9,7 @@
 #define new DEBUG_NEW
 #endif
 
-static AFX_EXTENSION_MODULE FindFileDllDLL = { NULL, NULL };
+static AFX_EXTENSION_MODULE FileOperateDllDLL = { NULL, NULL };
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -19,10 +19,10 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		TRACE0("FindFileDll.DLL 正在初始化!\n");
+		TRACE0("FileOperateDll.DLL 正在初始化!\n");
 		
 		// 扩展 DLL 一次性初始化
-		if (!AfxInitExtensionModule(FindFileDllDLL, hInstance))
+		if (!AfxInitExtensionModule(FileOperateDllDLL, hInstance))
 			return 0;
 
 		// 将此 DLL 插入到资源链中
@@ -37,15 +37,15 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		//  规则 DLL 的资源链，并将导致严重的
 		//  问题。
 
-		new CDynLinkLibrary(FindFileDllDLL);
+		new CDynLinkLibrary(FileOperateDllDLL);
 
 	}
 	else if (dwReason == DLL_PROCESS_DETACH)
 	{
-		TRACE0("FindFileDll.DLL 正在终止!\n");
+		TRACE0("FileOperateDll.DLL 正在终止!\n");
 
 		// 在调用析构函数之前终止该库
-		AfxTermExtensionModule(FindFileDllDLL);
+		AfxTermExtensionModule(FileOperateDllDLL);
 	}
 	return 1;   // 确定
 }

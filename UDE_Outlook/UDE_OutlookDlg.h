@@ -20,7 +20,6 @@
 #include "..\\BlendWndDll\MsgBox.h"
 #include "..\\BlendWndDll\PsdMgr.h"
 #include "..\\CRCDll\\CRC.h"
-#include "..\\FindFileDll\FindCtrlFile.h"
 #include "..\\RegisterDll\RegisterDlg.h"
 #include "..\\LightDll\LightCtrl.h"
 #include "..\\ExcelDll\Excel.h"
@@ -48,11 +47,9 @@
 
 #include "tlhelp32.h"
 
-
 #ifdef _DEBUG
 #pragma comment(lib, "..\\Debug\\BlendWndDll.lib")
 #pragma comment(lib, "..\\Debug\\CRCDll.lib")
-#pragma comment(lib, "..\\Debug\\FindFileDll.lib")
 #pragma comment(lib, "..\\Debug\\CamMgrDll.lib")
 #pragma comment(lib, "..\\Debug\\RegisterDll.lib")
 #pragma comment(lib, "..\\Debug\\LightDll.lib")
@@ -65,7 +62,6 @@
 #else
 #pragma comment(lib, "..\\Release\\BlendWndDll.lib")
 #pragma comment(lib, "..\\Release\\CRCDll.lib")
-#pragma comment(lib, "..\\Release\\FindFileDll.lib")
 #pragma comment(lib, "..\\Release\\CamMgrDll.lib")
 #pragma comment(lib, "..\\Release\\RegisterDll.lib")
 #pragma comment(lib, "..\\Release\\LightDll.lib")
@@ -151,7 +147,11 @@ protected:
 
 	int m_nCommuniType;//軟件通訊方式
 
-	int m_nShowResTextType;
+	int m_nShowResTextType; 
+
+	int m_nCurLine;//當前執行行號
+
+	CString m_strSourcePath;//當前源文件路徑
 public:
 	void ItemClickMenuAppMain(LPCTSTR strMenu, LPCTSTR strItem, short nItemPos, BOOL bChecked, long nFlags);
 	void StatusChangedSwAppLock(BOOL bStatus);
@@ -173,7 +173,7 @@ public:
 
 	CBlender<CMLTrain> * m_pMLTrain;
 
-	CFindCtrlFile m_FindImageFile;
+	CSearchFile m_FindImageFile;
 
 	vector <CViewTop *> m_TopWnd_Child;
 	vector <vector <CViewTop *>> m_TopWnd;
@@ -238,7 +238,7 @@ public:
 
 public:
 	CCRC    m_CRC;
-	CFindCtrlFile m_FindCtrlFile;
+	//CSearchFile m_FindCtrlFile;
 
 	int m_nCurCam;//正在傳送圖像到主對話框的相機
 	CSmartImage m_CurrentImage;

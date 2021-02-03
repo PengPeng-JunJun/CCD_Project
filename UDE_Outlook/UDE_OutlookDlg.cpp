@@ -345,8 +345,8 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 
 	SetUnhandledExceptionFilter(ExceptionFilter);
 
-
-	m_FindCtrlFile.GetExePath();
+	CSearchFile t_GetExePath;
+	t_GetExePath.GetExePath();
 
 	if (m_strPassword != PROGRAM_LOCK_PASSWORD)
 	{
@@ -2253,7 +2253,10 @@ void CUDE_OutlookDlg::SearchControllerFile()
 {
 	CMsgBox MsgBox(this);
 	//判断路径是否存在   
-	if (!m_FindCtrlFile.SearchControllerFile())
+
+	CSearchFile t_CtrlFile;
+
+	if (!t_CtrlFile.SearchControllerFile())
 	{
 		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 		//m_Menu.EnableItemByName(_T("設置"), _T("添加設備"), FALSE);
@@ -2265,7 +2268,8 @@ void CUDE_OutlookDlg::SearchImageFile()
 {
 	CMsgBox MsgBox(this);
 	//判断路径是否存在   
-	if (!m_FindCtrlFile.SearchImageFile())
+	CSearchFile t_ImgFile;
+	if (!t_ImgFile.SearchImageFile())
 	{
 		MsgBox.ShowMsg(_T("未找到NG圖像文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 	}
@@ -2274,7 +2278,8 @@ void CUDE_OutlookDlg::SearchImageFile()
 void CUDE_OutlookDlg::SearchReportFile()
 {
 	CMsgBox MsgBox(this);
-	if (!m_FindCtrlFile.SearchReportFile())
+	CSearchFile t_ReportFile;
+	if (!t_ReportFile.SearchReportFile())
 	{
 		MsgBox.ShowMsg(_T("未找到報表放置文件夾!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 	}
@@ -4162,7 +4167,8 @@ void CUDE_OutlookDlg::OnTimer(UINT_PTR nIDEvent)
 		{
 			KillTimer(30);
 			
-			const vector<CString> vstr = m_FindCtrlFile._FindFile(_T("F:\\NG_Img\\3"), _T("bmp"));
+			CSearchFile t_ImgFile;
+			const vector<CString> vstr = t_ImgFile._FindFile(_T("F:\\NG_Img\\3"), _T("bmp"));
 
 			static int nImageCounter = 0;//
 			CString strPath;//
@@ -5135,6 +5141,10 @@ BOOL CUDE_OutlookDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 {
+	//const int nLine = __LINE__;//獲取程序在源程序中執行的行號
+
+	//const string str = __FILE__;
+
 	m_dStartTime = GetTickCount();// 取得开始时间
 
 	m_nFinishTest = 0;

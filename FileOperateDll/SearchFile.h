@@ -6,11 +6,12 @@ extern CString _declspec(dllimport) g_strExePath;//exe文件路徑
 
 using namespace std;
 
-class AFX_EXT_CLASS CFindCtrlFile
+class AFX_EXT_CLASS CSearchFile
 {
 public:
-	CFindCtrlFile(void);
-	~CFindCtrlFile(void);
+	CSearchFile(void);
+	~CSearchFile(void);
+
 public:
 	vector <CString> m_vstrFileName;
 public:
@@ -28,4 +29,3 @@ public:
 	BOOL RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/);
 	vector<CString> _FindFile(CString strFolderName, CString strFileType);//根據文件夾名稱和文件類型查找文件，返回文件路徑
 };
-

@@ -8,6 +8,7 @@
 #include "..\\LocatorDistanceDll\\LocatorDistance.h"
 #include "..\\TestConfiguraDll\\TestConfigura.h"
 #include "..\\TestResultDll\\TestResult.h"
+#include "..\\CodeLoggerDll\Logger.h"
 
 #include "TestLightInfo.h"
 #include "TestNameInfo.h"
@@ -38,6 +39,7 @@
 // CViewTop 对话框
 using namespace std;
 
+using namespace LOGGER;
 
 #define NO_CIRCLR_ERROR 32000
 #define MIAN_POS_EMPTY_ERROR 32001//主定位點不存在
@@ -249,8 +251,6 @@ public:
 	CBlender<CTestResult> m_TestResult;
 
 	CValueCalculate m_ValueCalculate;
-
-	CFindCtrlFile m_FindFile;
 
 	CBlender<CTestNameInfo> m_TestNameInfo;
 public:
