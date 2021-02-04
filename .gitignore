@@ -3,5 +3,6 @@
 *.txt
 *.opensdf
 *.ipch
+*.dump
 Debug/
 Release/

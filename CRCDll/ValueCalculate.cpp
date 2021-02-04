@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ValueCalculate.h"
 
+COperateFile g_LogFile;
+
+
 CValueCalculate::CValueCalculate(void)
 {
 }

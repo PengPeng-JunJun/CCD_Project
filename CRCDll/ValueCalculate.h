@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "..\\FileOperateDll\\SearchFile.h"
+#include "..\\FileOperateDll\\OperateFile.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "..\\Debug\\FileOperateDll.lib")
@@ -62,6 +63,8 @@
 #define	CRC32_MPEG_2_STRING  _T("CRC32_MPEG_2") 
 
 using namespace std;
+
+extern COperateFile _declspec(dllimport) g_LogFile;//日誌文件類對象（全局變量）
 
 class AFX_EXT_CLASS CValueCalculate
 {

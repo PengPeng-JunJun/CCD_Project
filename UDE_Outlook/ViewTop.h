@@ -164,6 +164,8 @@ public:
 	int m_nTestFinishSet;    //測試設置數量
 	int m_nTestFinishCounter;//測試完成數量
 
+	CString m_strLogInfo;
+
 	typedef struct _RECT_FOCUS_INFO
 	{
 		BOOL bMainFocus;

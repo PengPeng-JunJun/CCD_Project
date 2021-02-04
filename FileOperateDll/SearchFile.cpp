@@ -15,31 +15,18 @@ CSearchFile::~CSearchFile(void)
 
 BOOL CSearchFile::SearchControllerFile()
 {
-	CString strFolderPath;
+	const CString strFolderPath = g_strExePath + _T("\\Controller");
 
-	strFolderPath = g_strExePath + _T("\\Controller");
-
-	//判断路径是否存在   
 	if(!PathIsDirectory(strFolderPath))   
-	{
-		CString strMsg;
-		if(!CreateDirectory(strFolderPath,NULL))   
-		{   
-			return FALSE;
-		}
-		else
-		{
-			return TRUE;
-		}
-	}
+		return CreateDirectory(strFolderPath,NULL);
+
 	return TRUE;
 }
 
 
 BOOL CSearchFile::SearchReportFile()
 {
-	CString strFolderPath;
-	strFolderPath = g_strExePath + _T("\\Report");
+	CString strFolderPath = g_strExePath + _T("\\Report");
 
 	//判断路径是否存在   
 	if(!PathIsDirectory(strFolderPath))   
@@ -50,7 +37,9 @@ BOOL CSearchFile::SearchReportFile()
 		}
 	}
 
-	strFolderPath = g_strExePath + _T("\\Data");
+	strFolderPath.Empty();
+	strFolderPath.Append(g_strExePath);
+	strFolderPath.Append(_T("\\Data"));
 
 	if(!PathIsDirectory(strFolderPath))   
 	{
@@ -64,23 +53,14 @@ BOOL CSearchFile::SearchReportFile()
 
 BOOL CSearchFile::SearchTemplateFile()
 {
-	CString strFolderPath;
-	strFolderPath = g_strExePath + _T("\\Template");
+	const CString strFolderPath = g_strExePath + _T("\\Template");
 
 	//判断路径是否存在   
 	if(!PathIsDirectory(strFolderPath))   
-	{
-		CString strMsg;
-		if(!CreateDirectory(strFolderPath,NULL))   
-		{   
-			return FALSE;
-		}
-		else
-		{
-			return TRUE;
-		}
-	}
+		return CreateDirectory(strFolderPath,NULL);
+
 	return TRUE;
+
 }
 
 BOOL CSearchFile::SearchImageFile()
@@ -91,7 +71,6 @@ BOOL CSearchFile::SearchImageFile()
 	//判断路径是否存在   
 	if(!PathIsDirectory(strFolderPath))   
 	{
-		CString strMsg;
 		if(!CreateDirectory(strFolderPath,NULL))   
 		{   
 			return FALSE;
@@ -111,6 +90,18 @@ BOOL CSearchFile::SearchImageFile()
 			}
 		}
 	}
+	return TRUE;
+}
+
+BOOL CSearchFile::SearchLogFile()
+{
+	const CString strFolderPath = g_strExePath + _T("\\Log");
+
+	//判断路径是否存在   
+
+	if(!PathIsDirectory(strFolderPath))   
+		return CreateDirectory(strFolderPath,NULL);
+
 	return TRUE;
 }
 
@@ -274,34 +265,6 @@ vector<pair<CString,CString>> CSearchFile::FindFilesInDirecotryRecursion( CStrin
 	vstrFileName = m_vstrFileName;
 	return files;
 }
-
-// 删除文件（第二个参数bDelete表示是否删除至回收站,默认删除到回收站）  
-BOOL CSearchFile::RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/)  
-{  
-	strPath += '\0';  
-	SHFILEOPSTRUCT  shDelFile;  
-	memset(&shDelFile,0,sizeof(SHFILEOPSTRUCT));  
-	shDelFile.fFlags |= FOF_SILENT;             // 不显示进度  
-	shDelFile.fFlags |= FOF_NOERRORUI;          // 不报告错误信息  
-	shDelFile.fFlags |= FOF_NOCONFIRMATION;     // 直接删除，不进行确认  
-
-	// 设置SHFILEOPSTRUCT的参数为删除做准备  
-	shDelFile.wFunc = FO_DELETE;        // 执行的操作  
-	shDelFile.pFrom = strPath;          // 操作的对象，也就是目录（注意：以“\0\0”结尾）  
-	shDelFile.pTo = NULL;               // 必须设置为NULL  
-	if (bDelete) //根据传递的bDelete参数确定是否删除到回收站  
-	{      
-		shDelFile.fFlags &= ~FOF_ALLOWUNDO;    //直接删除，不进入回收站  
-	}   
-	else   
-	{             
-		shDelFile.fFlags |= FOF_ALLOWUNDO;    //删除到回收站  
-	}  
-
-	BOOL bres = SHFileOperation(&shDelFile);    //删除  
-	return !bres;  
-}
-
 
 
 vector<CString> CSearchFile::_FindFile(CString strFolderName, CString strFileType)

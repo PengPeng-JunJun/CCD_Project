@@ -19,6 +19,9 @@ public:
 	BOOL SearchReportFile();
 	BOOL SearchTemplateFile();
 	BOOL SearchImageFile();
+	BOOL SearchLogFile();
+
+
 	BOOL SearchFile(CString strPath, BOOL & bIfCreate);
 	CString GetExePath();//获取exe路径
 	CString LoadSignalData(CString strFileName);
@@ -26,6 +29,5 @@ public:
 
 	vector<pair<CString,CString>> FindFilesInDirecotry(CString fileName, CString directory, int & filecounter);
 	vector<pair<CString,CString>> FindFilesInDirecotryRecursion( CString fileName, CString directory, int recursionCount, int & filecounter, vector <CString> & vstrFileName);
-	BOOL RecycleFileOrFolder(CString strPath, BOOL bDelete/*=FALSE*/);
 	vector<CString> _FindFile(CString strFolderName, CString strFileType);//根據文件夾名稱和文件類型查找文件，返回文件路徑
 };

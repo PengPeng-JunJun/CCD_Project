@@ -340,13 +340,16 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 	// 设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 
+	CSearchFile t_GetExePath;
+	t_GetExePath.GetExePath();
+
+	m_strLogInfo.Format(_T("啟動軟件  行号%d  源：主程序"), __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	SetUnhandledExceptionFilter(ExceptionFilter);
-
-	CSearchFile t_GetExePath;
-	t_GetExePath.GetExePath();
 
 	if (m_strPassword != PROGRAM_LOCK_PASSWORD)
 	{
@@ -365,11 +368,7 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 
  	CreateChildWindow();
  
- 	SearchConfigurationFile();//查找CRC算法ini
- 
- 	SearchControllerFile();//查找PLC廠商信息
-
-	SearchImageFile();
+	_SearchFile();
 
 	InitMainWindow();
 
@@ -390,8 +389,6 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 
 	m_Register->CheckRegisterList(CHECKREGISTERLIST);//詢問註冊信息
 
- 	SearchReportFile();//创建报表文件夹
-
 	_AddTestProject();
 
 #ifdef _DEBUG
@@ -406,6 +403,19 @@ BOOL CUDE_OutlookDlg::OnInitDialog()
 // 
 // 	Excel.CloseExcelFile();
 // 	Excel.ReleaseExcel();
+
+
+//  	string str="ksarea";
+//  	CString cstr(str.c_str());//或者CString cstr(str.data());初始化时才行
+// // 	cstr=str.c_str();//或者cstr=str.data();
+// // 	str = cstr.GetBuffer(0); //CString -> string
+//  	cstr.Format(_T("%s"), str.c_str()); //string->CString
+// // 	cstr.format("%s", str.data()); //string->CString
+// // 	str = LPCSTR(cstr); //CString->string
+// // 	/*c_str()和data()区别是：前者返回带'/0'的字符串，后者则返回不带'/0'的字符串*/
+
+	m_strLogInfo.Format(_T("启动完成  行号%d  源：主程序"), __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -2189,6 +2199,9 @@ void CUDE_OutlookDlg::_TestRunCheck(BOOL bAuto)
 		}
 	}
 	LockCtrls(-1);
+
+	m_strLogInfo.Format(_T("开启自动运行模式  行号%d  源：主程序"),  __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 }
 
 void CUDE_OutlookDlg::CreateChildWindow()
@@ -2239,17 +2252,25 @@ void CUDE_OutlookDlg::CreateChildWindow()
 
 }
 
-void CUDE_OutlookDlg::SearchConfigurationFile()
+void CUDE_OutlookDlg::_SearchFile()
+{
+	_SearchConfigurationFile();
+	_SearchControllerFile();
+	_SearchImageFile();
+	_SearchReportFile();
+	_SearchLogFile();
+}
+
+void CUDE_OutlookDlg::_SearchConfigurationFile()
 {
 	CMsgBox MsgBox(this);
 	if (!m_CRC.SearchConfigurationFile())
 	{
-		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
-		//m_Menu.EnableItemByName(_T("設置"), _T("CRC循環冗餘校驗"), FALSE);
+		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION); 
 	} 
 }
 
-void CUDE_OutlookDlg::SearchControllerFile()
+void CUDE_OutlookDlg::_SearchControllerFile()
 {
 	CMsgBox MsgBox(this);
 	//判断路径是否存在   
@@ -2259,29 +2280,38 @@ void CUDE_OutlookDlg::SearchControllerFile()
 	if (!t_CtrlFile.SearchControllerFile())
 	{
 		MsgBox.ShowMsg(_T("未找到CRC配置文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
-		//m_Menu.EnableItemByName(_T("設置"), _T("添加設備"), FALSE);
 	}
 }
 
 
-void CUDE_OutlookDlg::SearchImageFile()
+void CUDE_OutlookDlg::_SearchImageFile()
 {
 	CMsgBox MsgBox(this);
 	//判断路径是否存在   
 	CSearchFile t_ImgFile;
 	if (!t_ImgFile.SearchImageFile())
 	{
-		MsgBox.ShowMsg(_T("未找到NG圖像文件!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
+		MsgBox.ShowMsg(_T("未找到NG圖像文件夾!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 	}
 }
 
-void CUDE_OutlookDlg::SearchReportFile()
+void CUDE_OutlookDlg::_SearchReportFile()
 {
 	CMsgBox MsgBox(this);
 	CSearchFile t_ReportFile;
 	if (!t_ReportFile.SearchReportFile())
 	{
-		MsgBox.ShowMsg(_T("未找到報表放置文件夾!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
+		MsgBox.ShowMsg(_T("未找到報表文件夾!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
+	}
+}
+
+void CUDE_OutlookDlg::_SearchLogFile()
+{
+	CMsgBox MsgBox(this);
+	CSearchFile t_ReportFile;
+	if (!t_ReportFile.SearchLogFile())
+	{
+		MsgBox.ShowMsg(_T("未找到日誌文件夾!"),_T("查找失敗"), MB_YESNO | MB_ICONQUESTION);  
 	}
 }
 
@@ -4044,6 +4074,7 @@ BOOL CUDE_OutlookDlg::GetImageFromCam(int nCam, CRect & rcAOI, CSmartImage & Img
 		rcAOI.BottomRight().x = ImgDst.Width();
 		rcAOI.BottomRight().y = ImgDst.Height();
 	}
+
 	return TRUE;
 }
 
@@ -5035,6 +5066,9 @@ afx_msg LRESULT CUDE_OutlookDlg::OnTestfinish(WPARAM wParam, LPARAM lParam)
  				InvalidateRect(m_rcSingleImgShowWnd[i], FALSE);//刷新每個窗口，有BOOL變量確保只更新用到的相機窗口
  			}
  		}
+
+		m_strLogInfo.Format(_T("群组 %d 测试完成  行号%d  源：主程序"), nTopWndGroup + 1, __LINE__);
+		g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
  	}
 	return 0; 
 }
@@ -5129,6 +5163,8 @@ BOOL CUDE_OutlookDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					
 					for (int i = 0; i < Info.nParam2; i++)
 					{
+						m_strLogInfo.Format(_T("收到啟動信號  行号%d  源：主程序"), __LINE__);
+						g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 						GroupTestRun(Info.byStarGroup[i]);
 					}
 				}
@@ -5141,9 +5177,8 @@ BOOL CUDE_OutlookDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 void CUDE_OutlookDlg::GroupTestRun(int nGroup)//開始群組檢測
 {
-	//const int nLine = __LINE__;//獲取程序在源程序中執行的行號
-
-	//const string str = __FILE__;
+	m_strLogInfo.Format(_T("開始拍照  行号%d  源：主程序"), __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 
 	m_dStartTime = GetTickCount();// 取得开始时间
 
@@ -5351,6 +5386,10 @@ void CUDE_OutlookDlg::_TimerGroupTestRun()
 		m_TimerID = timeSetEvent(5, 1, &TimerCallBack_GroupTestRun, (DWORD)this, TIME_ONESHOT);
 		return;
 	}
+
+	m_strLogInfo.Format(_T("拍照完成  行号%d  源：主程序"), __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+
 	if (m_bImageTrigger)//觸發模式
 	{
 		HWND hWnd = ::FindWindow(NULL, m_strDstWnd);//查找目标窗口

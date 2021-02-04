@@ -3685,13 +3685,20 @@ UINT CViewTop::_TestRunThreadKernal(void)
 		m_nTestRes = 3800;//CCD選向預設角度
 	}
 	
+	m_strLogInfo.Format(_T("群组 %d  项目 %d 开始定位图像  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+
+
 	m_bFindMark = SearchLocatorPt(&m_ImgSrc);// 查找定位點初始化
+
+	m_strLogInfo.Format(_T("群组 %d  项目 %d 定位图像完成  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 
 	if (m_bFindMark)
 	{
 		GetAllTestSizeByAOI(m_rcTopWnd, m_rcAOI, m_ImgSrc);
 
-		vector<BOOL> vbFinish;
+		vector<BOOL> vbFinish;//变量作用：防止重复计算完成数量
 
 		const int nTestCounter = (int)m_rcTestScope.size();
 
@@ -3787,8 +3794,8 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			TestSidePosition(m_vnSideWidthPixel, m_vnValidPixelCounter, m_vdColAreaPropor);
 			break;
 		case TEST_P2P_ANGLE:
-			TestP2PAngle();
-			m_nTestFinishCounter = m_nTestFinishSet;//角度測試未在測試框中運行
+			TestP2PAngle();//角度測試未在測試框中運行
+			m_nTestFinishCounter = m_nTestFinishSet;
 			break;
 		case TEST_COL_SURFACE://焊點檢測
 			m_vnValidPixelCounter.clear();
@@ -3830,6 +3837,9 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			break;
 		}
 
+		m_strLogInfo.Format(_T("群组 %d  项目 %d 开始测试  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, __LINE__);
+		g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+
 		for (int i = 0; i < nTestCounter; i++)
 		{
 			(*m_TestConfig[i])->m_bTestFinish = FALSE;
@@ -3844,6 +3854,9 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			{
 				if ((*m_TestConfig[i])->m_bTestFinish && vbFinish[i] == FALSE)
 				{
+					m_strLogInfo.Format(_T("群组 %d  项目 %d 範圍 %d  测试完成  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, i + 1, __LINE__);
+					g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+
 					m_nTestFinishCounter++;
 					switch (m_nTestProject)
 					{
@@ -3941,7 +3954,11 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			}
 		}
 	}
-
+	else
+	{
+		m_strLogInfo.Format(_T("群组 %d  项目 %d 定位图像错误  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, __LINE__);
+		g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
+	}
 
 	if (m_nTestMode == TEST_RESULT_LENGTH)
 	{
@@ -3998,7 +4015,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 			{
 				m_TestResult->PostMessage(gMsgTestResultUpdate, 0);
 
-				if (m_vnColSurfaceRes.size() && m_bFindMark)
+				if (m_vnColSurfaceRes.size() && m_bFindMark)//焊点检测需要区分NG项目
 				{
 					int nMaxTemp = 0;
 					int nMinTemp = 0;
@@ -4027,6 +4044,8 @@ UINT CViewTop::_TestRunThreadKernal(void)
 		}
 	}
 	
+	m_strLogInfo.Format(_T("群组 %d  项目 %d 结果验证完成  行号%d  源：TopWnd"), m_nTopWndGroup + 1, m_nTopWndNO + 1, __LINE__);
+	g_LogFile._Write2TxtFile(g_strExePath + _T("\\Log"), _T("Log"), m_strLogInfo);
 // 	if (m_bIsWindowShow)
 // 	{
 // 		_bUpdateUI = FALSE;

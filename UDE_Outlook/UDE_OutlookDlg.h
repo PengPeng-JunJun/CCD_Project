@@ -149,9 +149,7 @@ protected:
 
 	int m_nShowResTextType; 
 
-	int m_nCurLine;//當前執行行號
-
-	CString m_strSourcePath;//當前源文件路徑
+	CString m_strLogInfo;
 public:
 	void ItemClickMenuAppMain(LPCTSTR strMenu, LPCTSTR strItem, short nItemPos, BOOL bChecked, long nFlags);
 	void StatusChangedSwAppLock(BOOL bStatus);
@@ -237,8 +235,7 @@ public:
 	BOOL m_bRegister; //软件注册成功（用于和权限配合控制菜单栏）
 
 public:
-	CCRC    m_CRC;
-	//CSearchFile m_FindCtrlFile;
+	CCRC m_CRC;
 
 	int m_nCurCam;//正在傳送圖像到主對話框的相機
 	CSmartImage m_CurrentImage;
@@ -279,17 +276,17 @@ public:
 
 	void CreateChildWindow();//创建包含的所有自对话框
 
-	void CleanCurrentReportList();//清空目前报表报个内容
+	void _SearchFile();//查找相關文件夾是否存在，便於保存圖像
 
-	void SearchConfigurationFile();//查找CRC配置文件
+	void _SearchConfigurationFile();//查找CRC配置文件
 
-	void SearchControllerFile();//查找机台名称文件夹
+	void _SearchControllerFile();//查找机台名称文件夹
 
-	void SearchImageFile();//查找NG圖片保存文件夾
+	void _SearchImageFile();//查找NG圖片保存文件夾
 
-	void SearchReportFile();//查找报表生成文件夹
+	void _SearchReportFile();//查找报表生成文件夹
 
-	void CreateTestList_Slave();
+	void _SearchLogFile();//查找日誌文件夾
 
 	BOOL GetImageFromCam(int nCam, CRect & rcAOI);//使用相機拍照獲取圖片，需給出相機編號和圖像的矩形變量
 
