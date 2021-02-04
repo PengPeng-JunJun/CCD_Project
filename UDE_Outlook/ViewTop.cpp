@@ -3074,7 +3074,6 @@ vector<Point2i> CViewTop::SearchContoursEdgePt(vector<Point2i> vptContours, int 
 				break;
 			}
 		}
-
 	}
 
 	if (nLinePos == LINE_POS_LEFT || nLinePos == LINE_POS_RIGHT)
@@ -4062,7 +4061,7 @@ UINT CViewTop::_TestRunThreadKernal(void)
 
 	Invalidate(FALSE);
 
-	m_pTopWnd->PostMessage(WM_TESTFINISH, m_nTopWndGroup, m_nTopWndNO);
+	m_pTopWnd->SendMessage(WM_TESTFINISH, m_nTopWndGroup, m_nTopWndNO);
 
 	m_dEndTime = GetTickCount() - m_dStartTime;		// 取得开始时间
 	return 0;

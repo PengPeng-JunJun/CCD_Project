@@ -19,7 +19,6 @@
 // 注意
 // 如果报警 无解解析的外部操作符_gsl_multimin_fminimizer, 则要在C++ 预处理器中加入GSL
 
-
 template<typename T>
 class CCircle_Pt
 {
